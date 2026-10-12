@@ -11,7 +11,8 @@ tactile stack of cards that syncs across the card, a web UI, and AI assistants.
 
 ## Publish information
 
-- **Title**: 小诺简录 · 随说随记的 AI 清单 / Xiaonuo Jianlu · Talk-to-Note AI Lists
+- **Title**: Xiaonuo Jianlu · Talk-to-Note AI Lists (the listing is bilingual;
+  the Chinese half of the title is recorded in the paired `README.zh_CN.md`)
 - **Description**: hold the button and talk; your words become neatly titled,
   auto-categorized note cards in a stack you flip through. Works offline
   (voice memos queue on-device and can be played back), syncs everywhere
@@ -55,9 +56,13 @@ Three keys drive the app. A top bar shows the title and battery percentage.
 
 ## Engineering notes (reference value)
 
-- **Wi-Fi/BLE separation for provisioning**: Wi-Fi and NimBLE cannot coexist in
-  this board's RAM, so provisioning runs BLE-only, stores credentials in NVS,
-  and reboots into the Wi-Fi-only path.
+- **Wi-Fi/BLE separation for provisioning**: within this application's measured
+  RAM budget the two stacks are never up at the same time — with the Wi-Fi
+  driver resident only ~42 KB of heap remains, while bringing NimBLE up needs
+  ~58 KB (both measured on ESP32-C3, ESP-IDF 5.5.3, this app's config). So
+  provisioning runs BLE-only, stores credentials in NVS, and reboots into the
+  Wi-Fi-only path. This is a per-application budget limit, not a hardware
+  impossibility — a leaner config or a PSRAM variant could run both.
 - **mDNS behind restrictive routers**: some routers do not forward multicast
   responses to the device, so discovery uses a hand-written mDNS query that
   forces unicast legacy responses (RFC 6762 §8.1); the hub advertises via the
