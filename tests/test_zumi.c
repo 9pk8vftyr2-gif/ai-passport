@@ -39,7 +39,7 @@ int main(void) {
         assert(s.won&&(s.powered&s.homes)==s.homes);
         for(int i=0;i<9;i++) if(s.fixed&(1u<<i)) assert(s.tiles[i]==fixed[i]);
         int moves=s.moves;z_action(&s,Z_UP);assert(s.moves==moves&&s.won);
-        z_action(&s,Z_OK);assert(s.page==Z_PLAY&&s.level==(level+1)%Z_LEVELS);
+        z_action(&s,Z_OK);assert(s.page==Z_LINK&&s.level==(level+1)%Z_LEVELS&&s.moves==0&&!s.won);
     }
     puts("PASS six solvable levels, fixed tiles, untimed play, wrap selection, next level");
     for(int key=0;key<3;key++) {
@@ -95,7 +95,7 @@ int main(void) {
             advance(&s,240);z_render(&s,100,&v);assert(v.ops[2].opacity==255);
         }
         z_button(&s,&in,Z_OK,0);z_button(&s,&in,Z_OK,4);
-        if(saved.won) assert(s.page==Z_PLAY&&s.level==(level+1)%Z_LEVELS);
+        if(saved.won) assert(s.page==Z_LINK&&s.level==(level+1)%Z_LEVELS&&s.moves==0&&!s.won);
         else assert(s.page==Z_LINK&&s.moves==saved.moves+1);
         z_button(&s,&in,Z_OK,0);z_button(&s,&in,Z_OK,3);z_button(&s,&in,Z_OK,4);
         assert(s.page==Z_HOME);

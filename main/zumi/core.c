@@ -60,7 +60,7 @@ void z_action(z_state *s,int action) {
         if(action==Z_OK) z_link_start(s,s->level);
     } else if(s->page==Z_LINK) {
         if(s->won) {
-            if(action==Z_OK) { s->level=(s->level+1)%Z_LEVELS; s->page=Z_PLAY; }
+            if(action==Z_OK) z_link_start(s,(s->level+1)%Z_LEVELS);
             return;
         }
         if(action==Z_UP||action==Z_DOWN) {

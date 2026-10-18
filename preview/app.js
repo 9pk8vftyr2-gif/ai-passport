@@ -32,6 +32,7 @@ const decoder=new TextDecoder();
 function render(){
  const sound=api.pocket_take_sound();
  if(api.pocket_screen_off() || api.pocket_page()!==2) {if(soundNode)stopSound();}
+ else if(sound<0)stopSound();
  else if(sound)playSound(sound);
  if(api.pocket_screen_off()) {ctx.fillStyle='#000';ctx.fillRect(0,0,240,320);return;}
  const n=api.pocket_render(),base=api.pocket_ops(),stride=api.pocket_stride();

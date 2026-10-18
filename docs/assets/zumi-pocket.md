@@ -2,6 +2,14 @@
 
 # Zumi Pocket: Design and Acceptance
 
+The home screen uses three numbered Talk / Play / Garden rows with a short
+purpose line and a dark selected row. No character image appears there.
+Energy Link's level picker shows the selected level's initial 3 x 3 board,
+using the same wire geometry and full energy labels as gameplay, without a
+character image. UP/DOWN changes the preview; OK starts that board. Wake-card
+art and the Talk/Garden placeholder characters are unchanged.
+
+
 ## Accepted boundary and conservative defaults
 
 Phase one is an offline software prototype before hardware arrival. The device
@@ -15,7 +23,8 @@ Energy Link is the only game. Six authored 3 x 3 boards preserve the website's
 reciprocal N/E/S/W connectors and source-to-all-homes win condition. Unused wires
 are allowed. Fixed source/home tiles and marked fixed clues cannot rotate.
 There is no time or move limit. Completion keeps the board visible; OK advances
-to the next level's start screen, wrapping after six. Any level can be selected.
+directly to the next board without an inter-level screen, wrapping after six.
+The initial Play entry still offers level selection.
 The website's 5 x 5 boards, generated Hexapipes levels, artwork, undo/history,
 and persistence are not imported; synthesized sound parameters are reused. Rules were inspected read-only at
 website source revision `a0504f97fb74a94ea864361f539e5832a16b268f`,
@@ -147,7 +156,9 @@ flashing requires a new explicit authorization and a chosen target and image.
    and the exact successful firmware manifest/hash before any approved write.
    Agree on preservation of existing NVS data: merged images can reset it.
 2. Confirm boot goes directly to Zumi's home. Inspect 240 x 320 portrait,
-   rounded corners, RGB565 colors, text clipping and ZCO cap mark. Approve the
+   rounded corners, RGB565 colors and text clipping. Confirm no character on home
+   or level selection, and a matching board preview for all six levels. Inspect
+   the ZCO cap mark on retained character pages. Approve the
    small expressions and all eight wake cards against the approved art.
 3. Exercise rapid taps, all three keys, level/wire wrapping and fixed-tile skipping.
    Verify long OK and its release never open Talk or rotate an extra wire.

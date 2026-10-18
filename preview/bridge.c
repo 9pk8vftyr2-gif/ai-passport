@@ -11,6 +11,7 @@ void pocket_button(int button,int event) {
     z_state before=state;z_button(&state,&input,button,event);
     int sound=z_sound_event(&before,&state);
     if(sound) pending_sound=sound;
+    if(before.page==Z_LINK && before.level!=state.level) pending_sound=-1;
     if(state.page!=Z_LINK) pending_sound=0;
 }
 int pocket_take_sound(void) { int sound=pending_sound;pending_sound=0;return sound; }

@@ -121,7 +121,7 @@ void app_main(void) {
             z_state before=state;
             z_button(&state,&input,e.button,e.event);
             int sound=z_sound_event(&before,&state);
-            if(sound || (before.page==Z_LINK && state.page!=Z_LINK)) z_audio_play(sound);
+            if(sound || (before.page==Z_LINK && (state.page!=Z_LINK || before.level!=state.level))) z_audio_play(sound);
         }
         if(state.screen_off && brightness) {
             bsp_display_backlight(0); brightness=0;

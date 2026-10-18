@@ -2,30 +2,30 @@
 
 # Zumi Pocket Validation
 
-2026-10-18. Game-resume-after-wake increment on `feature/zumi-pocket`, based on
-`0541fdd`. The successful gate ran before committing, so the image version is
-`0541fdd-dirty`; no firmware source or display pixel changes followed the build.
+2026-10-18. Home/initial-picker redesign and direct-next-level increment on `feature/zumi-pocket`, based on
+`20babf7`. The successful gate ran before committing, so the image version is
+`20babf7-dirty`; no firmware source or display pixel changes followed the build.
 The full-image and ELF hashes below identify the actual deliverable.
 
 | Field | Status | Evidence |
 | --- | --- | --- |
 | Build | PASS | ESP-IDF 5.5.3, complete official gate, merged layout and matching ELF archive verified |
 | Host Tests | PASS | Original repository checks, sanitizers, 100,000 game transitions, all-page 60-second boundaries/activity reset/late-key guards, 256 wake cycles and all eight cards, 5,000 native/WASM comparisons, provenance and pixel-data hashes |
-| Browser Demo | PASS | Chrome desktop/mobile; black pixels and in-game screen-off/wake with unchanged progress and continued play, eight distinct cards offline, no adjacent repeats, three-second return, game controls, full English labels and shared sound |
+| Browser Demo | PASS | Chrome desktop/mobile; redesigned home, six character-free board previews, direct next level; black pixels and in-game screen-off/wake with unchanged progress and continued play, eight distinct cards offline, no adjacent repeats, three-second return, game controls, full English labels and shared sound |
 | Device Tests | NOT RUN | No physical device flashed, erased, reset or opened |
 | Unverified | Pending hardware | physical backlight shutdown and wake latency, LCD colors and clipping, fade frame time, internal heap/LVGL peak, audio, battery current and real runtime |
 
 ## Exact firmware identity
 
-- Application: 1,993,760 bytes of the 8,323,072-byte factory partition.
-- Merged image: 2,059,296 bytes. Flash configuration: 8 MB; no PSRAM.
+- Application: 1,994,432 bytes of the 8,323,072-byte factory partition.
+- Merged image: 2,059,968 bytes. Flash configuration: 8 MB; no PSRAM.
 - Eight wake cards: 1,228,800 read-only Flash bytes, native 240 x 320 RGB565.
 - Basic sprites: 43,056 Flash bytes; shared audio PCM: 20,800 bytes.
 - State: 88 bytes; two draw lists: 12,808 bytes. Original 9,600-byte BSP draw
   buffer and 24 KB LVGL pool retained. No added full-frame decoder buffer.
-- Full-image SHA-256: `ecac5ae451e57c2713ddd2083b2753ca4b30c00ce0bd379a8ed6cdde7c08313e`.
-- Matching ELF SHA-256: `44441c7f3e6b2d67914f1f7628eb618d0cdc58ba1bd515988baebbbbaa5a3343`.
-- Local bundle: `build/firmware/ecac5ae451e57c2713ddd2083b2753ca4b30c00ce0bd379a8ed6cdde7c08313e/`.
+- Full-image SHA-256: `c6cbbcdd92ba20af2a8e161aa502c4917be78d5fe982dea9e33ce04ec227b662`.
+- Matching ELF SHA-256: `ec34af33b5fcd69509d65a958a3306760cc11c26c389a3afc5a423515987ce45`.
+- Local bundle: `build/firmware/c6cbbcdd92ba20af2a8e161aa502c4917be78d5fe982dea9e33ce04ec227b662/`.
 
 The archive contains the matching merged/application images, ELF, MAP, bootloader,
 partition table, flash arguments and manifest. It is ignored by Git and has not
@@ -36,7 +36,7 @@ layout; no Xiaozhi SDK was used.
 ## Actual validation
 
 `./tools/validate.sh` completed with ESP-IDF 5.5.3; log:
-`build/full-gate-game-resume.log`.
+`build/full-gate-layout-direct-next.log`.
 
 `tests/test_zumi.c` also passed with AddressSanitizer and UndefinedBehaviorSanitizer.
 It checks all six solvable levels, a reciprocal-edge oracle, fixed tiles, 3,000 ms
@@ -60,7 +60,15 @@ all preserve Zumi Pocket and zco.eco. The generated backgrounds were approved;
 no paid AI service is connected to the firmware. Local package provenance does
 not assert published WeChat status. Native cards are read directly from Flash;
 image opacity avoids a full-frame object layer. Garden and Talk are placeholders.
-Energy Link titles now sit at (22,16), clear of battery information.
+Energy Link titles sit at (22,16), clear of battery information. Home now uses
+three numbered entries without a character. The initial level picker replaces
+the character with a preview of the selected board. All six previews were
+checked, with 28–43 drawing commands below the 64-command limit and no new images.
+After a win, OK starts the next board directly, wrapping after level six; there
+is no inter-level picker. Initial Play entry still allows level selection.
+Changing levels cancels previous game audio. Screenshots:
+`build/browser-home-redesign.png`, `build/browser-level-preview-1.png` through
+`browser-level-preview-6.png`.
 
 All pages turn the backlight off (70% to 0%) after 60 seconds without input,
 and application redraws stop. Any key wakes to a random card for three seconds,

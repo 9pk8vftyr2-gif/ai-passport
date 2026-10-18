@@ -1,11 +1,11 @@
 {
-  "main/zumi/core.c": "05a0b1b10e6383c9f1307b3dd858cac90e9ed25e4fb223fa7c451c1d9c71a8e8",
+  "main/zumi/core.c": "5060936ce74453f0e62bb696bf0a3c3a6cb3d411f76eca426a17eef72124dc5a",
   "main/zumi/core.h": "043d03d9047b0aba9b7e643e12b638d1774e38181370ef731b0139c4f4b2a74f",
-  "main/zumi/view.c": "c5bce88089807b5d67cfc8e2e30c4daf97da6429c7053f5d667bb6fb33419014",
+  "main/zumi/view.c": "1d5d4db5c0f6d5182531321245bbb3f69b4a3bddaea24ba2b99ddb28f4f5ec87",
   "main/zumi/view.h": "0efd87934e6830ffa2c94bb6089a5c395cb2a5021dec5d8781ea9d9d6b937c0b",
   "main/zumi/sound.h": "df9fd06bff3b0fdcc8eba1d719f4ee1500e4b18699096edd0d3f27bffa195f53",
   "main/zumi/sound.c": "7b2dc67bd16818944c83efe3971776ae1fffc21243a9e6aa452833d897c75862",
   "main/zumi/sounds.c": "04bc309512999817667eca4eaeea47f4e2df349db269789af6b01b508639866a",
-  "preview/bridge.c": "e808ce735ae5d99691ca816993210ff3bd89345e302859814269b5c184602b86",
-  "preview/pocket.wasm": "a67922b484e01db7a20dea8f008b51eef0145270e78f51502c2d397133b5ef5c"
+  "preview/bridge.c": "e0f42f67ac91a5f6e8572aec9ea6f06f11270bd8960e78bfec0bcf1aafa060d2",
+  "preview/pocket.wasm": "2d4e7aa9d42c1e22e02c2785d4bd09d7e81d73a1e058e516214098ed97d78a47"
 }

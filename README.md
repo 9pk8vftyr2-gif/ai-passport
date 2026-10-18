@@ -23,13 +23,16 @@ needed. Gameplay continues offline after the page's local resources load.
 
 ## Phase one
 
-- **Home:** Talk / Play / Garden. Zumi keeps his original appearance.
+- **Home:** three numbered Talk / Play / Garden entries with short descriptions,
+  a clear selected row, and no character image. Original Zumi art stays in wake
+  cards and Talk/Garden placeholders.
 - **Energy Link:** the only game, adapted from the website connection puzzle.
   Six pocket-authored 3 x 3 boards. UP/DOWN cycle through movable wires;
   OK rotates clockwise. `Solar power` / `Wind power` name the fixed source; `House` names each home. Matching
   connectors carry power; light every home to win. No countdown or move limit.
-  The completed board stays visible. OK opens the next level; hold OK goes home.
-  On the start screen, UP/DOWN select any of six levels. Both Energy Link titles
+  The completed board stays visible. OK starts the next board directly, without an inter-level screen; hold OK goes home.
+  On the start screen, UP/DOWN select any of six levels; the center shows that
+  level's initial board instead of a character. Both Energy Link titles
   use the upper-left (22,16) position, clear of the battery reading.
 - **Sound:** website Energy Link rotation, connection and victory tones, played
   from the same 16 kHz PCM in the browser and firmware. Audio failure leaves the
