@@ -7,9 +7,11 @@ cd "$(dirname "$0")/.."
     -Wl,--export=pocket_init -Wl,--export=pocket_button \
     -Wl,--export=pocket_tick -Wl,--export=pocket_render \
     -Wl,--export=pocket_ops -Wl,--export=pocket_stride \
-    -Wl,--export=pocket_page -Wl,--export=pocket_score \
-    -Wl,--export=pocket_lives -Wl,--export=pocket_lane \
-    -Wl,--export=pocket_target -o preview/pocket.wasm
+    -Wl,--export=pocket_page -Wl,--export=pocket_moves \
+    -Wl,--export=pocket_won -Wl,--export=pocket_cursor \
+    -Wl,--export=pocket_board -Wl,--export=pocket_level -Wl,--export=pocket_dimmed \
+    -Wl,--export=pocket_expression -o preview/pocket.wasm
+chmod 644 preview/pocket.wasm
 python3 - <<'PY'
 import hashlib, json
 from pathlib import Path

@@ -1,8 +1,8 @@
 {
-  "main/zumi/core.c": "24343b2ad6af2e800026cba7d1c11ce8aebafe7bf09ce55b1a831f772f3a3310",
-  "main/zumi/core.h": "b7656bc46f2bfa1b35dac0c01350b7aad1e6f7381920280bd7b84d94578f8b94",
-  "main/zumi/view.c": "d2e0a3752f086a3d3094f0797d855c41152a0789b6f3a553a8370107e92bf43b",
-  "main/zumi/view.h": "6c64a6294404c3e158b223366fbdb030a89f137d0ee2c11ef30fa2c494c167a6",
-  "preview/bridge.c": "e079ef4efeef4bde80fb508074f8a2fe9677cf55a1e3bec66a4575f858d38ee7",
-  "preview/pocket.wasm": "d7e9e461345025dcec08ef44daedc750f93f3f33aa7a27d29c6112d53779951e"
+  "main/zumi/core.c": "6d6d137e850d9a8d0246c1fe6b2794a9dad91eeea8d5bf7cab66297c04304b34",
+  "main/zumi/core.h": "004b0758b0677885c3659b005730414a84d445302c7e9b65bec427dade4abf50",
+  "main/zumi/view.c": "7478d8e4b3ba52a85bd20bd86cab15695d31a8b0bba5076a467396b982926463",
+  "main/zumi/view.h": "b6fc3213e6321ffd3809a692753ab8118a27b992d8ad92b3391e149bd002d779",
+  "preview/bridge.c": "f78f807be877af215154272d81d01d33996b93e827e55bfad13042c082bb58c6",
+  "preview/pocket.wasm": "6b476ac5f74ca764edd6f9dcbda63bcc1828defef349361be83120ec28616e99"
 }

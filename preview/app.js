@@ -12,14 +12,15 @@ try {
 const color=n=>'#'+n.toString(16).padStart(6,'0');
 const decoder=new TextDecoder();
 function render(){
+ canvas.style.filter=api.pocket_dimmed()?'brightness(0.29)':'none';
  const n=api.pocket_render(),base=api.pocket_ops(),stride=api.pocket_stride();
  const data=new DataView(api.memory.buffer);
  ctx.save();ctx.beginPath();ctx.roundRect(0,0,240,320,30);ctx.clip();
  for(let i=0;i<n;i++){
-  const p=base+i*stride,a=Array.from({length:8},(_,j)=>data.getInt32(p+j*4,true));
-  const [kind,x,y,w,h,c,r,size]=a;ctx.fillStyle=color(c);
+  const p=base+i*stride,a=Array.from({length:9},(_,j)=>data.getInt32(p+j*4,true));
+  const [kind,x,y,w,h,c,r,size,opacity]=a;ctx.fillStyle=color(c);ctx.globalAlpha=opacity/255;
   if(kind===0){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
-  else if(kind===1){const b=new Uint8Array(api.memory.buffer,p+32,64);const end=b.indexOf(0);const text=decoder.decode(b.subarray(0,end<0?64:end));ctx.font=`${size}px Arial`;ctx.textBaseline='top';ctx.fillText(text,x,y);}
+  else if(kind===1){const b=new Uint8Array(api.memory.buffer,p+36,64);const end=b.indexOf(0);const text=decoder.decode(b.subarray(0,end<0?64:end));ctx.font=`${size}px Arial`;ctx.textBaseline='top';ctx.fillText(text,x,y);}
   else ctx.drawImage(sprites[size%3],x,y,w,h);
  }
  ctx.restore();

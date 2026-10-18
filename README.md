@@ -23,18 +23,19 @@ needed. Gameplay continues offline after the page's local resources load.
 
 ## Phase one
 
-- **Home:** Talk / Play / Garden, with happy, focused and cheering expressions.
-- **Carbon Pop:** select one of three rows, pop CO2 with OK, protect leaves and
-  sunlight. Correct hits earn 10 play points. A wrong hit or an expired 1.8-second
-  target costs one of three hearts. Survive 30 seconds to finish.
-- **Pocket Journey:** move between three lanes, collect green + tokens for five
-  points, and jump rocks with OK. Jumps last 600 ms with a 1,000 ms cooldown.
-  Survive 30 seconds to finish. Collisions cost one heart; jumping protects from
-  rocks but still allows token collection.
-- **Talk / Garden:** explicit unavailable-service screens and C interfaces only;
-  no recording, network calls, paid AI, or real Garden synchronization.
-- **Result:** OK replays; hold OK returns home. Scores are play points, not
-  measured carbon savings. Session state resets on reboot; there is no save data.
+- **Home:** Talk / Play / Garden. Zumi keeps his original appearance.
+- **Energy Link:** the only game, adapted from the website connection puzzle.
+  Six pocket-authored 3 x 3 boards. UP/DOWN cycle through movable wires;
+  OK rotates clockwise. S is the fixed source, H is a fixed home. Matching
+  connectors carry power; light every home to win. No countdown or move limit.
+  The completed board stays visible. OK opens the next level; hold OK goes home.
+  On the start screen, UP/DOWN select any of six levels.
+- **Wake greeting:** menus dim after 60 seconds. A key press restores brightness,
+  chooses a different existing expression, and consumes the wake press. A
+  3-second greeting fades back to home, with `zco.eco` in the corner. Games stay lit.
+- **Talk / Garden:** unavailable-service screens and C interfaces only.
+- Session state resets on reboot. No storage, recording, network or paid AI.
+  This is a puzzle, not real power simulation or carbon accounting.
 
 The firmware and browser compile the **same C game logic and draw list**. The
 browser paints with Canvas; firmware paints with LVGL through the original BSP.

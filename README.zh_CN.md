@@ -2,81 +2,34 @@
 
 # Zumi Pocket
 
-面向 FoloToy AI Passport 的离线三键口袋伙伴：ESP32-C3、240×320 竖屏、
-8MB Flash、无 PSRAM。Zumi 是男孩。本原型使用 ZCO 现有米白 2D 母版，
-仅制作轻量的面部表情衍生，未重新设计角色外观。
+面向 FoloToy AI Passport 的第一阶段离线原型：ESP32-C3、8 MB Flash、无 PSRAM、240 × 320 竖屏。Zumi 是男孩，使用现有官方角色素材，仅调整面部表情，不重新设计外观。
 
-## 体验浏览器原型
+## 浏览器预览
 
-在仓库根目录运行：
+在仓库根目录运行 `python3 -m http.server 8876 --bind 127.0.0.1`，打开 <http://127.0.0.1:8876/preview/>。预览资源已提交，无须安装依赖。使用屏幕下方三键或键盘 ↑ / ↓ / Enter；长按 OK 500 毫秒回首页。屏幕无需触摸，资源加载后可离线游玩。
 
-```sh
-python3 -m http.server 8876 --bind 127.0.0.1
-```
+## 第一阶段
 
-打开 <http://127.0.0.1:8876/preview/>。已提交 WebAssembly 模块，预览无需安装
-依赖包。使用屏幕下方三键，或键盘 ↑ / ↓ / Enter；长按 OK / Enter 500 毫秒
-返回首页。屏幕本身没有触摸操作。保持本地服务器运行，不需要外部服务。
-页面本地资源加载完成后，断网也能继续游戏。
+- 首页：Talk / Play / Garden。
+- 唯一游戏 **Energy Link**：延续网站旋转线路、点亮全部房屋的规则，重新编排 6 个 3×3 口袋关卡。UP / DOWN 循环选择可旋转线路，OK 顺时针旋转。S 是固定能源，H 是固定房屋，相对接头连接才通电。没有时间或步数限制。完成后保留棋盘，OK 进入下一关准备页；准备页上下选关。
+- 菜单静置 60 秒变暗，按键恢复亮度并随机换一个不同的现有表情；唤醒按键被消费，不误触。3 秒欢迎表情淡出后，首页淡入。表情角落显示 `zco.eco`。游戏保持亮屏。
+- Talk / Garden 仅保留未连接提示和接口。无录音、联网、付费 AI 或存储写入。重启清空会话；不是实际电力模拟或减排核算。
 
-## 第一阶段内容
+固件与浏览器编译同一套 C 逻辑和绘制列表，分别由原 BSP 的 LVGL 和浏览器 Canvas 绘制。预览不能代替真机显示与性能验证。官方测试菜单源文件仅保留作参考，不链接到应用入口。
 
-- **首页：** Talk / Play / Garden，以及开心、专注、欢呼三种基础表情。
-- **Carbon Pop：** 上下选择三行之一，OK 消除 CO2，保护叶子和阳光。
-  正确命中得 10 游戏分；误击或错过 1.8 秒目标扣一颗心，共三颗心。
-  坚持 30 秒完成一局。
-- **Pocket Journey：** 上下切换三条跑道，收集绿色 + 标记得 5 分，OK 跳过石块。
-  跳跃持续 600 毫秒，冷却 1,000 毫秒。坚持 30 秒完成；撞石块扣一颗心。
-  跳跃时免受石块伤害，仍可收集标记。
-- **Talk / Garden：** 明确的未接入状态页及 C 接口，不录音、不请求网络、
-  不接入付费 AI，也不执行真实 Garden 同步。
-- **结算：** OK 重玩，长按 OK 回首页。分数仅用于游戏，不代表实测减排量。
-  重启后清空本次状态，本阶段不保存游戏数据。
+## 开发验证
 
-固件和浏览器编译**同一份 C 游戏逻辑与绘制指令**。浏览器使用 Canvas，
-固件通过原有 BSP 使用 LVGL。浏览器是行为预览，不代表真实屏幕显示和时序验收。
-原硬件测试源码保留为参考，但不链接到本应用入口。
+严格使用 ESP-IDF **5.5.3**，不混用小智仓库 SDK。五个官方 Skills 通过 `python3 tools/install_passport_skills.py --install` 安装，并用 `--check` 检查。
 
-## 开发与验证
+激活 SDK 后运行 `./tools/validate.sh` 执行完整检查；`--static` 只检查静态与主机测试，`--firmware` 只构建并校验合并镜像。这些操作不刷机。镜像及匹配 ELF/MAP 保存在 `build/firmware/`。
 
-使用本仓库 main 基线要求的 ESP-IDF **5.5.3**，不混用小智移植仓库要求。
-执行 `python3 tools/install_passport_skills.py --install` 安装官方五个技能，
-再执行 `--check` 检查。
+浏览器重新编译：`WASI_SDK_PATH=/path/to/wasi-sdk-34 ./tools/build_preview.sh`。开发依赖用 `pnpm install --frozen-lockfile` 安装。`node tests/wasm_parity.cjs` 比较 5,000 次原生/WASM 状态；运行预览服务后用 `node tests/browser_zumi.cjs` 测试 Chrome（可设 `PLAYWRIGHT_CHANNEL`）。结果和截图在忽略目录 `build/`。
 
-```sh
-. /path/to/esp-idf-v5.5.3/export.sh
-idf.py --version
-./tools/validate.sh
-```
+`node tools/build_zumi_assets.cjs` 使用 Sharp 编译现有素材；图片来源与校验值在 `assets/images/zumi-pocket/`。生成的 C 资源已提交，固件构建不需要 Node。
 
-仅主机门禁使用 `./tools/validate.sh --static`；仅固件门禁使用
-`./tools/validate.sh --firmware`。这些命令均不刷写设备。构建成功后，
-`build/firmware/` 保留经核验的合并镜像及对应 ELF/MAP；仅应用镜像不是完整设备镜像。
-
-重新编译浏览器模块需 wasi-sdk 34：
-
-```sh
-WASI_SDK_PATH=/path/to/wasi-sdk-34 ./tools/build_preview.sh
-node tests/wasm_parity.cjs
-```
-
-制作及测试依赖可执行 `pnpm install --frozen-lockfile` 安装（需要 Node.js）。
-
-一致性测试编译原生 C 回放，并与 WebAssembly 比较 5,000 次状态转换。
-安装 Playwright 和 Chrome 后，保持预览服务器运行，执行
-`node tests/browser_zumi.cjs`；其他 Playwright Chromium 通道可通过
-`PLAYWRIGHT_CHANNEL` 指定。截图和机器可读结果保存在被忽略的 `build/`。
-
-资源编译器为 `node tools/build_zumi_assets.cjs`，依赖 Sharp。
-原始角色和来源记录位于 `assets/images/zumi-pocket/`，生成的 C 图像资源已提交，
-固件构建无需 Node 或 Sharp。
-
-详见[设计与硬件验收](docs/assets/zumi-pocket.zh_CN.md)及
-[验证报告](docs/assets/zumi-pocket-validation.zh_CN.md)。
+参见[设计与硬件验收清单](docs/assets/zumi-pocket.zh_CN.md)和[构建测试报告](docs/assets/zumi-pocket-validation.zh_CN.md)。
 
 ## 分支边界
 
-Fork：`9pk8vftyr2-gif/ai-passport`；分支：`feature/zumi-pocket`。
-基于上游 main `3d685a90bdb96dd8526d84edde1e63fec25b460e`。
-上游和 Fork 的 main 均保持不变。本项目不修改 ZCO 网站、不部署到 Cloudflare、
-不刷写设备、不擦除存储、不接入付费 AI 服务。
+Fork：`9pk8vftyr2-gif/ai-passport`；分支：`feature/zumi-pocket`。上游基线 `3d685a90bdb96dd8526d84edde1e63fec25b460e`。
+不改上游或 Fork main，不改现有 ZCO 网站，不部署 Cloudflare，不刷写、擦除设备或接入付费服务。

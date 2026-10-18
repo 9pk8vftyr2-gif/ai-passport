@@ -1,9 +1,9 @@
 #pragma once
 #include "core.h"
-#define Z_DRAW_MAX 48
+#define Z_DRAW_MAX 64
 enum { Z_RECT, Z_TEXT, Z_SPRITE };
 typedef struct {
-    int kind, x, y, w, h, color, radius, size;
+    int kind, x, y, w, h, color, radius, size, opacity;
     char text[64];
 } z_draw;
 typedef struct { int count; z_draw ops[Z_DRAW_MAX]; } z_view;

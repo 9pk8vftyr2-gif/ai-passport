@@ -48,6 +48,7 @@ static void render(void) {
         }
         lv_obj_t *o=objects[i];
         lv_obj_set_pos(o,d->x,d->y);
+        lv_obj_set_style_opa(o,(lv_opa_t)d->opacity,0);
         if(d->kind==Z_RECT) {
             lv_obj_set_size(o,d->w,d->h);
             lv_obj_set_style_bg_color(o,lv_color_hex(d->color),0);
@@ -56,7 +57,8 @@ static void render(void) {
         } else if(d->kind==Z_TEXT) {
             lv_obj_set_width(o,d->w);
             lv_label_set_long_mode(o,LV_LABEL_LONG_CLIP);
-            lv_obj_set_style_text_font(o,d->size==20?&lv_font_montserrat_20:&lv_font_montserrat_14,0);
+            lv_obj_set_style_text_font(o,d->size==20?&lv_font_montserrat_20:
+                                       d->size==10?&lv_font_montserrat_10:&lv_font_montserrat_14,0);
             lv_obj_set_style_text_color(o,lv_color_hex(d->color),0);
             lv_label_set_text(o,d->text);
         } else {
@@ -98,7 +100,7 @@ void app_main(void) {
         }
         return;
     }
-    uint64_t last=esp_timer_get_time()/1000, battery_time=last, activity_time=last;
+    uint64_t last=esp_timer_get_time()/1000, battery_time=last;
     int brightness=70;
     for(;;) {
         uint64_t now=esp_timer_get_time()/1000;
@@ -106,11 +108,9 @@ void app_main(void) {
         input_event e;
         /* Bounded draining ensures an event flood cannot starve rendering. */
         for(int i=0;i<32 && xQueueReceive(queue,&e,0)==pdTRUE;i++) {
-            activity_time=now;
             z_button(&state,&input,e.button,e.event);
         }
-        const bool playing=state.page==Z_CARBON || state.page==Z_JOURNEY;
-        int desired=(!playing && now-activity_time>=60000)?20:70;
+        int desired=state.dimmed?20:70;
         if(desired!=brightness) { bsp_display_backlight((uint8_t)desired); brightness=desired; }
         if(now-battery_time>=30000) { battery=bsp_battery_soc(); battery_time=now; }
         if(bsp_lvgl_lock(50)) { render(); bsp_lvgl_unlock(); }
