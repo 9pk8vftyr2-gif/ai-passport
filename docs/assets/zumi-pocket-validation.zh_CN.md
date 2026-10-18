@@ -2,43 +2,43 @@
 
 # Zumi Pocket 验证报告
 
-验证日期：2026-10-18。范围：无硬件条件下的第一阶段软件原型。
+日期：2026-10-18。固件源码：`feature/zumi-pocket` 的 `1a361c9`。范围：硬件到货前的第一阶段软件原型。
 
-| 字段 | 状态 | 证据 |
+| 项目 | 状态 | 证据 |
 | --- | --- | --- |
-| Build | NOT RUN | 正在准备 ESP-IDF 5.5.3 工具链，最终构建后更新 |
-| Host Tests | PASS | 仓库完整静态门禁；Zumi 原生测试及 AddressSanitizer/UndefinedBehaviorSanitizer；10 万次随机状态转换；5,000 次原生/WASM 对照 |
-| Browser Demo | PASS | Chrome/Chromium 桌面 1440×1000、手机视口 390×844；十项交互；离线游戏；无页面错误 |
-| Device Tests | NOT RUN | 硬件尚未到货，未执行刷写或设备存储操作 |
-| Unverified | OPEN | 真屏/字体、ADC 时序、按键延迟、长时间堆内存与碎片、电量/电流、真机启动及角色视觉验收 |
+| Build | PASS | ESP-IDF v5.5.3、ESP32-C3 官方完整检查通过，合并镜像和匹配 ELF 校验通过 |
+| Host Tests | PASS | 仓库静态与原有基线测试；六关可解；10 万次状态转换与独立连通性校验；地址/未定义行为检查；5,000 次原生/WASM 对照 |
+| Browser Demo | PASS | Chrome 桌面 1440×1000、手机视口 390×844，15 项交互检查通过，离线游玩、无页面错误，截图已人工查看 |
+| Device Tests | NOT RUN | 硬件未到；没有刷写、擦除或重置设备 |
+| Unverified | OPEN | 实际屏幕与字体、淡入淡出顺滑度、按键延迟、LVGL 分配峰值、长时间碎片、电量/电流/温度、Safari、实体手机及用户视觉验收 |
 
-## 复现方法
+## 构建证据
 
-- `./tools/validate.sh --static`：仓库规范、工作流检查、原有 BSP/主机测试及新增
-  Zumi 测试；本地记录见 `build/static.log`。
-- `cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -Imain/zumi tests/test_zumi.c main/zumi/core.c main/zumi/view.c -o build/test_zumi`
-  然后执行 `build/test_zumi`，覆盖游戏/导航实际分支及随机不变量。
-- `node tests/wasm_parity.cjs`：对照原生模型和已提交浏览器模块的 5,000 次回放。
-  静态门禁检查产物哈希，避免模型或视图修改后仍使用过期模块。
-- `node tests/browser_zumi.cjs`：需要本地预览服务、Playwright 和 Chrome。
-  证据为 `build/browser-results.json`、`build/browser-home.png`、
-  `build/browser-carbon.png`、`build/browser-journey.png`、`build/browser-mobile.png`。
-- 资源编译器保留原始矢量，记录 SHA-256 来源。未调用图像生成或外部 AI 服务。
+应用镜像 680,368 字节，factory 分区 8,323,072 字节；合并镜像 745,904 字节。原 BSP 和分区表未修改，无 PSRAM 依赖。新增 Montserrat 10 网址小字，没有增加存储格式或写入。
 
-浏览器测试覆盖首页、两个未接入服务页、Carbon Pop 计分、长按抬起抑制、
-Journey 进入/跳跃、离线游玩、失败/重玩、手机视口溢出和实体按键模拟控件。
-手机视口不等于真机手机验收；Safari 和真实移动浏览器未验证。
+合并镜像 SHA-256：
+`279607af4c394a1344f036d13dbfc7a8c6b13d9d151712fe7ad8992fb9ef8e16`。
+匹配 ELF SHA-256：
+`9e3949471358432713a080d46d1cb9581da4111b63a3a9756ae056d3d0432dd7`。
 
-官方门禁做了两处有界 macOS 兼容修复：macOS `sha256sum` 不支持 GNU 长选项，
-改用 `shasum` 校验固定版本 actionlint；原 demo 测试在 Darwin 使用
-`-dead_strip`，Linux 保留 `--gc-sections`。未删除或跳过原有测试。
+本地镜像/ELF/MAP/manifest 保存在 `build/firmware/279607af4c394a1344f036d13dbfc7a8c6b13d9d151712fe7ad8992fb9ef8e16/`。
+应用描述确认源码版本 `1a361c9`、IDF `v5.5.3`。构建产物被 Git 忽略，并非发布的固件版本。最终报告提交不改变已测试的固件、浏览器模块或素材。
+
+## 复现与测试范围
+
+- 激活 ESP-IDF 5.5.3 后运行 `./tools/validate.sh`。日志：`build/full-gate-link.log`，原基线检查全部保留。
+- `cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -Imain/zumi tests/test_zumi.c main/zumi/core.c main/zumi/view.c -o build/test_zumi`，再运行 `build/test_zumi`：通过操作解六关，检查固定格、无限时、下一关循环、三键唤醒与释放抑制、精确 3,000 毫秒欢迎页、首页淡入、网址和绘制边界。随机状态使用独立的双向接头遍历校验。
+- `node tests/wasm_parity.cjs`：原生 C 与 WASM 的 5,000 次状态对照。源码/模块校验值防止旧模块冒充更新。
+- 预览服务器运行后执行 `node tests/browser_zumi.cjs`：首页、Talk、Garden、游戏入口、第一关通关、下一关、离线旋转、无限时思考、长 OK 释放、空闲变暗、不同表情、网址、3 秒返回、手机视口溢出、实体按键样式控件，共 15 项。
+- 浏览器证据位于 `build/`：`browser-results.json`、`browser-home.png`、`browser-link.png`、`browser-link-complete.png`、`browser-wake.png`、`browser-mobile.png`。手机视口不等于实体手机验证。
+- 素材编译保留来源哈希，没有调用图像生成或付费服务。浏览器无法验证实际 LVGL 内存。
+
+官方检查做了两处 macOS 兼容修复：actionlint 校验使用 `shasum`；原有主机 demo 测试用 Darwin 的 `-dead_strip`，Linux 仍用 `--gc-sections`。没有删减或跳过基线测试。
 
 ## 环境与交付边界
 
-使用 ZCO 网站仓库之外的独立目录。五个 passport 技能已建立仓库本地链接并确认可读。
-官方 ESP-IDF v5.5.3 的注解标签对象为 `b31fcc7a314a44ad992b58f589f7d1d8a4fadff6`，
-实际源码提交为 `2c211b236707889e8400c4dc5644dd5c4ee071e0`，未使用小智替代 SDK。
-wasi-sdk 34 仅用于浏览器模块。
+五个官方 passport Skills 已安装并检查可读。ESP-IDF v5.5.3 tag 对象为 `b31fcc7a314a44ad992b58f589f7d1d8a4fadff6`，源码提交 `2c211b236707889e8400c4dc5644dd5c4ee071e0`；未混用小智 SDK。wasi-sdk 34 仅构建浏览器。角色来源见 `assets/images/zumi-pocket/manifest.json`。
 
-仅向选定 Fork 发布请求的功能分支；上游 main、Fork main、原 ZCO 网站与 Cloudflare
-均不变。详见[硬件到货清单](zumi-pocket.zh_CN.md)。
+独立仓库、Fork `9pk8vftyr2-gif/ai-passport`，只更新 feature 分支。上游与 Fork main 均核对为 `3d685a90bdb96dd8526d84edde1e63fec25b460e`。ZCO 网站仅只读参考 Energy Link 规则，未修改网站、部署 Cloudflare、接入付费 AI 或操作设备。
+
+参见[硬件到货验收清单](zumi-pocket.zh_CN.md)。
