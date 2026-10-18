@@ -1,0 +1,6 @@
+{
+  "main/zumi/talk_model.c": "8335b4a557af38e4bb75640d5bfd4f4ca574ff8321270115c2a486e91848d091",
+  "main/zumi/talk_model.h": "babe57d12a1f231f75006945711205565bc99ae43b80060d6241f31d980c93a3",
+  "preview/talk/bridge.c": "135b852755a5dcd0a7ceea89be952cd3a015dc560d713d727597b545e726ea3e",
+  "preview/talk/talk.wasm": "0728f331f4f2ad4d2e0e88e647d18f3eef8996cb05f452b7e79bcae2e79c2cc2"
+}

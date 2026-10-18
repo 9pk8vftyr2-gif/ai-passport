@@ -131,7 +131,7 @@ and display/audio contention require device measurement. No microphone reads.
   12,808 bytes. LVGL objects are reused; changed commands update under BSP locks.
 - One owner task, nonblocking bounded input queue; battery I/O outside LVGL lock.
 - Three 78 x 92 RGB565 sprites occupy 43,056 Flash bytes. No full-screen decoded
-  images. BSP partial DMA buffer is 9,600 bytes; LVGL pool remains 24 KB.
+  images. BSP partial DMA buffer is 19,200 bytes; LVGL pool remains 24 KB.
   Peak runtime heap, LVGL allocation and fragmentation need physical validation.
 - Original BSP and 8 MB partition table unchanged; no PSRAM. Enabled Montserrat
   10 for small website labels alongside existing 14/20 fonts. Original test UI

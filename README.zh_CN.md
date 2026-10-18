@@ -38,3 +38,5 @@ Fork：`9pk8vftyr2-gif/ai-passport`；分支：`feature/zumi-pocket`。上游基
 不改上游或 Fork main，不改现有 ZCO 网站，不部署 Cloudflare，不刷写、擦除设备或接入付费服务。
 
 宣传卡转换：`node tools/build_zumi_wake_cards.cjs`（Sharp），8 张 240×320 RGB565 共占 1,228,800 字节 Flash，运行时不申请整帧解码缓冲。
+
+- [Talk V1.0 架构审计与交互设计](docs/assets/zumi-talk-v1.zh_CN.md)

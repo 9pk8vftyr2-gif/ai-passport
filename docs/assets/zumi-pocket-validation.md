@@ -22,7 +22,7 @@ The full-image and ELF hashes below identify the actual deliverable.
 - Eight wake cards: 1,228,800 read-only Flash bytes, native 240 x 320 RGB565.
 - Basic sprites: 43,056 Flash bytes; shared audio PCM: 20,800 bytes.
 - Eco Pop icons: 12,288 Flash bytes (six 32 x 32 RGB565 lit/unlit variants).
-- State: 104 bytes; two draw lists: 12,808 bytes. Original 9,600-byte BSP draw
+- State: 104 bytes; two draw lists: 12,808 bytes. Original 19,200-byte BSP draw
   buffer and 24 KB LVGL pool retained. No added full-frame decoder buffer.
 - Full-image SHA-256: `cb681e7452c32b843511904bff3760614e3aac0f3123296854623f2f94aadd2a`.
 - Matching ELF SHA-256: `34e33e22cbaf63ab37d335075f6ea558b17488fb3c6d3f1003cdab5b21c16ddc`.

@@ -106,3 +106,5 @@ Fork: `9pk8vftyr2-gif/ai-passport`; branch: `feature/zumi-pocket`.
 Based on upstream main `3d685a90bdb96dd8526d84edde1e63fec25b460e`.
 Upstream and fork main stay unchanged. This project does not modify the ZCO
 website, deploy to Cloudflare, flash devices, erase storage, or connect paid AI.
+
+- [Talk V1.0 architecture and interaction review](docs/assets/zumi-talk-v1.md)

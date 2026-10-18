@@ -31,6 +31,9 @@ run_static_checks() {
     "${CC:-cc}" -std=c11 -O2 -Wall -Wextra -Werror -Imain/zumi \
         tests/zumi_difficulty.c main/zumi/core.c -o "${test_dir}/zumi_difficulty"
     "${test_dir}/zumi_difficulty"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/zumi \
+        tests/test_talk_model.c main/zumi/talk_model.c -o "${test_dir}/test_talk_model"
+    "${test_dir}/test_talk_model"
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_zumi_artifacts.py
     "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
         tests/test_ui_pixel_math.c main/ui_pixel_math.c \

@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-18",
+  "source_revision": "b61f8c0ae6167e7a28c032fdbf62a122d8b0fb4a",
+  "scope": "Zumi runtime baseline; Talk model is not linked into firmware",
+  "partitions": [
+    {
+      "name": "nvs",
+      "type": "data",
+      "subtype": "nvs",
+      "offset": 36864,
+      "size": 24576
+    },
+    {
+      "name": "phy_init",
+      "type": "data",
+      "subtype": "phy",
+      "offset": 61440,
+      "size": 4096
+    },
+    {
+      "name": "factory",
+      "type": "app",
+      "subtype": "factory",
+      "offset": 65536,
+      "size": 8323072
+    }
+  ],
+  "flash_bytes": 8388608,
+  "app_bytes": 2006896,
+  "app_remaining_bytes": 6316176,
+  "merged_bytes": 2072432,
+  "full_sha256": "cb681e7452c32b843511904bff3760614e3aac0f3123296854623f2f94aadd2a",
+  "elf_sha256": "34e33e22cbaf63ab37d335075f6ea558b17488fb3c6d3f1003cdab5b21c16ddc",
+  "image_version": "1c7a2cf-dirty",
+  "idf_version": "v5.5.3",
+  "linker_dram_used_bytes": 117484,
+  "linker_dram_remaining_bytes": 203812,
+  "linker_remainder_is_runtime_heap": false,
+  "lvgl_static_pool_bytes": 24576,
+  "lcd_dma_buffer_bytes": 19200,
+  "runtime_free_internal_heap_bytes": null,
+  "runtime_largest_internal_block_bytes": null,
+  "runtime_min_free_heap_bytes": null,
+  "device_tests": "NOT RUN",
+  "source_sha256": {
+    "partitions.csv": "950a9b173c54df7b2263e730c41722ef279155a4b6ccb91a17ea7fbb089af3ac",
+    "sdkconfig.defaults": "53ed4573ca4b71ec9eca4ca77e1b2a4f0e6a4460d9599368d1a97efcaa720105",
+    "main/CMakeLists.txt": "c74e22dee4f1c14b0b6beb05883964ca4ae39864b12de003ab7e35f868ab52bb",
+    "main/zumi_main.c": "35ae429f726e26cdc65ebef97beba438347d9e8b57f5b1855a0e70c6a9412626",
+    "main/zumi/audio.c": "87205c1a38b09fd1e4e8ad247fd533bfd070dceffcedefd7404f2e4dd823db5c",
+    "components/bsp/src/bsp_audio.c": "1cc4977cd9352806c8cf95ec0348220737645fd5d2cf42195a2564aa5d3090c3",
+    "components/bsp/src/bsp_display_lvgl.c": "3d7b991004d2cbb8b1799e9f44bc74f20fcd4637928b912edbc2072479664fd6"
+  }
+}

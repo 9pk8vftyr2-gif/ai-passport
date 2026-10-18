@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>Zumi · Talk V1.0 设计预览</title><link rel="stylesheet" href="style.css"></head>
+<body><main>
+<section class="intro"><a href="../" class="back">← 返回 Zumi Pocket</a><p class="eyebrow">TALK / V1.0 · DESIGN REVIEW</p><h1>说一句。<br>听 Zumi 回答。</h1><p class="lead">一次按下，一次对话。<br>只有你想说话时，Zumi 才开始听。</p>
+<div class="scope">交互模拟 · 不访问麦克风 · 不连接 AI 服务</div>
+<div class="instructions"><p><b>短按 OK</b> 开始录音，再按结束并提交。<br><b>等待或回答时按 OK</b> 取消 / 打断。<br><b>UP / DOWN</b> 翻阅文字。<br><b>长按 OK</b> 取消并返回首页。</p><p class="muted">为适配小内存，方案会在录音时分块上传；结束后才提交问答。此页用固定示例文字演示，Speaking 不播放真实 TTS。</p></div>
+</section>
+<section class="device-area"><div class="device"><div class="lanyard"></div><div class="device-brand">ZUMI <span>POCKET</span></div>
+<div id="screen" role="region" aria-label="Talk 240 by 320 screen">
+<header><strong>Talk</strong><span id="network">ONLINE</span></header>
+<div id="state-label" role="status">Idle</div>
+<div class="portrait"><img src="../../assets/images/zumi-pocket/zumi-0.png" alt="原版 Zumi"><span class="signal" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></div>
+<div id="indicator">MIC OFF</div>
+<div id="copy"><span id="caption">YOUR MOMENT</span><p id="message">Ready when you are.</p></div>
+<div id="cta">OK · Start talking</div><footer>UP / DOWN text <span>Hold OK: home</span></footer>
+</div>
+<div class="keys"><button data-key="up" aria-label="UP">↑<small>UP</small></button><button data-key="down" aria-label="DOWN">↓<small>DOWN</small></button><button data-key="ok" aria-label="OK" class="ok">●<small>OK</small></button></div>
+<p class="hardware">240 × 320 / THREE KEYS</p></div><p id="status">正在加载交互模型…</p></section>
+<section class="review"><div><p class="eyebrow">REVIEW CONTROLS</p><h2>试试断网和打断</h2><p class="muted">以下是预览测试工具，不是设备菜单。</p></div><div class="test-buttons"><button id="network-toggle">模拟断网</button><button id="failure">模拟服务错误</button><button id="timeout">模拟等待超时</button><button id="open">重新进入 Talk</button></div><label class="automatic"><input type="checkbox" id="auto" checked> 自动演示识别与回答</label></section>
+<section class="states"><article><b>01 / Idle</b><p>准备好了，麦克风关闭。</p></article><article><b>02 / Listening</b><p>红色录音指示与计时，最长 15 秒。</p></article><article><b>03 / Processing</b><p>麦克风关闭，显示识别文字。</p></article><article><b>04 / Speaking</b><p>回答文字与播放提示，可随时打断。</p></article><article><b>05 / Offline</b><p>停止采集，重新连接后重新开始。</p></article><article><b>06 / Error</b><p>说明错误，重试不重发旧录音。</p></article></section>
+<p class="boundary">本次交付是架构与交互原型。硬件录音、Wi-Fi、服务端和 TTS 尚未接入；现有小游戏与固件入口保持原样。预览中的浏览器字体不代表硬件已支持中文。</p>
+</main><script type="module" src="app.js"></script></body></html>
