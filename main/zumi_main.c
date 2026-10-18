@@ -11,6 +11,7 @@
 #include "zumi/core.h"
 #include "zumi/view.h"
 #include "zumi/sprites.h"
+#include "zumi/energy_icons.h"
 #include "zumi/wake_cards.h"
 #include "esp_random.h"
 #include "zumi/sound.h"
@@ -46,7 +47,7 @@ static void render(void) {
         if (fresh) {
             if(objects[i]) lv_obj_delete(objects[i]);
             objects[i]=d->kind==Z_TEXT ? lv_label_create(screen) :
-                       (d->kind==Z_SPRITE || d->kind==Z_WAKE_CARD) ? lv_image_create(screen) : lv_obj_create(screen);
+                       (d->kind==Z_SPRITE || d->kind==Z_WAKE_CARD || d->kind==Z_ENERGY_ICON) ? lv_image_create(screen) : lv_obj_create(screen);
             lv_obj_remove_style_all(objects[i]);
             lv_obj_remove_flag(objects[i],LV_OBJ_FLAG_SCROLLABLE);
         }
@@ -54,7 +55,7 @@ static void render(void) {
         lv_obj_set_pos(o,d->x,d->y);
         /* Image opacity blends directly into the BSP draw buffer, without an
            object-opacity layer large enough to exhaust the 24 KB LVGL pool. */
-        if(d->kind==Z_WAKE_CARD) lv_obj_set_style_image_opa(o,(lv_opa_t)d->opacity,0);
+        if(d->kind==Z_WAKE_CARD || d->kind==Z_ENERGY_ICON) lv_obj_set_style_image_opa(o,(lv_opa_t)d->opacity,0);
         else lv_obj_set_style_opa(o,(lv_opa_t)d->opacity,0);
         if(d->kind==Z_RECT) {
             lv_obj_set_size(o,d->w,d->h);
@@ -68,6 +69,10 @@ static void render(void) {
                                        d->size==10?&lv_font_montserrat_10:&lv_font_montserrat_14,0);
             lv_obj_set_style_text_color(o,lv_color_hex(d->color),0);
             lv_label_set_text(o,d->text);
+        } else if(d->kind==Z_ENERGY_ICON) {
+            lv_image_set_src(o,&zumi_energy_icons[d->size % 6]);
+            lv_image_set_pivot(o,0,0);
+            lv_image_set_scale(o,(uint16_t)(d->w*256/32));
         } else if(d->kind==Z_WAKE_CARD) {
             lv_image_set_src(o,&zumi_wake_cards[d->size % Z_WAKE_CARDS]);
         } else {

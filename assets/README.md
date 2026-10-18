@@ -63,3 +63,11 @@ Store reusable music and sound-effect sources in `music/`.
 ### Approved promotional wake cards
 
 `images/zumi-pocket/wake-cards/` holds eight approved 240 x 320 RGB565-quantized PNGs and the concatenated `wake_cards.rgb565` (1,228,800 bytes). `source/` contains the approved V3 composites and original sticker identity hashes from the owner-supplied local Zumi: Office Vibes package. This does not assert WeChat publication. Built-in image generation edited backgrounds; original sticker layers were reused without redrawing. Owner approval for device integration was given on 2026-10-18. Run `node tools/build_zumi_wake_cards.cjs` (Sharp) to reproduce. The native binary is linked read-only from Flash; the browser uses matching quantized PNGs. No runtime PNG/JPEG decode or full-frame buffer. The same ZCO artwork licensing boundary applies.
+
+
+Energy Link reuses ZCO Eco Pop sun, turbine and building artwork under
+`images/zumi-pocket/energy-icons/`. Original website PNGs and crop/hash provenance
+are retained there. `node tools/build_energy_link_icons.cjs` (Sharp) generates
+six lit/unlit 32 x 32 RGB565 variants, 12,288 Flash bytes, with matching browser
+PNGs. Artwork is reused at the user's request, without a new third-party
+redistribution license. See the [design notes](../docs/assets/zumi-pocket.md).

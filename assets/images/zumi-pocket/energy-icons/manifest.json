@@ -1,0 +1,108 @@
+{
+  "source_project": "ZCO Eco Pop",
+  "source_revision": "a0504f97fb74a94ea864361f539e5832a16b268f",
+  "source_path": "game/carbon-pop/icons",
+  "crop_reference": "docs/evidence/carbon-pop-matte/alignment.json",
+  "note": "Original artwork reused at user request. House uses Eco Pop building/demand art. House crop y=529.5 rounds to 530. No claim of a new third-party redistribution license.",
+  "flash_bytes": 12288,
+  "width": 32,
+  "height": 32,
+  "assets": [
+    {
+      "id": 0,
+      "name": "solar",
+      "lit": false,
+      "file": "solar-off.png",
+      "sha256": "69f49a4619c97b22284ecfbe77216e2f6aa1933f1cd7fa2b5736645c127da8d8",
+      "rgb565_sha256": "2bc6fe8b5efcc726be58af837e78b4a349ca1b72d994dd37f7dca727c74b1873",
+      "bytes": 2048,
+      "source": "clay-matte-v1.png",
+      "source_sha256": "088e3048a0380ef9df92302687a1ebef53997a63284074fe4b6039370ef0870e",
+      "crop": [
+        78,
+        60,
+        441
+      ]
+    },
+    {
+      "id": 1,
+      "name": "wind",
+      "lit": false,
+      "file": "wind-off.png",
+      "sha256": "9c6db454a59674bb4a6b528acad97846f031aae98ff7321f27b91fcda3a72c9b",
+      "rgb565_sha256": "5b4b9b663f86cdd038fe90eb09671c891f7f6c9896954b032052ad9dd28469d3",
+      "bytes": 2048,
+      "source": "wind-matte-sky-v1.png",
+      "source_sha256": "8c2fd8cd67ab25a35b457650695439645ff0257b5ea503106f970652098dbb89",
+      "crop": [
+        98,
+        117,
+        1059
+      ]
+    },
+    {
+      "id": 2,
+      "name": "house",
+      "lit": false,
+      "file": "house-off.png",
+      "sha256": "023b0332d80b59b561a83eaf08a315d631c8b6f78eca884a6c97f293a0311b81",
+      "rgb565_sha256": "d5a1a310d67b667e31a3829270e1b0a00b86ab37080a02901ef8ceeb94b7c7ad",
+      "bytes": 2048,
+      "source": "clay-matte-v1.png",
+      "source_sha256": "088e3048a0380ef9df92302687a1ebef53997a63284074fe4b6039370ef0870e",
+      "crop": [
+        1013,
+        530,
+        460
+      ]
+    },
+    {
+      "id": 3,
+      "name": "solar",
+      "lit": true,
+      "file": "solar-on.png",
+      "sha256": "89f05938447d2909d030c3d07a75e19ffe003e34534b3c8990127d55a72ea14f",
+      "rgb565_sha256": "bcfc0f0cbb142f81c0cc2b4b22ffcc485544c8c909ee2f9f02d713d6c1c1249b",
+      "bytes": 2048,
+      "source": "clay-matte-v1.png",
+      "source_sha256": "088e3048a0380ef9df92302687a1ebef53997a63284074fe4b6039370ef0870e",
+      "crop": [
+        78,
+        60,
+        441
+      ]
+    },
+    {
+      "id": 4,
+      "name": "wind",
+      "lit": true,
+      "file": "wind-on.png",
+      "sha256": "fc5674a9d97c218f7a57ce6ab2382126248bb1d2ffb145457f3196a4c4386602",
+      "rgb565_sha256": "9ee41461e9bc50bf22c2c77c0e39946b3f1c1241a035437d8177aed9b2d1b706",
+      "bytes": 2048,
+      "source": "wind-matte-sky-v1.png",
+      "source_sha256": "8c2fd8cd67ab25a35b457650695439645ff0257b5ea503106f970652098dbb89",
+      "crop": [
+        98,
+        117,
+        1059
+      ]
+    },
+    {
+      "id": 5,
+      "name": "house",
+      "lit": true,
+      "file": "house-on.png",
+      "sha256": "76d68b461df742c2d5f509dd709b4691de4db5fd27a9b755fde1e33aa6588136",
+      "rgb565_sha256": "41398117208d3f5036eca59cea4767974137a28765747fc3d99009885c56e395",
+      "bytes": 2048,
+      "source": "clay-matte-v1.png",
+      "source_sha256": "088e3048a0380ef9df92302687a1ebef53997a63284074fe4b6039370ef0870e",
+      "crop": [
+        1013,
+        530,
+        460
+      ]
+    }
+  ]
+}

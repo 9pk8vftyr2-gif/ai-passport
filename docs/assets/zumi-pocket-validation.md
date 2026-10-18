@@ -2,30 +2,31 @@
 
 # Zumi Pocket Validation
 
-2026-10-18. Three-column/four-row board and raised counter increment on `feature/zumi-pocket`, based on
-`6bbbb70`. The successful gate ran before committing, so the image version is
-`6bbbb70-dirty`; no firmware source or display pixel changes followed the build.
+2026-10-18. 4 x 4 board, harder six-level progression and Eco Pop icon increment on `feature/zumi-pocket`, based on
+`1c7a2cf`. The successful gate ran before committing, so the image version is
+`1c7a2cf-dirty`; no firmware source or display pixel changes followed the build.
 The full-image and ELF hashes below identify the actual deliverable.
 
 | Field | Status | Evidence |
 | --- | --- | --- |
 | Build | PASS | ESP-IDF 5.5.3, complete official gate, merged layout and matching ELF archive verified |
-| Host Tests | PASS | Original repository checks, all six 12-cell solutions/fourth-row links/row boundaries/full cursor coverage, sanitizers, 100,000 game transitions, all-page 60-second boundaries/activity reset/late-key guards, 256 wake cycles and all eight cards, 5,000 native/WASM comparisons, provenance and pixel-data hashes |
-| Browser Demo | PASS | Chrome desktop/mobile; redesigned home, six 3-column x 4-row boards and previews, direct next level; black pixels and in-game screen-off/wake with unchanged progress and continued play, eight distinct cards offline, no adjacent repeats, three-second return, game controls, full English labels and shared sound |
+| Host Tests | PASS | Original repository checks, all six 16-cell solutions/fourth-row links/row boundaries/full cursor coverage, sanitizers, 100,000 game transitions, all-page 60-second boundaries/activity reset/late-key guards, 256 wake cycles and all eight cards, 5,000 native/WASM comparisons, provenance and pixel-data hashes |
+| Browser Demo | PASS | Chrome desktop/mobile; redesigned home, six 4-column x 4-row boards and previews, direct next level; black pixels and in-game screen-off/wake with unchanged progress and continued play, eight distinct cards offline, no adjacent repeats, three-second return, game controls, full English labels and shared sound |
 | Device Tests | NOT RUN | No physical device flashed, erased, reset or opened |
-| Unverified | Pending hardware | physical backlight shutdown and wake latency, LCD colors and clipping, fade frame time, internal heap/LVGL peak, audio, battery current and real runtime |
+| Unverified | Pending hardware | physical 48-pixel-cell icon/cursor readability, backlight shutdown and wake latency, LCD colors and clipping, fade frame time, internal heap/LVGL peak, audio, battery current and real runtime |
 
 ## Exact firmware identity
 
-- Application: 1,994,448 bytes of the 8,323,072-byte factory partition.
-- Merged image: 2,059,984 bytes. Flash configuration: 8 MB; no PSRAM.
+- Application: 2,006,8104 bytes of the 8,323,072-byte factory partition.
+- Merged image: 2,072,432 bytes. Flash configuration: 8 MB; no PSRAM.
 - Eight wake cards: 1,228,800 read-only Flash bytes, native 240 x 320 RGB565.
 - Basic sprites: 43,056 Flash bytes; shared audio PCM: 20,800 bytes.
-- State: 96 bytes; two draw lists: 12,808 bytes. Original 9,600-byte BSP draw
+- Eco Pop icons: 12,288 Flash bytes (six 32 x 32 RGB565 lit/unlit variants).
+- State: 104 bytes; two draw lists: 12,808 bytes. Original 9,600-byte BSP draw
   buffer and 24 KB LVGL pool retained. No added full-frame decoder buffer.
-- Full-image SHA-256: `aee9ec0ac8a2d080bf287567375b631c8d2c849ad05720d3dfc409e3b26c25c9`.
-- Matching ELF SHA-256: `855527d5bde7de350c4c4301a08b6a720ef29841abd8282be2af7ebbcda11399`.
-- Local bundle: `build/firmware/aee9ec0ac8a2d080bf287567375b631c8d2c849ad05720d3dfc409e3b26c25c9/`.
+- Full-image SHA-256: `cb681e7452c32b843511904bff3760614e3aac0f3123296854623f2f94aadd2a`.
+- Matching ELF SHA-256: `34e33e22cbaf63ab37d335075f6ea558b17488fb3c6d3f1003cdab5b21c16ddc`.
+- Local bundle: `build/firmware/cb681e7452c32b843511904bff3760614e3aac0f3123296854623f2f94aadd2a/`.
 
 The archive contains the matching merged/application images, ELF, MAP, bootloader,
 partition table, flash arguments and manifest. It is ignored by Git and has not
@@ -36,14 +37,17 @@ layout; no Xiaozhi SDK was used.
 ## Actual validation
 
 `./tools/validate.sh` completed with ESP-IDF 5.5.3; log:
-`build/full-gate-3x4.log`.
+`build/full-gate-4x4-eco-icons.log`.
 
 `tests/test_zumi.c` also passed with AddressSanitizer and UndefinedBehaviorSanitizer.
 It checks all six solvable levels, a reciprocal-edge oracle, fixed tiles, 3,000 ms
 wake timing, key suppression, all eight wake-card selections without adjacent
 repeats, fade boundaries, Garden placeholder and audio event/PCM bounds.
 `node tests/wasm_parity.cjs` compares 5,000 transitions including idle/wake cycles.
-`tests/test_zumi_artifacts.py` validates source/module hashes, eight distinct
+`tests/zumi_difficulty.c` exhaustively proves minimum clockwise rotations of
+**8, 13, 16, 18, 20, 25** for the six boards, excluding cursor-selection presses.
+It is included in the full gate; results: `build/zumi-difficulty.json`.
+`tests/test_zumi_artifacts.py` validates Eco Pop source/PNG/firmware-pixel hashes, source/module hashes, eight distinct
 original sticker hashes, approved source hashes, PNG dimensions and RGB565 slices.
 
 `node tests/browser_zumi.cjs` passed after loading local assets and switching the
@@ -62,17 +66,16 @@ not assert published WeChat status. Native cards are read directly from Flash;
 image opacity avoids a full-frame object layer. Garden and Talk are placeholders.
 Energy Link titles sit at (22,16), clear of battery information. Home now uses
 three numbered entries without a character. The initial level picker replaces
-the character with a preview of the selected board. All six boards and previews now have three columns and four rows. The level/turn
-counter moves to (22,47); the board starts at y=72 with 64 x 44 pixel cells.
-Preview cells are 60 x 34 pixels. Each solvable level uses the fourth row.
-Board screenshots use 32–52 commands, below the 64-command limit, with no new images.
+the character with a preview of the selected board. All six boards and previews now have four columns and four rows. The level/turn
+counter moves to (22,47); the board starts at y=72 with 48 x 44 pixel cells.
+Preview cells are 48 x 34 pixels. Each solvable level uses the fourth row.
+Board screenshots use 38–55 commands, below the 64-command limit, using the original Eco Pop sun, turbine and house artwork with a full English footer legend.
 Additional tests cover fourth-row horizontal/vertical links, row-edge isolation,
-all movable cursor positions and wake preservation across all 12 cells.
+all movable cursor positions and wake preservation across all 16 cells.
 After a win, OK starts the next board directly, wrapping after level six; there
 is no inter-level picker. Initial Play entry still allows level selection.
 Changing levels cancels previous game audio. Four-row screenshots:
-`build/browser-board-3x4-1.png` through `browser-board-3x4-6.png`; level five
-shows the raised `5 / 6  7 turns` counter. Other screenshots:
+`build/browser-board-4x4-1.png` through `browser-board-4x4-6.png`; the level/turn counter retains its raised position. Other screenshots:
 `build/browser-home-redesign.png`, `build/browser-level-preview-1.png` through
 `browser-level-preview-6.png`.
 

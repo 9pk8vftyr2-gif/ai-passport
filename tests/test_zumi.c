@@ -22,6 +22,16 @@ static unsigned oracle(const z_state *s) {
         }
     } while(seen!=previous);return seen;
 }
+static z_state solve(z_state *s) {
+    z_state last=*s;
+    for(int visit=0;visit<Z_CELLS&&!s->won;visit++) {
+        for(int turns=0;turns<4&&s->tiles[s->cursor]!=s->solution[s->cursor]&&!s->won;turns++) {
+            last=*s;z_action(s,Z_OK);
+        }
+        if(!s->won) z_action(s,Z_DOWN);
+    }
+    assert(s->won);return last;
+}
 int main(void) {
     z_state s;z_input in={0};z_init(&s,42);
     z_action(&s,Z_OK);assert(s.page==Z_TALK&&z_talk_request()==-1);z_action(&s,Z_OK);
@@ -32,7 +42,7 @@ int main(void) {
         z_link_start(&s,level);assert(!s.won);uint8_t fixed[Z_CELLS];memcpy(fixed,s.tiles,sizeof(fixed));
         z_state solved=s;memcpy(solved.tiles,solved.solution,sizeof(solved.tiles));
         z_link_evaluate(&solved);assert(solved.won&&solved.powered==oracle(&solved));
-        assert(solved.powered & (7u << 9)); /* Each solution uses the fourth row. */
+        assert(solved.powered & 0xF000u); /* Each solution uses the fourth row. */
         z_state picker=s;picker.page=Z_PLAY;z_state untouched=picker;
         bounds(&picker);assert(!memcmp(&picker,&untouched,sizeof(picker)));
         unsigned visited=0,expected=0;
@@ -52,13 +62,13 @@ int main(void) {
         z_action(&s,Z_OK);assert(s.page==Z_LINK&&s.level==(level+1)%Z_LEVELS&&s.moves==0&&!s.won);
     }
     puts("PASS six solvable levels, fixed tiles, untimed play, wrap selection, next level");
-    z_init(&s,42);s.source=2;s.homes=1u<<3;s.tiles[2]=2;s.tiles[3]=8;
+    z_init(&s,42);s.source=3;s.homes=1u<<4;s.tiles[3]=2;s.tiles[4]=8;
     z_link_evaluate(&s);assert(!s.won); /* Right edge cannot wrap into the next row. */
-    z_init(&s,42);s.source=8;s.homes=1u<<11;s.tiles[8]=4;s.tiles[11]=1;
-    z_link_evaluate(&s);assert(s.won&&s.powered==((1u<<8)|(1u<<11)));
-    s.tiles[11]=2;z_link_evaluate(&s);assert(!s.won); /* Reciprocal bottom edge. */
-    z_init(&s,42);s.source=9;s.homes=1u<<11;s.tiles[9]=2;s.tiles[10]=10;s.tiles[11]=8;
-    z_link_evaluate(&s);assert(s.won&&s.powered==(7u<<9));
+    z_init(&s,42);s.source=11;s.homes=1u<<15;s.tiles[11]=4;s.tiles[15]=1;
+    z_link_evaluate(&s);assert(s.won&&s.powered==((1u<<11)|(1u<<15)));
+    s.tiles[15]=2;z_link_evaluate(&s);assert(!s.won); /* Reciprocal bottom edge. */
+    z_init(&s,42);s.source=12;s.homes=1u<<15;s.tiles[12]=2;s.tiles[13]=10;s.tiles[14]=10;s.tiles[15]=8;
+    z_link_evaluate(&s);assert(s.won&&s.powered==0xF000u);
     puts("PASS fourth-row connectivity, no row wrap, full cursor coverage and pure previews");
     for(int key=0;key<3;key++) {
         z_init(&s,42);in=(z_input){0};advance(&s,60000);assert(s.screen_off);
@@ -95,7 +105,8 @@ int main(void) {
     for(int level=0;level<Z_LEVELS;level++) for(int key=0;key<3;key++) {
         z_init(&s,42);in=(z_input){0};z_link_start(&s,level);
         z_action(&s,Z_OK);z_action(&s,Z_DOWN);
-        /* Level 0 is won here; other levels cover partial boards. */
+        /* Preserve completed boards as well as partially solved games. */
+        if(level==0) (void)solve(&s);
         z_state saved=s;
         for(int cycle=0;cycle<3;cycle++) {
             advance(&s,60000);assert(s.screen_off);
@@ -121,7 +132,7 @@ int main(void) {
     puts("PASS exact game resume across all levels/keys, completed boards, repeated wakes, fades and continued play");
     z_link_start(&s,0);z_state before=s;
     z_action(&s,Z_DOWN);assert(z_sound_event(&before,&s)==Z_SOUND_NONE);
-    before=s;z_action(&s,Z_OK);assert(z_sound_event(&before,&s)==Z_SOUND_WIN);
+    before=solve(&s);assert(z_sound_event(&before,&s)==Z_SOUND_WIN);
     before=s;z_action(&s,Z_OK);assert(z_sound_event(&before,&s)==Z_SOUND_NONE);
     z_link_start(&s,1);before=s;z_action(&s,Z_OK);assert(z_sound_event(&before,&s)==Z_SOUND_TURN);
     before=s;s.moves++;s.powered|=s.homes;assert(z_sound_event(&before,&s)==Z_SOUND_CONNECT);

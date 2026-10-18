@@ -2,6 +2,7 @@ const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d');
 const status=document.querySelector('#status');
 const sprites=await Promise.all([0,1,2].map(i=>new Promise((resolve,reject)=>{const im=new Image(); im.onload=()=>resolve(im);im.onerror=reject;im.src=`../assets/images/zumi-pocket/zumi-${i}.png`;})));
 const wakeCards=await Promise.all(Array.from({length:8},(_,i)=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=`../assets/images/zumi-pocket/wake-cards/card-${i+1}.png`;})));
+const energyIcons=await Promise.all(['solar-off','wind-off','house-off','solar-on','wind-on','house-on'].map(name=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=`../assets/images/zumi-pocket/energy-icons/${name}.png`;})));
 let api;
 try {
  const response=await fetch('pocket.wasm'); if(!response.ok)throw Error('请先运行 tools/build_preview.sh');
@@ -43,6 +44,7 @@ function render(){
   const [kind,x,y,w,h,c,r,size,opacity]=a;ctx.fillStyle=color(c);ctx.globalAlpha=opacity/255;
   if(kind===0){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
   else if(kind===1){const b=new Uint8Array(api.memory.buffer,p+36,64);const end=b.indexOf(0);const text=decoder.decode(b.subarray(0,end<0?64:end));ctx.font=`${size}px Arial`;ctx.textBaseline='top';ctx.fillText(text,x,y);}
+  else if(kind===4)ctx.drawImage(energyIcons[size%6],x,y,w,h);
   else if(kind===3)ctx.drawImage(wakeCards[size%8],x,y,w,h);
   else ctx.drawImage(sprites[size%3],x,y,w,h);
  }

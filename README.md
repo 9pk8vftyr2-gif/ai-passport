@@ -27,8 +27,9 @@ needed. Gameplay continues offline after the page's local resources load.
   a clear selected row, and no character image. Original Zumi art stays in wake
   cards and Talk/Garden placeholders.
 - **Energy Link:** the only game, adapted from the website connection puzzle.
-  Six pocket-authored 3-column x 4-row boards. UP/DOWN cycle through movable wires;
-  OK rotates clockwise. `Solar power` / `Wind power` name the fixed source; `House` names each home. Matching
+  Six harder pocket-authored 4 x 4 boards (minimum 8 / 13 / 16 / 18 / 20 / 25 turns). UP/DOWN cycle through movable wires;
+  OK rotates clockwise. Eco Pop sun/turbine/building icons mark the fixed source and homes;
+  the footer gives their full English names. Matching
   connectors carry power; light every home to win. No countdown or move limit.
   The completed board stays visible. OK starts the next board directly, without an inter-level screen; hold OK goes home.
   On the start screen, UP/DOWN select any of six levels; the center shows that

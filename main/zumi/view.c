@@ -29,23 +29,24 @@ static void choice(z_view *v,int y,const char *label,bool selected) {
 }
 /* The level picker and playable board share geometry and full energy labels. */
 static void board(z_view *v,const z_state *s,bool preview) {
-    int cw=preview?60:64, ch=preview?34:44;
+    int cw=48, ch=preview?34:44;
     for(int i=0;i<Z_CELLS;i++) {
-        int x=(preview?30:24)+(i%Z_COLS)*cw, y=(preview?96:72)+(i/Z_COLS)*ch;
+        int x=24+(i%Z_COLS)*cw, y=(preview?96:72)+(i/Z_COLS)*ch;
         bool lit=(s->powered&(1u<<i))!=0;
         if(!preview && i==s->cursor&&!s->won) box(v,x,y,cw,ch,INK,9);
         box(v,x+2,y+2,cw-4,ch-4,lit?GREEN:0xE8EBDD,7);
         int c=lit?0x477A35:MUTED,m=s->tiles[i],cx=cw/2-2,cy=ch/2-2;
-        if(m&1) box(v,x+cx,y,4,cy+4,c,0);
-        if(m&2) box(v,x+cx,y+cy,cw-cx,4,c,0);
-        if(m&4) box(v,x+cx,y+cy,4,ch-cy,c,0);
-        if(m&8) box(v,x,y+cy,cx+4,4,c,0);
+        /* Merge opposite arms to stay below the fixed drawing-object budget. */
+        if((m&5)==5) box(v,x+cx,y,4,ch,c,0);
+        else if(m&1) box(v,x+cx,y,4,cy+4,c,0);
+        else if(m&4) box(v,x+cx,y+cy,4,ch-cy,c,0);
+        if((m&10)==10) box(v,x,y+cy,cw,4,c,0);
+        else if(m&2) box(v,x+cx,y+cy,cw-cx,4,c,0);
+        else if(m&8) box(v,x,y+cy,cx+4,4,c,0);
         if(i==s->source || (s->homes&(1u<<i))) {
-            box(v,x+5,y+(preview?3:5),cw-10,preview?28:34,lit?INK:MUTED,6);
-            if(i==s->source) {
-                text(v,x+(preview?15:(s->wind?14:12)),y+(preview?4:7),s->wind?"Wind":"Solar",PAPER,preview?10:14);
-                text(v,x+(preview?15:17),y+(preview?18:24),"power",PAPER,10);
-            } else text(v,x+(preview?14:11),y+(preview?12:15),"House",PAPER,preview?10:14);
+            int size=preview?28:32;
+            z_draw *icon=add(v,Z_ENERGY_ICON,x+(cw-size)/2,y+(ch-size)/2,size,size,0);
+            if(icon) icon->size=(i==s->source?(s->wind?1:0):2)+(lit?3:0);
         } else if(s->fixed&(1u<<i)) box(v,x+6,y+6,4,4,INK,0);
     }
 }
@@ -82,7 +83,7 @@ void z_render(const z_state *s, int battery, z_view *v) {
         text(v,30,78,"UP / DOWN choose level",MUTED,10);
         z_state preview=*s;z_link_start(&preview,s->level);
         board(v,&preview,true);
-        text(v,25,238,"Turn wires. Light homes.",INK,14);
+        text(v,25,238,preview.wind?"Wind power > House":"Solar power > House",INK,14);
         choice(v,263,"Start connecting",true);
         text(v,45,302,"OK start   Hold OK home",MUTED,10);
     } else if(s->page==Z_GARDEN) {
@@ -106,8 +107,8 @@ void z_render(const z_state *s, int battery, z_view *v) {
             text(v,27,254,"All homes are glowing!",INK,14);
             choice(v,278,s->level==5?"Play from level 1":"Next level",true);
         } else {
-            text(v,27,254,"UP / DOWN select wire",MUTED,14);
-            text(v,27,275,"OK turn clockwise",INK,14);
+            text(v,27,254,s->wind?"Wind power > House":"Solar power > House",MUTED,10);
+            text(v,27,275,"UP / DOWN select  OK turn",INK,10);
             text(v,27,299,"Hold OK: home",MUTED,10);
         }
     }

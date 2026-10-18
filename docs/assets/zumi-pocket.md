@@ -4,7 +4,7 @@
 
 The home screen uses three numbered Talk / Play / Garden rows with a short
 purpose line and a dark selected row. No character image appears there.
-Energy Link's level picker shows the selected level's initial 3-column x 4-row board,
+Energy Link's level picker shows the selected level's initial 4 x 4 board,
 using the same wire geometry and full energy labels as gameplay, without a
 character image. UP/DOWN changes the preview; OK starts that board. Wake-card
 art and the Talk/Garden placeholder characters are unchanged.
@@ -20,16 +20,16 @@ home selection clamps, levels and movable wires wrap. OK acts on RELEASE;
 LONG at 500 ms returns home and suppresses that release. CLICK/DOUBLE are ignored.
 
 The in-game level/turn counter sits at (22,47), above the four-row board
-starting at y=72. Cells are 64 x 44 pixels; the initial picker uses 60 x 34
+starting at y=72. Cells are 48 x 44 pixels; the initial picker uses 48 x 34
 pixel cells. All six solutions use the fourth row.
 
-Energy Link is the only game. Six authored 3-column x 4-row boards preserve the website's
+Energy Link is the only game. Six authored 4 x 4 boards preserve the website's
 reciprocal N/E/S/W connectors and source-to-all-homes win condition. Unused wires
 are allowed. Fixed source/home tiles and marked fixed clues cannot rotate.
 There is no time or move limit. Completion keeps the board visible; OK advances
 directly to the next board without an inter-level screen, wrapping after six.
 The initial Play entry still offers level selection.
-The website's 5 x 5 boards, generated Hexapipes levels, artwork, undo/history,
+The website's 5 x 5 boards, generated Hexapipes levels, undo/history,
 and persistence are not imported; synthesized sound parameters are reused. Rules were inspected read-only at
 website source revision `a0504f97fb74a94ea864361f539e5832a16b268f`,
 `game/energy-link/engine.mjs` and `levels.mjs`. Pocket levels and C code are new.
@@ -81,9 +81,24 @@ or no-button-activity substitute is enabled in this version.
 
 ## Readable labels and shared sound
 
-Source cells show `Solar power` or `Wind power` on two lines (14/10 px);
-home cells show `House` (14 px). No S/H abbreviations. Wind appears in levels
-3 and 5, solar in the other levels. Source kind does not alter puzzle rules.
+Source and house cells reuse Eco Pop's sun, light-blue turbine and orange
+building artwork. The footer names `Solar power > House` or `Wind power > House`
+in full. Wind appears in levels 3 and 5; source kind does not alter puzzle rules.
+The exact original atlas/crops from website revision
+`a0504f97fb74a94ea864361f539e5832a16b268f` are recorded in
+`assets/images/zumi-pocket/energy-icons/manifest.json`; building/demand artwork
+is used for House at the user's request. The two original PNGs remain under
+`source/`, with no new redistribution license implied. The converter
+`node tools/build_energy_link_icons.cjs` creates six 32 x 32 RGB565 lit/unlit
+variants (12,288 Flash bytes); previews draw them at 28 x 28. Only the small
+variants are linked into firmware. Browser PNGs use the same quantized colors.
+
+The six 4 x 4 boards have 2, 2, 3, 4, 4 and 5 houses. Exhaustive orientation
+search in `tests/zumi_difficulty.c`, with independent bit-mask connectivity,
+proves minimum clockwise-turn counts of **8, 13, 16, 18, 20 and 25**. Selection
+presses are excluded. These are objective puzzle costs, not a measured human
+completion time. The host gate rejects non-increasing minimum turn counts.
+There is no time limit or failure penalty.
 
 Sound parameters come from the same website revision's `game.mjs`: sine waves,
 12 ms exponential attack from 0.0001 to 0.045 gain, decay to 0.0001, 20 ms tail.
@@ -109,7 +124,7 @@ and display/audio contention require device measurement. No microphone reads.
 
 ## Architecture and budget
 
-- Allocation-free deterministic C model: 84 bytes, no timer-driven game state.
+- Allocation-free deterministic C model: 104 bytes, no timer-driven game state.
   Updates are capped at 100 ms after suspension. Host/browser tests use a
   repeatable xorshift seed; it is not a claim of unpredictable randomness.
 - Shared view: at most 64 commands, 6,404 bytes per list; two firmware lists use

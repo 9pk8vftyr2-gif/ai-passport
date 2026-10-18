@@ -1,5 +1,8 @@
 const {chromium}=require('playwright');
-const assert=require('node:assert/strict'),fs=require('node:fs');
+const assert=require('node:assert/strict'),fs=require('node:fs'),cp=require('node:child_process');
+cp.execFileSync(process.env.CC||'cc',['-std=c11','-O2','-Wall','-Wextra','-Werror','-Imain/zumi','tests/zumi_difficulty.c','main/zumi/core.c','-o','build/zumi_difficulty']);
+const levels=JSON.parse(cp.execFileSync('build/zumi_difficulty',{encoding:'utf8'}));
+fs.writeFileSync('build/zumi-difficulty.json',JSON.stringify(levels,null,2));
 (async()=>{
  const browser=await chromium.launch({headless:true,channel:process.env.PLAYWRIGHT_CHANNEL||'chrome'});
  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
@@ -24,8 +27,16 @@ const assert=require('node:assert/strict'),fs=require('node:fs');
  await tap('Enter');assert.equal((await state()).page,2);
  await page.screenshot({path:'build/browser-link.png'});
  const labels=()=>page.evaluate(()=>{const a=pocket.api,n=a.pocket_render(),base=a.pocket_ops(),stride=a.pocket_stride();return Array.from({length:n},(_,i)=>new TextDecoder().decode(new Uint8Array(a.memory.buffer,base+i*stride+36,64)).split('\0')[0]);});
- const solar=await labels();assert(solar.includes('Solar')&&solar.includes('power')&&solar.includes('House'));assert(!solar.includes('S')&&!solar.includes('H'));
- await tap('Enter');assert.equal((await state()).won,1);assert.equal((await state()).moves,1);
+ const solar=await labels();assert(solar.includes('Solar power > House'));assert(!solar.includes('S')&&!solar.includes('H'));
+ const first=levels[0],tiles=[...first.initial];
+ for(let visit=0;visit<16&&!(await state()).won;visit++){
+  const cursor=(await state()).cursor;
+  for(let turns=0;turns<4&&tiles[cursor]!==first.solution[cursor]&&!(await state()).won;turns++){
+   tiles[cursor]=((tiles[cursor]<<1)|(tiles[cursor]>>3))&15;await tap('Enter');
+  }
+  if(!(await state()).won)await tap('ArrowDown');
+ }
+ assert.equal((await state()).won,1);assert.equal((await state()).moves,first.minimum_turns);
  await page.waitForFunction(()=>window.soundEvidence.some(e=>e.frames===17440));
  assert(await page.evaluate(()=>soundEvidence.some(e=>e.rate===16000&&e.peak>0.03&&e.peak<0.15)));
  await page.screenshot({path:'build/browser-link-complete.png'});
@@ -38,7 +49,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs');
  await home();
  assert(await page.evaluate(()=>soundEvidence.some(e=>e.stopped)));
  await tap('ArrowDown');await tap('Enter');while((await state()).level!==2)await tap('ArrowDown');await tap('Enter');
- const wind=await labels();assert(wind.includes('Wind')&&wind.includes('power')&&wind.includes('House'));
+ const wind=await labels();assert(wind.includes('Wind power > House'));
  await page.screenshot({path:'build/browser-wind.png'});await home();
  await page.evaluate(()=>{for(let i=0;i<600;i++)pocket.api.pocket_tick(100);pocket.render();});
  assert.equal(await page.evaluate(()=>pocket.api.pocket_screen_off()),1);

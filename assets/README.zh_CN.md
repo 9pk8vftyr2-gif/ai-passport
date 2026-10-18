@@ -54,3 +54,8 @@ Zumi Pocket 使用 `music/zumi-link-tones.json` 记录现有 ZCO Energy Link 合
 ### 已审核唤醒宣传卡
 
 `images/zumi-pocket/wake-cards/` 保存 8 张 240×320 RGB565 量化 PNG 和合并原始像素 `wake_cards.rgb565`（1,228,800 字节）。`source/` 保留已审核 V3 合成图及用户本地 Zumi: Office Vibes 原表情哈希，不声称已在微信发布。内置图片生成仅编辑背景，角色图层复用原文件；用户于 2026-10-18 同意接入固件。执行 `node tools/build_zumi_wake_cards.cjs`（Sharp）可复现。固件只读访问 Flash，浏览器显示相同量化 PNG；运行时无 PNG/JPEG 解码或整帧缓冲。沿用上述 ZCO 角色许可边界。
+
+
+Energy Link 复用 ZCO Eco Pop 太阳、风机和建筑图标，存于 `images/zumi-pocket/energy-icons/`，保留网站原 PNG、裁切信息与哈希。
+`node tools/build_energy_link_icons.cjs`（Sharp）生成六张亮/暗 32×32 RGB565 图标，共 12,288 字节 Flash，并提供匹配浏览器 PNG。
+按用户请求复用素材，不代表新增第三方再分发授权。参见[设计说明](../docs/assets/zumi-pocket.zh_CN.md)。

@@ -6,10 +6,28 @@ import unittest
 import subprocess
 import sys
 import struct
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
 class ArtifactTests(unittest.TestCase):
+    def test_eco_pop_icons_match_original_sources_and_firmware(self):
+        folder = ROOT / 'assets/images/zumi-pocket/energy-icons'
+        manifest = json.loads((folder / 'manifest.json').read_text())
+        self.assertEqual(manifest['flash_bytes'], 12288)
+        self.assertEqual(len(manifest['assets']), 6)
+        c = (ROOT / 'main/zumi/energy_icons.c').read_text()
+        arrays = re.findall(r'static const uint8_t pixels_\d+\[\]=\{(.*?)\};', c, re.S)
+        self.assertEqual(len(arrays), 6)
+        for asset, array in zip(manifest['assets'], arrays):
+            png = (folder / asset['file']).read_bytes()
+            self.assertEqual(struct.unpack('>II', png[16:24]), (32, 32))
+            self.assertEqual(hashlib.sha256(png).hexdigest(), asset['sha256'])
+            self.assertEqual(hashlib.sha256((folder / 'source' / asset['source']).read_bytes()).hexdigest(), asset['source_sha256'])
+            raw = bytes(int(n) for n in re.findall(r'\d+', array))
+            self.assertEqual(len(raw), 2048)
+            self.assertEqual(hashlib.sha256(raw).hexdigest(), asset['rgb565_sha256'])
+
     def test_browser_sources_match_compiled_module(self):
         hashes = json.loads((ROOT / 'preview/build-manifest.json').read_text())
         self.assertEqual(set(hashes), {'main/zumi/core.c', 'main/zumi/core.h',
