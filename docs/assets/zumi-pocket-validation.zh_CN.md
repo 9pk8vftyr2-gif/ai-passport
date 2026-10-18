@@ -2,45 +2,53 @@
 
 # Zumi Pocket 验证报告
 
-日期：2026-10-18。固件源码：`feature/zumi-pocket` 的 `6a95860`。范围：硬件到货前的第一阶段软件原型。
+2026-10-18。固件源码内容已提交为 `feature/zumi-pocket` 的 `e0ea6d6`。
+本次成功门禁在提交前运行，因此镜像版本为 `7753a12-dirty`；构建后未修改固件源码或显示像素。
+报告及 Git 二进制属性不改变固件。
 
 | 项目 | 状态 | 证据 |
 | --- | --- | --- |
-| Build | PASS | ESP-IDF v5.5.3、ESP32-C3 官方完整检查通过，合并镜像和匹配 ELF 校验通过 |
-| Host Tests | PASS | 仓库静态与原有基线测试；六关可解；8 张行动卡完成/去重/重置/跨页保留；10 万次状态转换与独立连通性校验；音效事件、PCM 幅度/边界及通关延时；地址/未定义行为检查；5,000 次原生/WASM 对照 |
-| Browser Demo | PASS | Chrome 桌面 1440×1000、手机视口 390×844，23 项交互检查通过，离线游玩、无页面错误，截图已人工查看 |
-| Device Tests | NOT RUN | 硬件未到；没有刷写、擦除或重置设备 |
-| Unverified | OPEN | 实体扬声器响度/音色/失真、音频失败恢复与显示并发、实际屏幕与字体、淡入淡出顺滑度、按键延迟、LVGL 分配峰值、长时间碎片、电量/电流/温度、Safari、实体手机及用户视觉验收 |
+| Build | PASS | ESP-IDF 5.5.3 完整官方门禁、合并布局与匹配 ELF 归档复验通过 |
+| Host Tests | PASS | 原仓库检查、内存/未定义行为检查、100,000 次游戏转换、256 次唤醒覆盖八卡、5,000 次原生/WASM 对比、素材哈希 |
+| Browser Demo | PASS | Chrome 桌面/手机视口，八卡离线、相邻不重复、3 秒返回、游戏操作、完整英文标签和共用音效 |
+| Device Tests | NOT RUN | 未刷写、擦除、重置或打开实体设备 |
+| Unverified | 待硬件 | LCD 色彩/裁切、淡入淡出帧耗时、内部堆/LVGL 峰值、音频、整机电流与真实续航 |
 
-## 构建证据
+## 固件身份与资源
 
-应用镜像 765,456 字节，factory 分区 8,323,072 字节；合并镜像 830,992 字节。原 BSP 和分区表未修改，无 PSRAM 依赖。新增 Montserrat 10 网址小字，没有增加存储格式或写入。新增音频任务通过原 BSP 分块播放，复用网站音效参数，PCM 占 Flash 20,800 字节。
+- 应用 1,993,584 字节，factory 分区 8,323,072 字节。
+- 合并镜像 2,059,120 字节；8 MB Flash、无 PSRAM。
+- 八张 240×320 RGB565 宣传卡：1,228,800 字节只读 Flash。
+- 基础表情 43,056 字节、PCM 20,800 字节。
+- 状态 84 字节，两份绘制列表 12,808 字节；原 BSP 9,600 字节局部缓冲及 24 KB LVGL 池不变，无新增整帧解码缓冲。
+- 合并镜像 SHA-256：`9299330935d98dbc80234ec55945692250cacf0dd26e61abb92d445fa3682fef`。
+- 匹配 ELF SHA-256：`6c6bdbc7419ad0797b4cfcf66f3969dfd155bba9edf95c9dff453bb9835ef8d2`。
+- 本地归档：`build/firmware/9299330935d98dbc80234ec55945692250cacf0dd26e61abb92d445fa3682fef/`。
 
-合并镜像 SHA-256：
-`5048a5a3749b3f9f9a80d355250cdd03f5f536f27ea2221eeaecad0da5757e7e`。
-匹配 ELF SHA-256：
-`0a725f0edd0f7fe493e05ba4976dd214d72a0ca0ed04214127df42988c1839ae`。
+归档含匹配的合并/应用镜像、ELF、MAP、bootloader、分区表、flash 参数和清单，Git 忽略且未发布。
+使用 `python3 tools/archive_firmware.py verify` 加上述路径可复验。原 BSP 和分区布局不变，未混用小智 SDK。
 
-本地镜像/ELF/MAP/manifest 保存在 `build/firmware/5048a5a3749b3f9f9a80d355250cdd03f5f536f27ea2221eeaecad0da5757e7e/`。
-应用描述确认源码版本 `6a95860`、IDF `v5.5.3`。构建产物被 Git 忽略，并非发布的固件版本。最终报告提交不改变已测试的固件、浏览器模块或素材。
+## 实际检查
 
-## 复现与测试范围
+ESP-IDF 5.5.3 的 `./tools/validate.sh` 完整通过，日志为 `build/full-gate-wake-cards.log`。
+首次 shell 错选 Python 3.9，随后 CMake 包装器缺少 Python 包；改用已有 IDF Python 3.12 环境及 CMake 原生执行文件解决。
+最终完整门禁通过，未屏蔽检查、未更换 SDK 版本。
 
-- 激活 ESP-IDF 5.5.3 后运行 `./tools/validate.sh`。日志：`build/full-gate-cards.log`，原基线检查全部保留。
-- `cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -Imain/zumi tests/test_zumi.c main/zumi/core.c main/zumi/view.c main/zumi/sound.c main/zumi/sounds.c -o build/test_zumi`，再运行 `build/test_zumi`：通过操作解六关，检查固定格、无限时、下一关循环、三键唤醒与释放抑制、精确 3,000 毫秒欢迎页、首页淡入、网址和绘制边界。随机状态使用独立的双向接头遍历校验。
-- `node tests/wasm_parity.cjs`：原生 C 与 WASM 的 5,000 次状态对照。源码/模块校验值防止旧模块冒充更新。
-- 预览服务器运行后执行 `node tests/browser_zumi.cjs`：首页、Talk、Garden、游戏入口、第一关通关、下一关、离线旋转、无限时思考、长 OK 释放、空闲变暗、不同表情、网址、3 秒返回、手机视口溢出、实体按键样式控件、完整英文标签、真实 Web Audio PCM 播放、退出停止声音、卡片浏览、离线完成 8 张卡、防重复计数、跨首页保留、新组重置，共 23 项。
-- 浏览器证据位于 `build/`：`browser-results.json`、`browser-home.png`、`browser-link.png`、`browser-link-complete.png`、`browser-wake.png`、`browser-mobile.png`、`browser-wind.png`、`browser-actions.png`、`browser-action-done.png`、`browser-actions-complete.png`、`browser-actions-mobile.png`。手机视口不等于实体手机验证。
-- 素材编译保留来源哈希，没有调用图像生成或付费服务。浏览器无法验证实际 LVGL 内存。
+`tests/test_zumi.c` 另经 AddressSanitizer / UndefinedBehaviorSanitizer 检查通过，覆盖六关可解、互通线路独立判定、固定格、3,000 毫秒边界、按键消费、八卡及相邻不重复、淡入淡出边界、Garden 占位和音效。
+`node tests/wasm_parity.cjs` 对比 5,000 次原生与 WASM 转换，含闲置/唤醒。
+素材检查覆盖模块源码、八种原表情哈希、已审核合成图、PNG 尺寸和 RGB565 分段哈希。
 
-官方检查做了两处 macOS 兼容修复：actionlint 校验使用 `shasum`；原有主机 demo 测试用 Darwin 的 `-dead_strip`，Linux 仍用 `--gc-sections`。没有删减或跳过基线测试。
+`node tests/browser_zumi.cjs` 在本地资源加载后断网验证通过。证据：`build/browser-results.json`、`browser-play-title.png`、`browser-wake-card-1.png` 至 `browser-wake-card-8.png`、`browser-link.png`、`browser-wind.png`、`browser-mobile.png`。
+浏览器不证明物理 LCD、电池与扬声器表现。
 
-## 环境与交付边界
+## 行为与边界
 
-五个官方 passport Skills 已安装并检查可读。ESP-IDF v5.5.3 tag 对象为 `b31fcc7a314a44ad992b58f589f7d1d8a4fadff6`，源码提交 `2c211b236707889e8400c4dc5644dd5c4ee071e0`；未混用小智 SDK。wasi-sdk 34 仅构建浏览器。角色来源见 `assets/images/zumi-pocket/manifest.json`。
+八张已审核 V3 宣传卡取代 Tiny Actions 清单，复用本地 Office Vibes 八种原版表情／动作，均保留 Zumi Pocket 与 zco.eco。
+背景生成稿已获认可，固件未接付费 AI 服务；本地素材来源不等于微信发布认证。
+固件直接读取 Flash，图像透明度避免整帧对象中间层。Garden / Talk 保留占位。
+Energy Link 两处标题移至（22,16），避开电量。
 
-独立仓库、Fork `9pk8vftyr2-gif/ai-passport`，只更新 feature 分支。上游与 Fork main 均核对为 `3d685a90bdb96dd8526d84edde1e63fec25b460e`。ZCO 网站仅只读参考 Energy Link 规则，未修改网站、部署 Cloudflare、接入付费 AI 或操作设备。
-
-本次仅新增行动卡。运动检测及一小时站立提醒已按用户选择延后，等硬件确认后再做；没有启用每小时计时或未按键计时替代。行动卡完成是用户自报，本次开机内保留，重启清空，无联网或存储写入。
-
-参见[硬件到货验收清单](zumi-pocket.zh_CN.md)。
+仍是闲置 60 秒调暗、唤醒展示 3 秒返回首页，不是深度休眠。官方 500 mAh 电池容量不能单独证明续航，需测整机平均电流、亮度及待机状态。
+未启用运动检测、一小时提醒或新休眠策略；未改 ZCO 网站、未部署 Cloudflare、未操作设备。
+Fork/upstream main 均核实保持 `3d685a90bdb96dd8526d84edde1e63fec25b460e`。
+参见[硬件到货验收清单](zumi-pocket.zh_CN.md#硬件到货验收清单--not-run)。

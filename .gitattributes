@@ -1,0 +1,2 @@
+# Native display pixels must never undergo newline conversion or text diffs.
+*.rgb565 binary
