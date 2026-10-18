@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-18",
+  "scope": "Desktop capture, configured speech rules, same-session follow-ups and interruption recovery",
+  "synthetic_only": true,
+  "human_microphone_test": "NOT RUN; awaiting user-initiated trial",
+  "long_term_memory_enabled": false,
+  "pronunciation": "ZCO emitted as Z C O; each English letter separately",
+  "raw_asr_preserved": true,
+  "recognition_assessment": {
+    "zumi_chinese_name": "Correct in test turns",
+    "zco": "First term test CCCO; recovery ZCO correct",
+    "carbon_reduction": "Term test misrecognized 减碳 as 检叹; no proven raw ASR accuracy improvement",
+    "contextual_rules": "Additional cautious interpretation rule applied after term test; not an ASR hotword API"
+  },
+  "followup_context": "PASS: remembered bicycle from the immediately preceding turn",
+  "cloud_rounds": [
+    {
+      "name": "terms",
+      "question": "祖米，你是谁？请把 Z C O 三个英文字母分开读，再解释一下减碳。",
+      "asr": "祖米，你是谁？请把CCCO三个英文字母分开读，再解释一下检叹。",
+      "answer": "我是祖米，Zumi，是 Z C O 的绿色生活伙伴，平时通过 Zumi Pocket 陪你聊天、玩游戏、探索日常绿色生活。至于“检叹”，我不太确定你指的是什么，是想说“减碳”吗？",
+      "frames": 729,
+      "complete": true,
+      "synthetic_input": true
+    },
+    {
+      "name": "context",
+      "question": "我今天打算骑自行车出门，少开一次车，能减少哪类排放？",
+      "asr": "我今天打算骑自行车出门，少开一次车，能减少哪类排放？",
+      "answer": "主要是减少化石燃料燃烧产生的二氧化碳，也就是交通尾气里那部分。骑车零排放，短途替代开车效果挺明显的。",
+      "frames": 468,
+      "complete": true,
+      "synthetic_input": true
+    },
+    {
+      "name": "followup",
+      "question": "刚才我说打算用什么方式出门？",
+      "asr": "刚才我说打算用什么方式出门？",
+      "answer": "你刚才说打算骑自行车出门。",
+      "frames": 144,
+      "complete": true,
+      "synthetic_input": true
+    },
+    {
+      "name": "interrupt",
+      "question": "请给我讲一个比较长的环保故事。",
+      "asr": "请给我讲一个比较长的环保故事。",
+      "answer": "好呀，那我讲个长一点的。",
+      "frames": 12,
+      "complete": false,
+      "synthetic_input": true,
+      "interrupted": true
+    },
+    {
+      "name": "recovery",
+      "question": "祖米，我们重新开始。Z C O 网站上有哪些小游戏？",
+      "asr": "祖米，我们重新开始ZCO网站上有哪些小游戏？",
+      "answer": "Z C O 网站上现在有两款可以免登录直接玩的小游戏，一个是猜碳 Guess Carbon，用有来源的气候数据来学着估算碳排放；另一个是绿色旅程 Green Journey，跟着我一起做日常的绿色选择。你想先试试哪个？",
+      "frames": 795,
+      "complete": true,
+      "synthetic_input": true
+    }
+  ],
+  "browser": {
+    "status": "PASS",
+    "input": "public synthetic greeting; no real microphone",
+    "sequence": "two complete turns, interrupt, recovered complete turn",
+    "interruptMs": 4,
+    "evidence": {
+      "sentFrames": 832,
+      "receivedFrames": 495,
+      "playedFrames": 486,
+      "maxQueued": 12,
+      "underruns": 0,
+      "commits": 4,
+      "cancels": 1,
+      "done": 3,
+      "micRequests": 4,
+      "tracksStopped": true,
+      "questionPresent": true,
+      "answerPresent": true
+    },
+    "errors": []
+  },
+  "capture_checks": [
+    "button-only activation",
+    "permission denied",
+    "late permission grant cleanup",
+    "blur cancellation",
+    "partial final frame before commit",
+    "16/44.1/48 kHz frame/tail ordering"
+  ],
+  "device_tests": "NOT RUN",
+  "prompt_sha256": "05c08af90df04b43c1f2060358fb02bd9e25bacaf4526c22929f30cad7c66a51",
+  "official_configuration_readback": {
+    "role_matches_local": true,
+    "memory_enabled": false,
+    "voice": "阳光青年",
+    "latest_context_rule_verified": true
+  },
+  "validation": {
+    "build": "PASS",
+    "esp_idf": "5.5.3",
+    "host_tests": "PASS",
+    "browser_demo": "PASS",
+    "device_tests": "NOT RUN",
+    "archive": "build/firmware/46365dff25352987d4c51e58b4cc4ca3fff44436bb0cfa30d3db9ad2a864cf5d",
+    "full_bin_sha256": "46365dff25352987d4c51e58b4cc4ca3fff44436bb0cfa30d3db9ad2a864cf5d",
+    "elf_sha256": "90c74dacb837e6b792730e8f7aa6d78f4a9d8be9a77eb54d016304bc3dbd1f58",
+    "app_bytes": 2742464,
+    "app_partition_free_bytes": 5580608,
+    "build_source_version": "2cd594d-dirty"
+  }
+}

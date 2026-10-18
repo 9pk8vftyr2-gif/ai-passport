@@ -40,7 +40,7 @@ class RelayTests(unittest.IsolatedAsyncioTestCase):
         await self.msg('input.begin', turn=turn, capability='qa', memory='none')
     async def audio(self, seq=0, turn=1):
         await self.session.message(HEADER.pack(1, 1, 0, turn, seq, 640) + b'\0'*640)
-    async def test_complete_and_fresh_session(self):
+    async def test_complete_preserves_only_live_session(self):
         await self.begin(); await self.audio()
         self.assertEqual(len(self.session.pcm), 640)
         await self.msg('input.commit', turn=1, last_seq=0)
@@ -52,8 +52,11 @@ class RelayTests(unittest.IsolatedAsyncioTestCase):
         kinds = [json.loads(x)['type'] for x in self.local.sent if isinstance(x,str)]
         self.assertEqual(kinds,['ready','asr.final','answer.snapshot','output.end'])
         self.assertEqual(len([x for x in self.local.sent if isinstance(x,bytes)]),3)
-        self.assertTrue(cloud.closed)
-        await self.begin(2); self.assertEqual(len(self.clouds),2)
+        self.assertFalse(cloud.closed)
+        await self.begin(2); self.assertEqual(len(self.clouds),1)
+        await self.msg('cancel', turn=2); self.assertTrue(cloud.closed)
+        self.assertIn('abort', [json.loads(m)['type'] for m in cloud.sent if isinstance(m,str)])
+        await self.begin(3); self.assertEqual(len(self.clouds),2)
     async def test_cancel_waiting_credit_discards_old_audio(self):
         await self.begin(); await self.audio(); await self.msg('input.commit',turn=1,last_seq=0)
         old = self.clouds[-1]; await old.queue.put(b'opus'); await asyncio.sleep(0)

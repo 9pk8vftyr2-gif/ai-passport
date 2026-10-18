@@ -3,7 +3,7 @@ import {captureMicrophone} from './talk_microphone.js';
 export function createTalkClient(api,getAudio,stopGame){
  const live=new URLSearchParams(location.search).get('talk')==='xiaozhi';
  const E={OK:0,CANCEL:1,CONNECTED:2,DISCONNECTED:3,ASR:4,REPLY:5,AUDIO:6,DONE:7,FAILURE:8,OVERFLOW:9};
- let socket=null,generation=0,capture=null,microphone=null,turn=0,seq=0,rxSeq=0,nodes=new Set(),ended=false,nextTime=0;
+ let socket=null,generation=0,capture=null,microphone=null,turn=0,seq=0,rxSeq=0,nodes=new Set(),ended=false,nextTime=0,committing=false;
  const evidence={sentFrames:0,receivedFrames:0,playedFrames:0,maxQueued:0,underruns:0,commits:0,cancels:0,done:0};
  const enc=new TextEncoder();
  function event(e,t=api.pocket_talk_turn(),text=''){
@@ -16,7 +16,8 @@ export function createTalkClient(api,getAudio,stopGame){
   const dest=new Uint8Array(api.memory.buffer,api.pocket_talk_buffer(),1536);dest.fill(0);dest.set(b);api.pocket_talk_event(e,t);
  }
  function send(obj){if(socket?.readyState!==WebSocket.OPEN)throw Error('local relay offline');socket.send(JSON.stringify({v:1,...obj}));}
- function stopCapture(){clearInterval(capture);capture=null;microphone?.stop();microphone=null;}
+ function captureStatus(kind){const el=document.querySelector('#live-capture');if(el)el.textContent=({preparing:'麦克风准备中，请稍候…',ready:'可以说话了 · 再按 OK 发送',quiet:'声音较轻，请靠近麦克风',loud:'声音偏响，请稍微远离麦克风',sending:'录音已结束，正在发送…',off:'麦克风已关闭'})[kind]||'';}
+ function stopCapture(){clearInterval(capture);capture=null;committing=false;microphone?.stop();microphone=null;if(live)captureStatus('off');}
  function stopPlayback(){for(const n of nodes){n.onended=null;try{n.stop();}catch{}n.disconnect();}nodes.clear();nextTime=0;ended=false;}
  function close(){generation++;stopCapture();stopPlayback();const old=socket;socket=null;if(old){old.onclose=null;old.onmessage=null;old.close();}}
  function fail(){event(E.FAILURE);close();event(E.DISCONNECTED);}
@@ -69,10 +70,10 @@ export function createTalkClient(api,getAudio,stopGame){
     if(live){
      for(const id of ['live-question','live-answer']){const el=document.getElementById(id);if(el)el.textContent='';}
      microphone=captureMicrophone(pcm=>{try{
-      if(epoch!==generation||api.pocket_talk_state()!==1){stopCapture();return;}
+      if(epoch!==generation||api.pocket_talk_turn()!==turn||!(api.pocket_talk_state()===1||(committing&&api.pocket_talk_state()===2))){stopCapture();return;}
       if(socket.bufferedAmount>3200||pcm.byteLength!==640)throw Error('uplink stalled');
       const frame=new ArrayBuffer(654),v=new DataView(frame);v.setUint8(0,1);v.setUint8(1,1);v.setUint32(4,turn,true);v.setUint32(8,seq,true);v.setUint16(12,640,true);new Uint8Array(frame,14).set(new Uint8Array(pcm));socket.send(frame);seq++;evidence.sentFrames++;
-     }catch{fail();}},()=>{if(epoch===generation){const el=document.querySelector('#live-answer');if(el)el.textContent='麦克风未能开启，请检查浏览器权限，再按 OK 重试。';fail();}});
+     }catch{fail();}},()=>{if(epoch===generation){const el=document.querySelector('#live-answer');if(el)el.textContent='麦克风未能开启，请检查浏览器权限，再按 OK 重试。';fail();}},captureStatus);
      return;
     }
     capture=setInterval(()=>{try{
@@ -83,6 +84,17 @@ export function createTalkClient(api,getAudio,stopGame){
      socket.send(frame);seq++;evidence.sentFrames++;
     }catch{fail();}},20);
    }else if(c===2){
+    if(live){
+     const epoch=generation,recordingTurn=turn,activeMic=microphone;committing=true;captureStatus('sending');
+     (async()=>{try{
+      const drained=await activeMic?.finish();
+      if(epoch!==generation||turn!==recordingTurn||api.pocket_talk_turn()!==recordingTurn||api.pocket_talk_state()!==2||!committing)return;
+      committing=false;microphone=null;
+      if(!drained||!seq)throw Error('empty or interrupted recording');
+      send({type:'input.commit',turn,last_seq:seq-1});send({type:'output.credit',turn,frames:12});evidence.commits++;captureStatus('off');
+     }catch{if(epoch===generation&&turn===recordingTurn)fail();}})();
+     return;
+    }
     stopCapture();if(!seq)throw Error('empty recording');
     // WebSocket preserves message order; bounded bufferedAmount prevents an utterance queue.
     send({type:'input.commit',turn,last_seq:seq-1});send({type:'output.credit',turn,frames:12});evidence.commits++;

@@ -80,6 +80,12 @@ class Session:
     async def cancel(self):
         self.cancelled = True
         self.credit_event.set()
+        # Notify the provider before cancelling the receiver closes its socket.
+        if self.cloud:
+            try:
+                await asyncio.wait_for(self.cloud.send(json.dumps({'type': 'abort', 'session_id': self.session})), .5)
+            except (ConnectionClosed, asyncio.TimeoutError, OSError):
+                pass
         if self.task:
             self.task.cancel()
             try:
@@ -87,16 +93,12 @@ class Session:
             except (asyncio.CancelledError, ConnectionClosed):
                 pass
             self.task = None
-        if self.cloud:
-            try:
-                await self.cloud.send(json.dumps({'type': 'abort', 'session_id': self.session}))
-            except ConnectionClosed:
-                pass
         await self.close_cloud()
         self.turn = None; self.credits = 0
 
     async def answer(self, turn):
         seq, answer = 0, ''
+        completed = False
         deadline = time.monotonic() + 60
         try:
             while True:
@@ -110,6 +112,8 @@ class Session:
                 if isinstance(raw, bytes):
                     pcm = self.codec.decode(raw)
                     for start in range(0, len(pcm), 640):
+                        if self.cancelled:
+                            raise asyncio.CancelledError()
                         while not self.credits:
                             if self.cancelled:
                                 raise asyncio.CancelledError()
@@ -135,6 +139,7 @@ class Session:
                         if not seq:
                             raise ValueError('No speech returned')
                         await self.send('output.end', turn=turn, last_seq=seq-1)
+                        completed = True
                         return
                 elif msg.get('type') in ('error', 'goodbye', 'alert'):
                     raise ValueError('Cloud service unavailable')
@@ -142,7 +147,10 @@ class Session:
         except (ConnectionClosed, OSError, ValueError, TypeError, asyncio.TimeoutError):
             await self.send('error', turn=turn, code='xiaozhi_unavailable')
         finally:
-            await self.close_cloud()
+            # Keep only this live Talk session's provider context after success.
+            # Cancellation/error closes it so obsolete audio cannot cross turns.
+            if not completed:
+                await self.close_cloud()
 
     async def message(self, raw):
         if isinstance(raw, bytes):
@@ -172,7 +180,9 @@ class Session:
                 raise ValueError('Unsupported turn')
             if self.turn is not None:
                 if self.task and self.task.done():
-                    await self.cancel()
+                    await self.task
+                    self.task = None; self.turn = None; self.credits = 0
+                    self.pcm.clear()
                 else:
                     raise ValueError('Cancel previous turn first')
             await self.connect_cloud()

@@ -84,8 +84,10 @@ at most 120 ms PCM, the uplink packet accumulator at most 60 ms, and WebSocket
 receive queues are capped at four messages. Cloud JSON is capped at 64 KiB.
 These are desktop bounds, not a validated C3 memory budget.
 
-Every completed or cancelled turn closes its cloud session. A new turn creates
-a fresh session, isolating late audio and avoiding local conversation history.
+Successful turns now reuse the current live Talk session for contextual follow-ups.
+Cancellation or errors close it; recovery creates a fresh session to isolate old
+audio. Exit, disconnect or idle timeout also ends the session. No durable local
+conversation history is stored. See the [recognition and recovery report](zumi-talk-recognition.md).
 Text is bounded, UTF-8 clipped safely, and displayed through `textContent`.
 Chinese replies appear in the browser transcript; the shared hardware screen
 shows a short ASCII pointer because device Chinese glyph support is unfinished.
