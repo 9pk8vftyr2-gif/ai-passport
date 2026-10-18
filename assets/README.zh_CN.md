@@ -17,6 +17,14 @@
 
 ## 图片（images）
 
+Zumi Pocket 使用[现有米白 2D 矢量](images/zumi-pocket/zumi-original.svg)，以及
+`images/zumi-pocket/` 下三张 78×92 PNG 衍生图 `zumi-0.png` 至 `zumi-2.png`。
+`manifest.json` 记录源文件与衍生图哈希。Zumi 是男孩，仅改变面部表情。
+素材来自 ZCO 提供的角色形象，不额外授予第三方再分发许可。
+在仓库根目录运行 `node tools/build_zumi_assets.cjs`（需要 Sharp），
+将 43,056 字节 RGB565 数据编译至 `main/zumi/sprites.c`；浏览器和固件使用相同小图。
+详见[设计说明](../docs/assets/zumi-pocket.zh_CN.md)。
+
 可复用的源图与生成的显示资产放在 `images/`。
 
 | 文件 | 尺寸与格式 | 用途与来源 |

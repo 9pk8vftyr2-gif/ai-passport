@@ -19,6 +19,15 @@ Store reusable font files and generated font sources in `fonts/`.
 
 ## Images
 
+Zumi Pocket uses [the existing ivory 2D vector](images/zumi-pocket/zumi-original.svg)
+and three 78 x 92 PNG derivatives (`zumi-0.png` through `zumi-2.png`) under
+`images/zumi-pocket/`. `manifest.json` records source and derivative hashes.
+Zumi is a boy; only face expressions are varied. The source is ZCO's supplied
+character artwork, with no additional third-party redistribution license granted.
+Run `node tools/build_zumi_assets.cjs` from the repository root (Sharp required)
+to compile 43,056 bytes of RGB565 data into `main/zumi/sprites.c`; browser and
+firmware use the same small pictures. See the [design notes](../docs/assets/zumi-pocket.md).
+
 Store reusable source images and generated display assets in `images/`.
 
 | File | Dimensions and format | Use and source |

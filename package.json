@@ -1,0 +1,13 @@
+{
+  "name": "zumi-pocket-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local authoring and browser tests for the Zumi Pocket firmware prototype",
+  "scripts": {
+    "test:browser": "node tests/browser_zumi.cjs",
+    "test:parity": "node tests/wasm_parity.cjs",
+    "build:assets": "node tools/build_zumi_assets.cjs",
+    "build:preview": "bash tools/build_preview.sh"
+  },
+  "devDependencies": {"playwright": "1.62.1", "sharp": "0.35.5"}
+}

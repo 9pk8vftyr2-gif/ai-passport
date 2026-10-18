@@ -1,0 +1,28 @@
+{
+  "source": "ZUMI_2D_FRONT_IVORY_v1.1.svg",
+  "source_sha256": "d08e3d5425da7228d26f1ba7adfeba33d90ea6cb28fa3f5389c4026bffb72b8e",
+  "character": "Zumi is a boy. Existing ivory 2D master; no redesign.",
+  "expressions": [
+    "happy (original)",
+    "focused (face-only derivative)",
+    "cheering (face-only derivative)"
+  ],
+  "license": "ZCO character artwork; supplied for this project. No additional third-party license is granted.",
+  "assets": [
+    {
+      "name": "zumi-0.png",
+      "sha256": "2a1c97c890d567d63fad71d7ffd5ceb9833679d82aa80b260b03b201a11864a3",
+      "rgb565_bytes": 14352
+    },
+    {
+      "name": "zumi-1.png",
+      "sha256": "0c026b090463ec8288989aafd9470e81a3eafc27fbeb8a9dc7ff30a9bf9f45ca",
+      "rgb565_bytes": 14352
+    },
+    {
+      "name": "zumi-2.png",
+      "sha256": "b4f24c7bf3b6e20416c99d7c4116395142f2b0510584607e557c5421844ce5ce",
+      "rgb565_bytes": 14352
+    }
+  ]
+}
