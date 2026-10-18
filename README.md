@@ -29,19 +29,18 @@ needed. Gameplay continues offline after the page's local resources load.
   OK rotates clockwise. `Solar power` / `Wind power` name the fixed source; `House` names each home. Matching
   connectors carry power; light every home to win. No countdown or move limit.
   The completed board stays visible. OK opens the next level; hold OK goes home.
-  On the start screen, UP/DOWN select any of six levels.
+  On the start screen, UP/DOWN select any of six levels. Both Energy Link titles
+  use the upper-left (22,16) position, clear of the battery reading.
 - **Sound:** website Energy Link rotation, connection and victory tones, played
   from the same 16 kHz PCM in the browser and firmware. Audio failure leaves the
   puzzle playable; physical speaker loudness/timbre await device testing.
-- **Wake greeting:** menus dim after 60 seconds. A key press restores brightness,
-  chooses a different existing expression, and consumes the wake press. A
-  3-second greeting fades back to home, with `zco.eco` in the corner. Games stay lit.
-- **Tiny Actions (Garden):** eight offline action cards. UP/DOWN browse, OK marks
-  a card done. Completed cards show Zumi cheering; OK advances to an unfinished
-  card. Each card counts once, and all eight completed unlock an explicit new set.
-  Progress stays during this boot, including game/menu/wake transitions.
-- **Talk / Garden services:** voice remains unavailable; Garden networking is
-  still an interface stub. Local cards do not sync or measure real-world actions.
+- **Wake cards:** menus dim after 60 seconds. A press restores brightness and
+  selects one of eight approved promotional cards with distinct original Zumi
+  sticker expressions/actions, avoiding an immediate repeat. The 3-second card
+  fades into home. Each includes Zumi Pocket and zco.eco; wake keys are consumed.
+  Games stay lit. This is dimming, not deep sleep or measured low-power standby.
+- **Talk / Garden:** reserved offline placeholders. Promotional wake cards replace
+  the earlier Tiny Actions checklist; no completion counters or Garden sync.
 - Motion detection and the one-hour standing reminder are deferred until hardware
   support is confirmed, as requested. No inactivity substitute is enabled.
 - Session state resets on reboot. No storage, recording, network or paid AI.
@@ -85,7 +84,9 @@ WebAssembly. With Playwright and Chrome installed, run
 `PLAYWRIGHT_CHANNEL` if using another Playwright Chromium channel. Screenshots and
 machine-readable results are written under ignored `build/`.
 
-The resource compiler is `node tools/build_zumi_assets.cjs` (requires Sharp).
+Resource compilers: `node tools/build_zumi_assets.cjs` and
+`node tools/build_zumi_wake_cards.cjs` (Sharp required). Eight approved 240 x 320
+RGB565 cards occupy 1,228,800 Flash bytes without a runtime full-frame decode buffer.
 Source artwork and provenance are in `assets/images/zumi-pocket/`; generated C
 sprites are checked in so firmware builds do not require Node or Sharp.
 

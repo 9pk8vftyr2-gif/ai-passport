@@ -22,7 +22,7 @@ website source revision `a0504f97fb74a94ea864361f539e5832a16b268f`,
 `game/energy-link/engine.mjs` and `levels.mjs`. Pocket levels and C code are new.
 
 Menus dim after 60 seconds (70% to 20% brightness). A PRESS restores brightness
-and randomly selects a different one of the three existing expressions. The
+and randomly selects one of eight approved promotional cards, avoiding an immediate repeat. The
 wake press and any presses during the greeting are consumed through RELEASE.
 The greeting occupies 3,000 ms: 240 ms fade-in, hold to 2,640 ms, 360 ms fade-out;
 home then fades in for 240 ms. Each expression view has a `zco.eco` corner label.
@@ -32,24 +32,26 @@ The firmware fades individual objects, without a full-screen compositing buffer.
 Games remain lit while thinking. This is not deep sleep or verified low power.
 Battery reads use the BSP and show `--` on failure. Talk/Garden services perform no I/O.
 
-## Tiny Actions in Garden
+## Offline promotional wake cards
 
-Garden opens eight local action cards: Bring a bottle, Lights out, Carry a tote,
-Use both sides, Save leftovers, Close the tap, Make it last, and Sort one item.
-Each has two short instruction lines. UP/DOWN browse all eight cyclically; OK
-marks an unfinished card complete. An eight-bit mask prevents duplicate counts.
-Completed cards use Zumi's existing cheering expression and a Next action button
-that seeks an unfinished card. When all eight are done, the explicit Start a new
-set button clears the mask. Long OK always exits without marking anything done.
-Entry picks an unfinished card when possible; the choices are repeatable from
-the prototype random seed. No pressure, penalties, streaks or carbon quantities.
+Eight cards reuse distinct original Zumi: Office Vibes sticker expressions/actions:
+wave, walk, thumbs-up, relaxed eyes, conversation, close inspection, applause,
+and thanks. Background and copy follow the approved V3 design. Zumi Pocket and
+zco.eco are baked into each image; the battery overlay stays visible during fades.
+The earlier Tiny Actions checklist is removed. Garden is a reserved service
+placeholder with OK returning home; Talk is also unavailable. No completion
+tracking or storage writes. Startup still enters home; cards appear on dim-screen
+key wake only. Random selection does not repeat the previous card; it does not
+promise a shuffle bag or equal frequency over a short session.
 
-Progress survives home, game and wake transitions during this boot. A reboot
-clears it; there is no Flash persistence, calendar, account or cloud sync. The
-completion is self-reported, not a sensor measurement. No Garden service is
-called by the cards; the unavailable Garden sync interface remains reserved.
-Idle dim and the existing three-second wake greeting continue to apply.
-The brand heading stays exclusive to the wake greeting.
+Approved composite sources and per-sticker provenance hashes are kept under
+`assets/images/zumi-pocket/wake-cards/source/`. They come from the owner's local
+Office Vibes package, not a claimed verified WeChat publication. Convert with
+`node tools/build_zumi_wake_cards.cjs`. Eight 240 x 320 little-endian RGB565
+images occupy 1,228,800 bytes in read-only Flash. Browser PNGs are quantized to
+the same RGB565 colors. Native images use image opacity with the original BSP's
+partial draw buffer, avoiding an object-opacity intermediate layer and runtime
+full-frame PNG/JPEG decoding. Physical frame timing still requires validation.
 
 The official hardware guide/BSP exposed no motion sensor interface during
 inspection. The user chose to defer both motion detection and the one-hour
@@ -86,8 +88,8 @@ and display/audio contention require device measurement. No microphone reads.
 
 ## Architecture and budget
 
-- Allocation-free deterministic C model: 88 bytes, no timer-driven game state.
-  Updates are capped at 100 ms after suspension. Prototype randomness uses a
+- Allocation-free deterministic C model: 84 bytes, no timer-driven game state.
+  Updates are capped at 100 ms after suspension. Host/browser tests use a
   repeatable xorshift seed; it is not a claim of unpredictable randomness.
 - Shared view: at most 64 commands, 6,404 bytes per list; two firmware lists use
   12,808 bytes. LVGL objects are reused; changed commands update under BSP locks.
@@ -138,19 +140,18 @@ flashing requires a new explicit authorization and a chosen target and image.
    Agree on preservation of existing NVS data: merged images can reset it.
 2. Confirm boot goes directly to Zumi's home. Inspect 240 x 320 portrait,
    rounded corners, RGB565 colors, text clipping and ZCO cap mark. Approve the
-   three small expressions and compare against the original art.
+   small expressions and all eight wake cards against the approved art.
 3. Exercise rapid taps, all three keys, level/wire wrapping and fixed-tile skipping.
    Verify long OK and its release never open Talk or rotate an extra wire.
 4. Complete all six Energy Link boards, including branching and fixed clues.
    Verify only reciprocal connectors conduct, every home is required, completed
    boards remain visible, next/replay works and long OK exits.
 5. Wait 60 seconds on each menu, wake with each key, confirm a different
-   expression, `zco.eco`, three-second greeting and smooth transition home.
+   card, Zumi Pocket, `zco.eco`, three-second greeting and smooth transition home.
    Hold the wake key beyond the greeting and verify no accidental action.
-6. Complete and browse all eight cards offline, check one count per card,
-   explicit new-set reset, retention across home/game/wake and reset on reboot.
-   Confirm no one-hour reminder or motion detection is enabled. Disconnect
-   networking: the game and cards work; Talk/Garden services stay unavailable.
+6. Wake repeatedly offline, inspect all eight distinct cards and no adjacent
+   repeats. Confirm no Tiny Actions checklist, one-hour reminder or motion
+   detection. Talk/Garden stay unavailable; games and wake cards need no network.
 7. Run 30 minutes and 100 page switches. Record minimum free heap, largest free
    block, LVGL pool peak, watchdog behavior, input latency and frame rate.
 8. Audition rotation, connection and victory sounds against the website. Check
@@ -161,3 +162,6 @@ flashing requires a new explicit authorization and a chosen target and image.
    application never writes or erases unrelated storage.
 10. Record board revision, image hash and evidence for each item before assigning
     Device Tests PASS/FAIL. Browser screenshots cannot replace this checklist.
+
+Firmware seeds the non-security PRNG with esp_random(); tests use fixed seeds.
+Both Energy Link titles are at (22,16), clear of the battery reading.

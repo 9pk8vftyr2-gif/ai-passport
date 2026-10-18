@@ -32,14 +32,11 @@ void z_render(const z_state *s, int battery, z_view *v) {
     box(v,0,0,240,320,PAPER,0);
     char tmp[64];
     if(battery<0) snprintf(tmp,sizeof(tmp),"--"); else snprintf(tmp,sizeof(tmp),"%d%%",battery);
-    text(v,184,16,tmp,MUTED,14);
+    if(s->page!=Z_WAKE) text(v,184,16,tmp,MUTED,14);
     int content_start=v->count;
     if(s->page==Z_WAKE) {
-        text(v,59,49,"Zumi Pocket",INK,20);
-        z_draw *hero=add(v,Z_SPRITE,61,83,117,138,0);
-        if(hero) hero->size=s->expression;
-        text(v,66,241,"Hello again.",INK,14);
-        text(v,171,292,"zco.eco",MUTED,10);
+        z_draw *card=add(v,Z_WAKE_CARD,0,0,240,320,0);
+        if(card) card->size=s->wake_card>=0?s->wake_card:0;
     } else if(s->page==Z_HOME) {
         sprite(v,81,46,s->expression);
         text(v,55,145,"A little greener.",INK,14);
@@ -48,7 +45,7 @@ void z_render(const z_state *s, int battery, z_view *v) {
         choice(v,256,"Garden",s->selection==2);
         text(v,36,298,"UP / DOWN    OK select",MUTED,14);
     } else if(s->page==Z_PLAY) {
-        text(v,24,49,"Energy Link",INK,20);
+        text(v,22,16,"Energy Link",INK,20);
         sprite(v,81,81,s->expression);
         text(v,25,189,"Turn wires. Light homes.",INK,14);
         snprintf(tmp,sizeof(tmp),"<   Level %d / 6   >",s->level+1);
@@ -56,18 +53,11 @@ void z_render(const z_state *s, int battery, z_view *v) {
         choice(v,247,"Start connecting",true);
         text(v,25,289,"UP / DOWN choose level",MUTED,14);
     } else if(s->page==Z_GARDEN) {
-        int count=z_card_count(s);
-        bool done=(s->cards_done&(1u<<s->card))!=0, all=count==Z_CARDS;
-        const z_card *card=z_card_get(s->card);
-        text(v,22,16,"UP / DOWN: browse",MUTED,10);
-        text(v,24,49,"Tiny Actions",INK,20);
-        snprintf(tmp,sizeof(tmp),"Card %d / 8    %d done",s->card+1,count);
-        text(v,24,77,tmp,MUTED,14);
-        sprite(v,81,97,done?Z_CHEER:s->expression);
-        text(v,24,205,all?"Nice work!":card->title,INK,20);
-        text(v,24,234,all?"Eight small steps.":card->line1,MUTED,14);
-        text(v,24,252,all?"Ready for another set?":done?"Nice small step!":card->line2,MUTED,14);
-        choice(v,278,all?"Start a new set":done?"Next action":"Mark as done",true);
+        text(v,24,49,"Garden",INK,20);
+        sprite(v,81,97,s->expression);
+        text(v,28,205,"Garden is not connected.",INK,14);
+        text(v,28,231,"Your games work offline.",MUTED,14);
+        choice(v,263,"Back home",true);
     } else if(s->page==Z_TALK) {
         text(v,24,55,"Hello, friend.",INK,20);
         sprite(v,81,97,s->expression);
@@ -75,7 +65,7 @@ void z_render(const z_state *s, int battery, z_view *v) {
         text(v,28,231,"Your games work offline.",MUTED,14);
         choice(v,263,"Back home",true);
     } else if(s->page==Z_LINK) {
-        text(v,22,46,"Energy Link",INK,20);
+        text(v,22,16,"Energy Link",INK,20);
         snprintf(tmp,sizeof(tmp),"%d / 6    %d turns",s->level+1,s->moves);
         text(v,22,74,tmp,MUTED,14);
         /* Shared edges meet exactly, even across rounded cell backgrounds. */
@@ -114,4 +104,5 @@ void z_render(const z_state *s, int battery, z_view *v) {
     } else if(s->page==Z_HOME && s->home_fade_ms)
         opacity=(int)((240-s->home_fade_ms)*255/240);
     for(int i=content_start;i<v->count;i++) v->ops[i].opacity=opacity;
+    if(s->page==Z_WAKE) text(v,184,16,tmp,MUTED,14);
 }

@@ -59,3 +59,7 @@ Store reusable music and sound-effect sources in `music/`.
 - Prefer 16 kHz, 16-bit mono PCM when it matches the current BSP audio path.
 - Check Flash and internal-RAM cost before embedding audio; stream or chunk long recordings.
 - Do not commit media without redistribution permission.
+
+### Approved promotional wake cards
+
+`images/zumi-pocket/wake-cards/` holds eight approved 240 x 320 RGB565-quantized PNGs and the concatenated `wake_cards.rgb565` (1,228,800 bytes). `source/` contains the approved V3 composites and original sticker identity hashes from the owner-supplied local Zumi: Office Vibes package. This does not assert WeChat publication. Built-in image generation edited backgrounds; original sticker layers were reused without redrawing. Owner approval for device integration was given on 2026-10-18. Run `node tools/build_zumi_wake_cards.cjs` (Sharp) to reproduce. The native binary is linked read-only from Flash; the browser uses matching quantized PNGs. No runtime PNG/JPEG decode or full-frame buffer. The same ZCO artwork licensing boundary applies.

@@ -11,6 +11,8 @@
 #include "zumi/core.h"
 #include "zumi/view.h"
 #include "zumi/sprites.h"
+#include "zumi/wake_cards.h"
+#include "esp_random.h"
 #include "zumi/sound.h"
 #include "zumi/audio.h"
 #include <string.h>
@@ -44,13 +46,16 @@ static void render(void) {
         if (fresh) {
             if(objects[i]) lv_obj_delete(objects[i]);
             objects[i]=d->kind==Z_TEXT ? lv_label_create(screen) :
-                       d->kind==Z_SPRITE ? lv_image_create(screen) : lv_obj_create(screen);
+                       (d->kind==Z_SPRITE || d->kind==Z_WAKE_CARD) ? lv_image_create(screen) : lv_obj_create(screen);
             lv_obj_remove_style_all(objects[i]);
             lv_obj_remove_flag(objects[i],LV_OBJ_FLAG_SCROLLABLE);
         }
         lv_obj_t *o=objects[i];
         lv_obj_set_pos(o,d->x,d->y);
-        lv_obj_set_style_opa(o,(lv_opa_t)d->opacity,0);
+        /* Image opacity blends directly into the BSP draw buffer, without an
+           object-opacity layer large enough to exhaust the 24 KB LVGL pool. */
+        if(d->kind==Z_WAKE_CARD) lv_obj_set_style_image_opa(o,(lv_opa_t)d->opacity,0);
+        else lv_obj_set_style_opa(o,(lv_opa_t)d->opacity,0);
         if(d->kind==Z_RECT) {
             lv_obj_set_size(o,d->w,d->h);
             lv_obj_set_style_bg_color(o,lv_color_hex(d->color),0);
@@ -63,6 +68,8 @@ static void render(void) {
                                        d->size==10?&lv_font_montserrat_10:&lv_font_montserrat_14,0);
             lv_obj_set_style_text_color(o,lv_color_hex(d->color),0);
             lv_label_set_text(o,d->text);
+        } else if(d->kind==Z_WAKE_CARD) {
+            lv_image_set_src(o,&zumi_wake_cards[d->size % Z_WAKE_CARDS]);
         } else {
             lv_image_set_src(o,&zumi_sprites[d->size % 3]);
             lv_image_set_pivot(o,0,0);
@@ -74,7 +81,7 @@ static void render(void) {
     previous=view;
 }
 void app_main(void) {
-    z_init(&state,0x5A554D49);
+    z_init(&state,esp_random());
     if(bsp_display_init()!=ESP_OK || !bsp_lvgl_init()) {
         ESP_LOGE("zumi","Display initialization failed"); return;
     }

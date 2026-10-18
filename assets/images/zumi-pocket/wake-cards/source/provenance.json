@@ -1,0 +1,80 @@
+{
+  "approval_date": "2026-10-18",
+  "collection": "Zumi: Office Vibes (local original sticker package; publication not asserted)",
+  "design": "Approved wake-cards-v3-original-stickers; existing sticker layers, imagegen-edited background; eight distinct expressions/actions.",
+  "license": "ZCO artwork supplied and authorized by the owner for Zumi Pocket. No additional third-party redistribution license.",
+  "cards": [
+    {
+      "id": 0,
+      "title": "绿色问候",
+      "expression": "挥手问候",
+      "original_sticker": "01-morning.png",
+      "original_sticker_sha256": "14e45475320e035fa9e06655f9d10bf4f5bd1d2cf7d13de3f381a2ceb6a4e55f",
+      "source": "card-1.png",
+      "source_sha256": "1bd91256e0f0b567bbf86675936fd6b538363d0fca5e75795181616d73b9870a"
+    },
+    {
+      "id": 1,
+      "title": "小小改变",
+      "expression": "迈步出发",
+      "original_sticker": "03-on-it.png",
+      "original_sticker_sha256": "e99bcda68120596fb1ba881a9162c2a14092a0e4729af085e36d95883f436c5b",
+      "source": "card-2.png",
+      "source_sha256": "73d117ef37dc4cfb2378c992381ae22ba24d04eb374898ed14b76de5bb0cb1dd"
+    },
+    {
+      "id": 2,
+      "title": "太阳能",
+      "expression": "开心点赞",
+      "original_sticker": "02-got-it.png",
+      "original_sticker_sha256": "4371645d0f8e23b62c8f0f686dcbeed4b30b8a7cfc203f4683b8e1678d881ff5",
+      "source": "card-3.png",
+      "source_sha256": "30961419509fe734df56fde502fb26b7a62c0f972417b207228e5449df48baec"
+    },
+    {
+      "id": 3,
+      "title": "风能",
+      "expression": "闭眼放松",
+      "original_sticker": "21-coffee-break.png",
+      "original_sticker_sha256": "bddb5a9974d0e3d611924e8787d3c8fe92eac70b0b34f2a386b4cffc7dc89aa1",
+      "source": "card-4.png",
+      "source_sha256": "9ee15863d698d189edc6fa7b64c77e43ba3e66aebb6be14998278b3129aee10f"
+    },
+    {
+      "id": 4,
+      "title": "连接",
+      "expression": "张手交流",
+      "original_sticker": "11-let-s-talk.png",
+      "original_sticker_sha256": "c4fa6be289a1d40c0085163791b95eb0101375b10473d850c09a5484af330752",
+      "source": "card-5.png",
+      "source_sha256": "b44eb1f4368971115db97b3faee7ee039903fb9e1a2ec0cca460845438e31429"
+    },
+    {
+      "id": 5,
+      "title": "减少浪费",
+      "expression": "认真观察",
+      "original_sticker": "07-checking.png",
+      "original_sticker_sha256": "0239728a7f9cdf7801a9681c277d2d717d46117f4d3d52ffcc1c3d72c977916c",
+      "source": "card-6.png",
+      "source_sha256": "f819b5393d34bb79f4d10571446fe8980d840683cc79cdb23b84c5bc6dbfe5d6"
+    },
+    {
+      "id": 6,
+      "title": "成长",
+      "expression": "鼓掌鼓励",
+      "original_sticker": "15-great-job.png",
+      "original_sticker_sha256": "254b5fb8f97b76eb3cd9b243c47dc4e3001ff9388050a090b8fee232f201cc83",
+      "source": "card-7.png",
+      "source_sha256": "46f75a0019e3ea6fd1c5ff175e80d53788b963162b9a358e0f16d3fb9e28ca43"
+    },
+    {
+      "id": 7,
+      "title": "共同的地球",
+      "expression": "暖心感谢",
+      "original_sticker": "14-thanks.png",
+      "original_sticker_sha256": "f03a76ec86183c5a3117b29ca2a53d87bfa0ccf9773167cd799918a3886ac704",
+      "source": "card-8.png",
+      "source_sha256": "e12f99affacc347a72c0a5ca45596ee1516787c0dbc08d9434b43fed0025d732"
+    }
+  ]
+}

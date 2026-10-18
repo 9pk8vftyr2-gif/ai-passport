@@ -5,6 +5,7 @@ from pathlib import Path
 import unittest
 import subprocess
 import sys
+import struct
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -33,6 +34,24 @@ class ArtifactTests(unittest.TestCase):
         for asset in manifest['assets']:
             self.assertEqual(hashlib.sha256((folder / asset['name']).read_bytes()).hexdigest(),
                              asset['sha256'])
+
+    def test_wake_cards_identity_and_flash_budget(self):
+        folder = ROOT / 'assets/images/zumi-pocket/wake-cards'
+        manifest = json.loads((folder / 'manifest.json').read_text())
+        raw = (folder / 'wake_cards.rgb565').read_bytes()
+        self.assertEqual(len(raw), 8 * 240 * 320 * 2)
+        self.assertEqual(manifest['flash_bytes'], len(raw))
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), manifest['sha256'])
+        self.assertEqual(len(manifest['cards']), 8)
+        self.assertEqual(len({c['original_sticker_sha256'] for c in manifest['cards']}), 8)
+        for i, card in enumerate(manifest['cards']):
+            self.assertEqual(card['id'], i)
+            self.assertEqual(card['offset'], i * 153600)
+            png = (folder / card['file']).read_bytes()
+            self.assertEqual(struct.unpack('>II', png[16:24]), (240, 320))
+            self.assertEqual(hashlib.sha256(png).hexdigest(), card['sha256'])
+            self.assertEqual(hashlib.sha256(raw[i*153600:(i+1)*153600]).hexdigest(), card['rgb565_sha256'])
+            self.assertEqual(hashlib.sha256((folder / 'source' / card['source']).read_bytes()).hexdigest(), card['source_sha256'])
 
 if __name__ == '__main__':
     unittest.main()

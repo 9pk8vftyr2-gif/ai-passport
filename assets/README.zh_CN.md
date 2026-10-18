@@ -50,3 +50,7 @@ Zumi Pocket 使用 `music/zumi-link-tones.json` 记录现有 ZCO Energy Link 合
 - 与当前 BSP 音频路径匹配时优先采用 16 kHz、16 位单声道 PCM。
 - 嵌入音频前评估 Flash 与内部 RAM 成本；长录音应流式或分块。
 - 无再分发许可不提交媒体文件。
+
+### 已审核唤醒宣传卡
+
+`images/zumi-pocket/wake-cards/` 保存 8 张 240×320 RGB565 量化 PNG 和合并原始像素 `wake_cards.rgb565`（1,228,800 字节）。`source/` 保留已审核 V3 合成图及用户本地 Zumi: Office Vibes 原表情哈希，不声称已在微信发布。内置图片生成仅编辑背景，角色图层复用原文件；用户于 2026-10-18 同意接入固件。执行 `node tools/build_zumi_wake_cards.cjs`（Sharp）可复现。固件只读访问 Flash，浏览器显示相同量化 PNG；运行时无 PNG/JPEG 解码或整帧缓冲。沿用上述 ZCO 角色许可边界。

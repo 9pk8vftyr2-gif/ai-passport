@@ -31,6 +31,4 @@ int pocket_won(void) { return state.won; }
 int pocket_board(void) { int n=0; for(int i=0;i<9;i++) n=((int64_t)n*17+state.tiles[i])%1000000007; return n; }
 int pocket_dimmed(void) { return state.dimmed; }
 int pocket_expression(void) { return state.expression; }
-int pocket_card(void) { return state.card; }
-int pocket_cards_done(void) { return state.cards_done; }
-int pocket_card_count(void) { return z_card_count(&state); }
+int pocket_wake_card(void) { return state.wake_card; }
