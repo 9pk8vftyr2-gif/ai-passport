@@ -1,5 +1,7 @@
 [简体中文](zumi-talk-v1.zh_CN.md)
 
+> Historical stage record; see the [local integration report](zumi-talk-integration.md) for current Talk behavior.
+
 # Zumi Talk V1.0: architecture review
 
 Date: 2026-10-18. Review baseline: `b61f8c0` on `feature/zumi-pocket`.

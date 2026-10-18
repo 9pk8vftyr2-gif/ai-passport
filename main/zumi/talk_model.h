@@ -1,5 +1,5 @@
 #pragma once
-/* Review-stage model: built by host/WASM tests, intentionally not in firmware. */
+/* Shared firmware/host/browser Talk controller; transport and audio are adapters. */
 #include <stdbool.h>
 #include <stdint.h>
 enum { T_IDLE, T_LISTENING, T_PROCESSING, T_SPEAKING, T_OFFLINE, T_ERROR };

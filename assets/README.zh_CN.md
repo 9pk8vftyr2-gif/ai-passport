@@ -59,3 +59,10 @@ Zumi Pocket 使用 `music/zumi-link-tones.json` 记录现有 ZCO Energy Link 合
 Energy Link 复用 ZCO Eco Pop 太阳、风机和建筑图标，存于 `images/zumi-pocket/energy-icons/`，保留网站原 PNG、裁切信息与哈希。
 `node tools/build_energy_link_icons.cjs`（Sharp）生成六张亮/暗 32×32 RGB565 图标，共 12,288 字节 Flash，并提供匹配浏览器 PNG。
 按用户请求复用素材，不代表新增第三方再分发授权。参见[设计说明](../docs/assets/zumi-pocket.zh_CN.md)。
+
+
+### 本地 Talk 语音样例
+
+测试文本位于 `tools/talk_mock_fixtures.json`。`tools/build_talk_mock_audio.py`
+使用本机 macOS 语音，在被忽略的 `build/talk-mock/` 生成流式测试音频。系统
+语音输出不分发、不嵌入固件，也不是已选定的 Zumi 音色。详见[接入报告](../docs/assets/zumi-talk-integration.zh_CN.md)。

@@ -25,15 +25,25 @@ run_static_checks() {
 
     test_dir="$(mktemp -d /tmp/ai-passport-host-tests.XXXXXX)"
     "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/zumi \
-        tests/test_zumi.c main/zumi/core.c main/zumi/view.c main/zumi/sound.c main/zumi/sounds.c \
+        tests/test_zumi.c main/zumi/core.c main/zumi/talk_model.c main/zumi/view.c main/zumi/sound.c main/zumi/sounds.c \
         -o "${test_dir}/test_zumi"
     "${test_dir}/test_zumi"
     "${CC:-cc}" -std=c11 -O2 -Wall -Wextra -Werror -Imain/zumi \
-        tests/zumi_difficulty.c main/zumi/core.c -o "${test_dir}/zumi_difficulty"
+        tests/zumi_difficulty.c main/zumi/core.c main/zumi/talk_model.c -o "${test_dir}/zumi_difficulty"
     "${test_dir}/zumi_difficulty"
     "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/zumi \
         tests/test_talk_model.c main/zumi/talk_model.c -o "${test_dir}/test_talk_model"
     "${test_dir}/test_talk_model"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/zumi \
+        tests/test_talk_wire.c main/zumi/talk_wire.c -o "${test_dir}/test_talk_wire"
+    "${test_dir}/test_talk_wire"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/zumi \
+        tests/test_talk_integration.c main/zumi/core.c main/zumi/talk_model.c -o "${test_dir}/test_talk_integration"
+    "${test_dir}/test_talk_integration"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Itests/talk_stubs -Imain/zumi \
+        tests/test_talk_audio.c main/zumi/sound.c main/zumi/sounds.c -o "${test_dir}/test_talk_audio"
+    "${test_dir}/test_talk_audio"
+    PYTHONDONTWRITEBYTECODE=1 python3 tests/test_xiaozhi_setup.py
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_zumi_artifacts.py
     "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
         tests/test_ui_pixel_math.c main/ui_pixel_math.c \

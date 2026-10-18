@@ -216,3 +216,7 @@ LICENSE                  仓库许可证
 AI 助手请从 [`AGENTS.md`](../AGENTS.md) 开始，再按任务路由读取相关文档。
 
 - [Zumi Pocket：Talk V1.0 设计审计](assets/zumi-talk-v1.zh_CN.md)
+
+- [Zumi Pocket：Talk 本地接入与角色设定](assets/zumi-talk-integration.zh_CN.md)
+
+- [官方小智电脑联调](assets/zumi-talk-xiaozhi.zh_CN.md)

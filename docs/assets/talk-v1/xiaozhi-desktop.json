@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "input": "public synthetic greeting; no real microphone",
+  "evidence": {
+    "sentFrames": 206,
+    "receivedFrames": 123,
+    "playedFrames": 123,
+    "maxQueued": 12,
+    "underruns": 0,
+    "commits": 1,
+    "cancels": 0,
+    "done": 1,
+    "micRequests": 1,
+    "tracksStopped": true,
+    "questionPresent": true,
+    "answerPresent": true
+  },
+  "errors": [],
+  "date": "2026-10-18",
+  "scope": "Desktop only; separate from ESP32-C3 firmware",
+  "tls_certificate_and_hostname_verified": true,
+  "binding_confirmed": true,
+  "free_service_user_confirmed": true,
+  "negotiated_audio": {
+    "format": "opus",
+    "sample_rate": 24000,
+    "channels": 1,
+    "frame_duration": 60
+  },
+  "device_tests": "NOT RUN",
+  "persona_and_male_voice": "Prepared; official console application and verification pending",
+  "hosted_memory_retention": "Not verified; no local long-term memory implemented",
+  "offline_tests": {
+    "binding": 3,
+    "relay": 5,
+    "opus": 1,
+    "microphone_scenarios": 3
+  },
+  "source_sha256": {
+    "tools/xiaozhi_setup.py": "9ff34986656ea391e67b36324fb663700d3fe1e094185061ee154ebbf0d5e35f",
+    "tools/talk_xiaozhi_relay.py": "69d0a9fffec1fff9243c4b0c56cc69967e2305a21b52a19f08ef1b5866edaf62",
+    "tools/talk_opus.py": "73e87b700bc1cc57d4aa75d4da251e2955747c5607e3fc951ce4388d436ccad6",
+    "preview/talk_client.js": "d9518b4414ca97a0a0528493ee0ae037e0b0744d5b74ba9a5ed231e30929c485",
+    "preview/talk_microphone.js": "042e6bdec3d1eb2e09e06160a16f8baa0ca893a4c4d2ffefd8c0b1567a41197a",
+    "preview/talk_mic_worklet.js": "e341cc6d743f3dfbe94bb5b74b427b5749b1a699cdcb6b789dd4f0fb31ac12a9"
+  }
+}

@@ -18,8 +18,11 @@ static void text(z_view *v, int x, int y, const char *str, int color, int size) 
     z_draw *d=add(v,Z_TEXT,x,y,240-x-12,size+6,color);
     if(d) { d->size=size; snprintf(d->text,sizeof(d->text),"%s",str); }
 }
-static void sprite(z_view *v, int x, int y, int mood) {
+static void portrait(z_view *v, int x, int y, int mood) {
     z_draw *d=add(v,Z_SPRITE,x,y,78,92,0); if(d) d->size=mood;
+}
+static void sprite(z_view *v, int x, int y, int mood) {
+    portrait(v,x,y,mood);
     text(v,165,y+84,"zco.eco",MUTED,10);
 }
 static void choice(z_view *v,int y,const char *label,bool selected) {
@@ -93,11 +96,25 @@ void z_render(const z_state *s, int battery, z_view *v) {
         text(v,28,231,"Your games work offline.",MUTED,14);
         choice(v,263,"Back home",true);
     } else if(s->page==Z_TALK) {
-        text(v,24,55,"Hello, friend.",INK,20);
-        sprite(v,81,97,s->expression);
-        text(v,28,205,"Voice is not connected.",INK,14);
-        text(v,28,231,"Your games work offline.",MUTED,14);
-        choice(v,263,"Back home",true);
+        const t_model *t=&s->talk;
+        const char *names[]={"Idle","Listening","Processing","Speaking","Offline","Error"};
+        const char *actions[]={"OK: Start talking","OK: Finish & send","OK: Cancel","OK: Stop speaking","OK: Connect","OK: Try again"};
+        text(v,22,16,"Talk",INK,20);text(v,24,48,names[t->state],INK,14);
+        portrait(v,81,76,t->state==T_LISTENING||t->state==T_PROCESSING?Z_FOCUS:t->state==T_SPEAKING?Z_CHEER:Z_HAPPY);
+        snprintf(tmp,sizeof(tmp),t->mic?"REC  %02u / 15s":t->speaker?"VOICE PLAYBACK":"MIC OFF",(unsigned)(t->elapsed/1000));
+        text(v,78,176,tmp,t->mic?0xAA493B:MUTED,10);
+        const char *message=t->state==T_LISTENING?"Press OK when finished.":
+            t->state==T_PROCESSING?(t->asr[0]?t->asr:"Sending your question..."):
+            t->state==T_OFFLINE?(t->connecting?"Connecting to local relay...":"I am Zumi, your ZCO green living companion. Let us explore, chat and play. Press OK to connect."):
+            t->state==T_ERROR?(t->error==T_E_TIMEOUT?"Response timed out.":"Service unavailable. Retry."):
+            (t->reply[0]?t->reply:"I am Zumi, your ZCO green living companion. Ready when you are.");
+        /* English local fixtures; unsupported glyphs wait for a licensed CJK font. */
+        size_t len=strlen(message);int lines=(int)((len+23)/24),start=s->talk_scroll;
+        if(start>lines-2)start=lines>2?lines-2:0;
+        for(int line=0;line<2;line++){size_t offset=(size_t)(start+line)*24;
+            if(offset<len){snprintf(tmp,sizeof(tmp),"%.24s",message+offset);text(v,24,207+line*19,tmp,INK,14);}}
+        choice(v,263,t->connecting?"Connecting...":actions[t->state],true);
+        text(v,26,302,"UP/DOWN text   Hold OK home",MUTED,10);
     } else if(s->page==Z_LINK) {
         text(v,22,16,"Energy Link",INK,20);
         snprintf(tmp,sizeof(tmp),"%d / 6    %d turns",s->level+1,s->moves);

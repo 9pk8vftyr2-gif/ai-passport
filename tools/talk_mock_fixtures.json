@@ -1,0 +1,12 @@
+{
+  "intro": {
+    "question": "Who are you?",
+    "answer": "Hi, I'm Zumi, your ZCO green living companion. Let's chat, play, and explore together. What's on your mind today?",
+    "spoken": "Hi, I'm Zumi, your ZCO green living companion. [[slnc 120]] Let's chat, play, and explore together. [[slnc 120]] What's on your mind today?"
+  },
+  "solar": {
+    "question": "What can solar power do?",
+    "answer": "Solar power turns sunlight into electricity. It can help power a home.",
+    "spoken": "Solar power turns sunlight into electricity. It can help power a home."
+  }
+}

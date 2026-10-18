@@ -222,3 +222,7 @@ provide reference material. Choose the entry that matches your task.
 AI agents: start with [`AGENTS.md`](../AGENTS.md) and follow its task-specific routing.
 
 - [Zumi Pocket: Talk V1.0 review](assets/zumi-talk-v1.md)
+
+- [Zumi Pocket: Talk local integration and identity](assets/zumi-talk-integration.md)
+
+- [Official XiaoZhi desktop trial](assets/zumi-talk-xiaozhi.md)

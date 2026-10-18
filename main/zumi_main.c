@@ -16,11 +16,12 @@
 #include "esp_random.h"
 #include "zumi/sound.h"
 #include "zumi/audio.h"
+#include "zumi/talk_device.h"
 #include <string.h>
 
 typedef struct { int button, event; } input_event;
 static QueueHandle_t queue;
-static z_state state;
+static z_state state, before;
 static z_input input;
 static z_view view, previous;
 static lv_obj_t *objects[Z_DRAW_MAX];
@@ -85,6 +86,11 @@ static void render(void) {
     }
     previous=view;
 }
+static void talk_dispatch(void) {
+    int c=z_talk_take_command(&state);
+    if(c==T_F_ABORT&&(state.page!=Z_TALK||state.screen_off||state.talk.state!=T_IDLE))c=5;
+    if(c)z_talk_device_command(c,state.talk.turn);
+}
 void app_main(void) {
     z_init(&state,esp_random());
     if(bsp_display_init()!=ESP_OK || !bsp_lvgl_init()) {
@@ -120,11 +126,12 @@ void app_main(void) {
     for(;;) {
         uint64_t now=esp_timer_get_time()/1000;
         z_tick(&state,(uint32_t)(now-last)); last=now;
+        talk_dispatch();z_talk_device_poll(&state);talk_dispatch();
         input_event e;
         /* Bounded draining ensures an event flood cannot starve rendering. */
         for(int i=0;i<32 && xQueueReceive(queue,&e,0)==pdTRUE;i++) {
-            z_state before=state;
-            z_button(&state,&input,e.button,e.event);
+            before=state;
+            z_button(&state,&input,e.button,e.event);talk_dispatch();
             int sound=z_sound_event(&before,&state);
             if(sound || (before.page==Z_LINK && (state.page!=Z_LINK || before.level!=state.level))) z_audio_play(sound);
         }

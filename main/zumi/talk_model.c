@@ -29,7 +29,7 @@ void t_event(t_model *m,int event,uint32_t turn,const char *text) {
     if(event>=T_ASR&&turn!=m->turn) return;
     if(event==T_CANCEL) {abort_turn(m,m->online?T_IDLE:T_OFFLINE,T_E_NONE);return;}
     if(event==T_DISCONNECTED) {
-        m->online=false;abort_turn(m,T_OFFLINE,T_E_NETWORK);return;
+        m->online=false;if(m->state==T_ERROR){return;}abort_turn(m,T_OFFLINE,T_E_NETWORK);return;
     }
     if(event==T_CONNECTED) {
         m->online=true;m->connecting=false;
@@ -50,6 +50,9 @@ void t_event(t_model *m,int event,uint32_t turn,const char *text) {
             enter(m,T_PROCESSING);m->effect=T_F_COMMIT;
         } else abort_turn(m,T_IDLE,T_E_NONE);
         return;
+    }
+    if(m->connecting&&(event==T_FAILURE||event==T_OVERFLOW)) {
+        abort_turn(m,T_ERROR,event==T_OVERFLOW?T_E_OVERFLOW:T_E_SERVICE);return;
     }
     if(!active(m)) return;
     if(event==T_FAILURE||event==T_OVERFLOW) {

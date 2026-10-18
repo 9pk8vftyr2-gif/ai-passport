@@ -1,15 +1,29 @@
+import {createTalkClient} from "./talk_client.js";
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d');
 const status=document.querySelector('#status');
-const sprites=await Promise.all([0,1,2].map(i=>new Promise((resolve,reject)=>{const im=new Image(); im.onload=()=>resolve(im);im.onerror=reject;im.src=`../assets/images/zumi-pocket/zumi-${i}.png`;})));
-const wakeCards=await Promise.all(Array.from({length:8},(_,i)=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=`../assets/images/zumi-pocket/wake-cards/card-${i+1}.png`;})));
-const energyIcons=await Promise.all(['solar-off','wind-off','house-off','solar-on','wind-on','house-on'].map(name=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=`../assets/images/zumi-pocket/energy-icons/${name}.png`;})));
+async function loadImages(paths){
+ const images=[];
+ // The local Python preview server has a small accept queue; load boundedly.
+ for(const src of paths){
+  const im=await new Promise((resolve,reject)=>{const image=new Image();let attempts=0;
+   image.onload=()=>resolve(image);image.onerror=()=>{if(attempts++<1)setTimeout(()=>{image.src=src;},100);else{status.textContent='图片未加载，请刷新预览。';reject(Error(`Image unavailable: ${src}`));}};image.src=src;
+  });images.push(im);
+ }
+ return images;
+}
+const sprites=await loadImages([0,1,2].map(i=>`../assets/images/zumi-pocket/zumi-${i}.png`));
+const wakeCards=await loadImages(Array.from({length:8},(_,i)=>`../assets/images/zumi-pocket/wake-cards/card-${i+1}.png`));
+const energyIcons=await loadImages(['solar-off','wind-off','house-off','solar-on','wind-on','house-on'].map(name=>`../assets/images/zumi-pocket/energy-icons/${name}.png`));
 let api;
 try {
  const response=await fetch('pocket.wasm'); if(!response.ok)throw Error('请先运行 tools/build_preview.sh');
  const bytes=await response.arrayBuffer();
  const {instance}=await WebAssembly.instantiate(bytes,{wasi_snapshot_preview1:{clock_time_get:()=>52,fd_write:()=>0,fd_close:()=>0,fd_seek:()=>0,proc_exit:code=>{throw Error(`WASM exit ${code}`);}}});
  api=instance.exports;api._initialize?.();api.pocket_init(0x5A554D49);
- status.textContent='本地预览 · 游戏逻辑与固件共享 · 无服务连接';
+ const live=new URLSearchParams(location.search).get('talk')==='xiaozhi';
+ status.textContent=live?'Talk：官方小智 · 按 OK 才开启麦克风 · 游戏离线可用':'Talk：本地模拟录音与问答 · 真实分块语音播放 · 游戏离线可用';
+ document.querySelector('#live-conversation').hidden=!live;
+ if(live){document.querySelector('#talk-fixture').disabled=true;document.querySelector('#talk-fixture').closest('article').querySelector('p').textContent='进入 Talk 自动连接，OK 开始录音，再按 OK 结束并等待回答。首次使用请允许麦克风权限。回答时按 OK 打断，长按返回。每次录音最多 15 秒，离开页面即停止。';document.querySelector('.tag').textContent='Talk 官方小智联调 · 小游戏离线可玩';}
 } catch(e) {status.textContent=`加载失败：${e.message}`;throw e;}
 let audioContext, soundNode, soundGeneration=0;
 function unlockAudio(){
@@ -28,9 +42,11 @@ function playSound(event){
  const generation=soundGeneration;
  audioContext.resume().then(()=>{if(generation===soundGeneration)node.start();}).catch(()=>stopSound());
 }
+const talkClient=createTalkClient(api,()=>audioContext,stopSound);
 const color=n=>'#'+n.toString(16).padStart(6,'0');
 const decoder=new TextDecoder();
 function render(){
+ talkClient.pump();
  const sound=api.pocket_take_sound();
  if(api.pocket_screen_off() || api.pocket_page()!==2) {if(soundNode)stopSound();}
  else if(sound<0)stopSound();
@@ -65,8 +81,8 @@ for(const b of document.querySelectorAll('button')){
  b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(!e.repeat)press(Number(b.dataset.key));}});
  b.addEventListener('keyup',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();release();}});
 }
-window.addEventListener('blur',()=>{release(true);stopSound();});
+window.addEventListener('blur',()=>{release(true);stopSound();talkClient.cancel();});
 let last=performance.now();
 function frame(now){const dt=Math.floor(now-last);last+=dt;if(!document.hidden){api.pocket_tick(dt);render();}requestAnimationFrame(frame);}
-document.addEventListener('visibilitychange',()=>{last=performance.now();if(document.hidden){release(true);stopSound();audioContext?.suspend().catch(()=>{});}});
-window.pocket={api,render};render();requestAnimationFrame(frame);
+document.addEventListener('visibilitychange',()=>{last=performance.now();if(document.hidden){release(true);stopSound();talkClient.cancel();audioContext?.suspend().catch(()=>{});}});
+window.pocket={api,render,talkClient};render();requestAnimationFrame(frame);

@@ -13,7 +13,7 @@ static const struct { uint8_t initial[Z_CELLS], solved[Z_CELLS]; uint16_t homes,
 static uint32_t random_next(z_state *s) {
     uint32_t x=s->rng; x^=x<<13; x^=x>>17; x^=x<<5; return s->rng=x;
 }
-void z_init(z_state *s,uint32_t seed) { *s=(z_state){.rng=seed?seed:1,.wake_card=-1}; }
+void z_init(z_state *s,uint32_t seed) { *s=(z_state){.rng=seed?seed:1,.wake_card=-1}; t_init(&s->talk); }
 void z_link_evaluate(z_state *s) {
     s->powered=(uint16_t)(1u<<s->source);
     const int dr[]={-1,0,1,0}, dc[]={0,1,0,-1};
@@ -42,16 +42,20 @@ void z_link_start(z_state *s,int level) {
 void z_action(z_state *s,int action) {
     if(action<Z_UP||action>Z_BACK||s->page==Z_WAKE||s->screen_off) return;
     s->idle_ms=0; s->screen_off=0;
-    if(action==Z_BACK) { s->page=Z_HOME; s->selection=0; return; }
+    if(action==Z_BACK) { if(s->page==Z_TALK) {t_event(&s->talk,T_CANCEL,s->talk.turn,0);s->talk.online=false;s->talk_command=T_F_ABORT;} s->page=Z_HOME; s->selection=0; return; }
     if(s->page==Z_HOME) {
         if(action==Z_UP&&s->selection>0) s->selection--;
         if(action==Z_DOWN&&s->selection<2) s->selection++;
         if(action==Z_OK) {
             const int pages[]={Z_TALK,Z_PLAY,Z_GARDEN};
             s->page=pages[s->selection]; s->selection=0;
-            if(s->page==Z_TALK) (void)z_talk_request();
+            if(s->page==Z_TALK) {uint32_t turn=s->talk.turn+1;t_init(&s->talk);s->talk.turn=turn;t_event(&s->talk,T_OK,s->talk.turn,0);s->talk_command=s->talk.effect;s->talk_scroll=0;}
             if(s->page==Z_GARDEN) (void)z_garden_sync(s);
         }
+    } else if(s->page==Z_TALK) {
+        if(action==Z_OK) { t_event(&s->talk,T_OK,s->talk.turn,0); s->talk_command=s->talk.effect;s->talk_scroll=0; }
+        if(action==Z_UP&&s->talk_scroll>0)s->talk_scroll--;
+        if(action==Z_DOWN&&s->talk_scroll<60)s->talk_scroll++;
     } else if(s->page==Z_GARDEN) {
         if(action==Z_OK) { s->page=Z_HOME; s->selection=0; }
     } else if(s->page==Z_PLAY) {
@@ -84,9 +88,13 @@ void z_tick(z_state *s,uint32_t ms) {
         }
         return;
     }
+    if(s->page==Z_TALK&&!s->screen_off) {
+        t_tick(&s->talk,ms);if(s->talk.effect)s->talk_command=s->talk.effect;
+        if(s->talk.mic||s->talk.speaker||s->talk.state==T_PROCESSING||s->talk.connecting) {s->idle_ms=0;return;}
+    }
     s->resume_fade_ms=s->resume_fade_ms>ms?s->resume_fade_ms-ms:0;
     if(s->idle_ms<Z_IDLE_OFF_MS) s->idle_ms+=ms;
-    if(s->idle_ms>=Z_IDLE_OFF_MS) { s->idle_ms=Z_IDLE_OFF_MS; s->screen_off=1; }
+    if(!s->screen_off&&s->idle_ms>=Z_IDLE_OFF_MS) { s->idle_ms=Z_IDLE_OFF_MS; s->screen_off=1; if(s->page==Z_TALK){t_event(&s->talk,T_DISCONNECTED,s->talk.turn,0);s->talk_command=T_F_ABORT;} }
 }
 void z_button(z_state *s, z_input *input, int button, int event) {
     if (button < 0 || button > 2) return;
@@ -128,3 +136,9 @@ void z_button(z_state *s, z_input *input, int button, int event) {
 }
 int z_talk_request(void) { return Z_SERVICE_UNAVAILABLE; }
 int z_garden_sync(const z_state *s) { (void)s; return Z_SERVICE_UNAVAILABLE; }
+
+int z_talk_take_command(z_state *s) {int c=s->talk_command;s->talk_command=0;return c;}
+void z_talk_receive(z_state *s,int event,uint32_t turn,const char *text) {
+    if(s->page!=Z_TALK||s->screen_off)return;
+    t_event(&s->talk,event,turn,text);if(s->talk.effect)s->talk_command=s->talk.effect;
+}

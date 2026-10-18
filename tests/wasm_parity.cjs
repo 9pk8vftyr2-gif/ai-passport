@@ -1,5 +1,5 @@
 const fs=require('node:fs'),cp=require('node:child_process'),assert=require('node:assert/strict');
-cp.execFileSync(process.env.CC||'cc',['-std=c11','-Wall','-Wextra','-Werror','-Imain/zumi','tests/zumi_replay.c','preview/bridge.c','main/zumi/core.c','main/zumi/view.c','main/zumi/sound.c','main/zumi/sounds.c','-o','build/zumi_replay']);
+cp.execFileSync(process.env.CC||'cc',['-std=c11','-Wall','-Wextra','-Werror','-Imain/zumi','tests/zumi_replay.c','preview/bridge.c','main/zumi/core.c','main/zumi/talk_model.c','main/zumi/view.c','main/zumi/sound.c','main/zumi/sounds.c','-o','build/zumi_replay']);
 const native=cp.execFileSync('build/zumi_replay',{encoding:'utf8'}).trim().split('\n');
 (async()=>{
  const {instance}=await WebAssembly.instantiate(fs.readFileSync('preview/pocket.wasm'),{wasi_snapshot_preview1:{clock_time_get:()=>52,fd_close:()=>0,fd_seek:()=>0,fd_write:()=>0}});

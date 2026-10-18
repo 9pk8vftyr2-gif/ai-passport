@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
+#include "talk_model.h"
 enum { Z_HOME, Z_PLAY, Z_LINK, Z_TALK, Z_GARDEN, Z_WAKE };
 enum { Z_UP, Z_DOWN, Z_OK, Z_BACK };
 enum { Z_HAPPY, Z_FOCUS, Z_CHEER };
@@ -15,6 +16,8 @@ typedef struct {
     uint16_t powered, homes, fixed;
     int source, wind;
     int wake_card, wake_return_page;
+    t_model talk;
+    int talk_command, talk_scroll;
 } z_state;
 typedef struct { bool ok_down, ok_long, wake_held; int wake_button; } z_input;
 void z_init(z_state *s, uint32_t seed);
@@ -24,4 +27,6 @@ void z_button(z_state *s, z_input *input, int button, int event);
 void z_link_start(z_state *s, int level);
 void z_link_evaluate(z_state *s);
 int z_talk_request(void);
+int z_talk_take_command(z_state *s);
+void z_talk_receive(z_state *s, int event, uint32_t turn, const char *text);
 int z_garden_sync(const z_state *s);

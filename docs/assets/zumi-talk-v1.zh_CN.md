@@ -1,5 +1,7 @@
 [English](zumi-talk-v1.md)
 
+> 历史阶段记录；Talk 当前接入情况见 [本地接入报告](zumi-talk-integration.zh_CN.md)。
+
 # Zumi Talk V1.0：架构审计与设计
 
 日期：2026-10-18。审计基线：`feature/zumi-pocket` 的 `b61f8c0`。

@@ -71,3 +71,11 @@ are retained there. `node tools/build_energy_link_icons.cjs` (Sharp) generates
 six lit/unlit 32 x 32 RGB565 variants, 12,288 Flash bytes, with matching browser
 PNGs. Artwork is reused at the user's request, without a new third-party
 redistribution license. See the [design notes](../docs/assets/zumi-pocket.md).
+
+
+### Local Talk speech fixtures
+
+Test text lives in `tools/talk_mock_fixtures.json`. `tools/build_talk_mock_audio.py`
+generates local macOS speech into ignored `build/talk-mock/` for streaming tests.
+System-voice output is not redistributed or embedded in firmware and is not the
+approved Zumi voice. See the [integration report](../docs/assets/zumi-talk-integration.md).

@@ -34,7 +34,7 @@ static z_state solve(z_state *s) {
 }
 int main(void) {
     z_state s;z_input in={0};z_init(&s,42);
-    z_action(&s,Z_OK);assert(s.page==Z_TALK&&z_talk_request()==-1);z_action(&s,Z_OK);
+    z_action(&s,Z_OK);assert(s.page==Z_TALK&&s.talk.state==T_OFFLINE);z_action(&s,Z_BACK);
     z_action(&s,Z_DOWN);z_action(&s,Z_DOWN);z_action(&s,Z_OK);assert(s.page==Z_GARDEN&&z_garden_sync(&s)==-1);
     z_button(&s,&in,Z_OK,0);z_button(&s,&in,Z_OK,3);z_button(&s,&in,Z_OK,4);assert(s.page==Z_HOME);
     z_action(&s,Z_DOWN);z_action(&s,Z_OK);assert(s.page==Z_PLAY);z_action(&s,Z_UP);assert(s.level==5);z_action(&s,Z_DOWN);assert(s.level==0);

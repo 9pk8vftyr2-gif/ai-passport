@@ -1,6 +1,6 @@
 {
-  "main/zumi/talk_model.c": "8335b4a557af38e4bb75640d5bfd4f4ca574ff8321270115c2a486e91848d091",
-  "main/zumi/talk_model.h": "babe57d12a1f231f75006945711205565bc99ae43b80060d6241f31d980c93a3",
+  "main/zumi/talk_model.c": "fc340237aa8abe103104dda5614d7ccc991a1b6d6317b2a1688c71448c4669b4",
+  "main/zumi/talk_model.h": "ab497602b68f2cb6096ef533e9a465b7c65cdf39b2139dac647574454d0cf9da",
   "preview/talk/bridge.c": "135b852755a5dcd0a7ceea89be952cd3a015dc560d713d727597b545e726ea3e",
-  "preview/talk/talk.wasm": "0728f331f4f2ad4d2e0e88e647d18f3eef8996cb05f452b7e79bcae2e79c2cc2"
+  "preview/talk/talk.wasm": "f42f3455b7f5879489012f10b151b5fd2a5aef1fac792ffa3e6294899f9b5d66"
 }

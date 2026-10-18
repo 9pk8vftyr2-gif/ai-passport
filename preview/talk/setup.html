@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zumi 角色设置</title>
+<style>body{font:17px/1.8 system-ui;background:#f6f4e9;color:#20483c;max-width:800px;margin:50px auto;padding:0 24px}h1{font-size:32px}textarea{box-sizing:border-box;width:100%;height:330px;padding:18px;background:#fffef8;border:1px solid #abb6a0;border-radius:12px;font:16px/1.6 system-ui;color:inherit}button,a{color:inherit}button{padding:9px 22px;background:#e1e9d4;border:0;border-radius:20px;cursor:pointer}small{color:#59685a}</style>
+<h1>Zumi 的声音与角色</h1><p>在已绑定测试设备对应的小智角色设置中，粘贴以下内容并保存。此页面只准备配置文案，不会自动修改云端角色。</p>
+<textarea id="persona" readonly aria-label="Zumi 角色配置"></textarea><p><button id="copy">复制角色设定</button> <span id="status" role="status"></span></p>
+<ol><li>从当前账号的免费音色中选择自然、轻快的男性声音，并试听确认。</li><li>关闭长期记忆和自动监听；没有相应选项时，先核实平台实际行为。</li><li>保留普通语音问答，不开启设备控制、摄像头或其他工具。</li><li>保存后退出预览中的 Talk，再进入，分别问“你是谁？”“ZCO 是什么？”“你能控制花园吗？”检查角色是否生效。</li></ol>
+<p><small>本地不保存录音或对话记录。官方平台的对话留存不等于角色记忆，仍需在平台单独查看。网站资料为已核对的内容快照，不能据此声称知道网站实时更新。</small></p>
+<p><a href="https://xiaozhi.me/" target="_blank" rel="noopener">打开官方小智</a> · <a href="../?talk=xiaozhi">开始 Zumi 对话</a></p>
+<script type="module">
+const response=await fetch('../../config/zumi-persona.json');if(!response.ok)throw Error('Role unavailable');const role=await response.json();
+document.querySelector('#persona').value=role.system_prompt_zh+'\n\n当前语音后端：官方小智。角色名称始终为 Zumi（祖米）。本次没有启用网站账号联动、花园控制或长期记忆。\n\n已核对的网站背景：ZCO 将气候小游戏、数据工具、绿色参与和社区创作结合在一起。Zumi 是其绿色生活伙伴，Zumi Pocket 是随身互动产品，包含 Energy Link 和唤醒宣传卡。不了解未提供的最新网站内容。';
+document.querySelector('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(document.querySelector('#persona').value);document.querySelector('#status').textContent='已复制';}catch{document.querySelector('#persona').select();document.querySelector('#status').textContent='请选择并复制文字';}};
+</script></html>

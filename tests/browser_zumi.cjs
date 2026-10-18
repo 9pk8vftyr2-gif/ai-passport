@@ -1,6 +1,6 @@
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs'),cp=require('node:child_process');
-cp.execFileSync(process.env.CC||'cc',['-std=c11','-O2','-Wall','-Wextra','-Werror','-Imain/zumi','tests/zumi_difficulty.c','main/zumi/core.c','-o','build/zumi_difficulty']);
+cp.execFileSync(process.env.CC||'cc',['-std=c11','-O2','-Wall','-Wextra','-Werror','-Imain/zumi','tests/zumi_difficulty.c','main/zumi/core.c','main/zumi/talk_model.c','-o','build/zumi_difficulty']);
 const levels=JSON.parse(cp.execFileSync('build/zumi_difficulty',{encoding:'utf8'}));
 fs.writeFileSync('build/zumi-difficulty.json',JSON.stringify(levels,null,2));
 (async()=>{
@@ -14,12 +14,12 @@ fs.writeFileSync('build/zumi-difficulty.json',JSON.stringify(levels,null,2));
    node.stop=(...args)=>{window.soundEvidence.push({stopped:true});return stop(...args);};return node;};
  });
  page.on('pageerror' ,e=>errors.push(e.message));
- await page.goto(process.env.ZUMI_PREVIEW_URL||'http://127.0.0.1:8876/preview/');await page.waitForFunction(()=>window.pocket);
+ await page.goto(process.env.ZUMI_PREVIEW_URL||'http://127.0.0.1:8876/preview/');await page.waitForFunction(()=>window.pocket).catch(async e=>{console.error("Preview initialization:",errors,await page.locator("#status").textContent());throw e;});
  const state=()=>page.evaluate(()=>({page:pocket.api.pocket_page(),moves:pocket.api.pocket_moves(),won:pocket.api.pocket_won(),level:pocket.api.pocket_level(),cursor:pocket.api.pocket_cursor(),board:pocket.api.pocket_board()}));
  const tap=key=>page.keyboard.press(key);
  const home=async()=>{await page.keyboard.down('Enter');await page.waitForTimeout(550);await page.keyboard.up('Enter');assert.equal((await state()).page,0);};
  await page.screenshot({path:'build/browser-home.png',fullPage:true});
- await tap('Enter');assert.equal((await state()).page,3);await tap('Enter');
+ await tap('Enter');assert.equal((await state()).page,3);await home();
  await tap('ArrowDown');await tap('ArrowDown');await tap('Enter');assert.equal((await state()).page,4);
  await tap('Enter');assert.equal((await state()).page,0);
  await tap('ArrowDown');await tap('Enter');assert.equal((await state()).page,1);
@@ -90,6 +90,6 @@ fs.writeFileSync('build/zumi-difficulty.json',JSON.stringify(levels,null,2));
   await page.evaluate(()=>{for(let i=0;i<31;i++)pocket.api.pocket_tick(100);pocket.render();});
  }
  assert.equal(seen.size,8);
- fs.writeFileSync('build/browser-results.json',JSON.stringify({status:'PASS',browser:'Chrome',checks:['home','Talk and Garden placeholders','single game entry','solve level 1','next level','offline rotation','untimed thinking','long OK release','60 second screen off on all pages','eight offline wake cards','no adjacent repeat','three second return to preserved game or home','mobile overflow','physical controls','full English energy labels','real Web Audio PCM playback','sound cancellation on exit'],pageErrors:errors},null,2));
+ fs.writeFileSync('build/browser-results.json',JSON.stringify({status:'PASS',browser:'Chrome',checks:['home','Talk offline entry and Garden placeholder','single game entry','solve level 1','next level','offline rotation','untimed thinking','long OK release','60 second screen off on all pages','eight offline wake cards','no adjacent repeat','three second return to preserved game or home','mobile overflow','physical controls','full English energy labels','real Web Audio PCM playback','sound cancellation on exit'],pageErrors:errors},null,2));
  await browser.close();console.log('Browser Demo: PASS (desktop + mobile, eight offline wake cards, no page errors)');
 })().catch(e=>{console.error(e);process.exit(1)});

@@ -1,11 +1,13 @@
 {
-  "main/zumi/core.c": "f88719b5c34e862af46ed47277d21e7fa89079f72188cd6671e40f77d36bf90d",
-  "main/zumi/core.h": "1997061617a2feaf36203a79b5f31e0e2f66b345bbb7e73ffd25161d4d188baa",
-  "main/zumi/view.c": "e6f311c68ffdf5550ed81a17eebca7b56048adceb97e3682a91186c9dc570c30",
+  "main/zumi/core.c": "8ee06b5d5640f342e670722fc6eb290f32b24b66d951fed5e57e21035e8b084a",
+  "main/zumi/core.h": "df7c7f99a843fa2964bef0ec287c127212c6ce5cab6673d08cf178e77eee86fa",
+  "main/zumi/talk_model.c": "fc340237aa8abe103104dda5614d7ccc991a1b6d6317b2a1688c71448c4669b4",
+  "main/zumi/talk_model.h": "ab497602b68f2cb6096ef533e9a465b7c65cdf39b2139dac647574454d0cf9da",
+  "main/zumi/view.c": "cf4d5a3332582f63c75518f6330c35b037ad1521f39d52a88c017283187b7f30",
   "main/zumi/view.h": "2f8bd6ab401850ce116e37f35c7e1b5c9723be37585839193d306afeae8a259d",
   "main/zumi/sound.h": "df9fd06bff3b0fdcc8eba1d719f4ee1500e4b18699096edd0d3f27bffa195f53",
   "main/zumi/sound.c": "7b2dc67bd16818944c83efe3971776ae1fffc21243a9e6aa452833d897c75862",
   "main/zumi/sounds.c": "04bc309512999817667eca4eaeea47f4e2df349db269789af6b01b508639866a",
-  "preview/bridge.c": "a265e3c2a09712badea693c211007c771aa0124feebdf17d8c8bdbbb71eb678b",
-  "preview/pocket.wasm": "b8add12a3d1d405b8f75a359ac3803d731f0898db59bde99d37157b2562648f5"
+  "preview/bridge.c": "cf4a8f93a7667455073b47ec87460f1beae942e04e77b957713b14100ef79fde",
+  "preview/pocket.wasm": "fe44118098b892eab853c0c6a658a1397383ce45112f434fc99caca7c3c157e7"
 }

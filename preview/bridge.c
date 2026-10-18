@@ -33,3 +33,10 @@ int pocket_board(void) { int n=0; for(int i=0;i<Z_CELLS;i++) n=((int64_t)n*17+st
 int pocket_screen_off(void) { return state.screen_off; }
 int pocket_expression(void) { return state.expression; }
 int pocket_wake_card(void) { return state.wake_card; }
+
+static char incoming[T_REPLY_CAP];
+int pocket_talk_command(void){return z_talk_take_command(&state);}
+int pocket_talk_state(void){return state.talk.state;}
+unsigned pocket_talk_turn(void){return state.talk.turn;}
+void pocket_talk_event(int event,unsigned turn){z_talk_receive(&state,event,turn,incoming);}
+char *pocket_talk_buffer(void){return incoming;}

@@ -25,7 +25,7 @@ needed. Gameplay continues offline after the page's local resources load.
 
 - **Home:** three numbered Talk / Play / Garden entries with short descriptions,
   a clear selected row, and no character image. Original Zumi art stays in wake
-  cards and Talk/Garden placeholders.
+  cards and Talk/Garden.
 - **Energy Link:** the only game, adapted from the website connection puzzle.
   Six harder pocket-authored 4 x 4 boards (minimum 8 / 13 / 16 / 18 / 20 / 25 turns). UP/DOWN cycle through movable wires;
   OK rotates clockwise. Eco Pop sun/turbine/building icons mark the fixed source and homes;
@@ -39,18 +39,19 @@ needed. Gameplay continues offline after the page's local resources load.
   from the same 16 kHz PCM in the browser and firmware. Audio failure leaves the
   puzzle playable; physical speaker loudness/timbre await device testing.
 - **Power saving and wake cards:** all pages turn off the backlight after 60 seconds
-  without input. A press restores brightness and
+  without input, except while Talk is connecting, recording, processing or speaking. A press restores brightness and
   selects one of eight approved promotional cards with distinct original Zumi
   sticker expressions/actions, avoiding an immediate repeat. The 3-second card
   fades back into the same game, or home when woken from other pages. Each includes Zumi Pocket and zco.eco; wake keys are consumed.
   Screen-off stops application redraws; any key wakes to the card, then resumes the game or home.
   Game level, wires, moves, cursor and completion state survive screen-off.
   This is backlight-off standby, not deep sleep; battery savings need measurement.
-- **Talk / Garden:** reserved offline placeholders. Promotional wake cards replace
+- **Talk:** integrated six-state UI and local mock streaming. See [setup, tests and Zumi identity](docs/assets/zumi-talk-integration.md). An opt-in [official XiaoZhi desktop trial](docs/assets/zumi-talk-xiaozhi.md) is available; no paid provider is configured.
+- **Garden:** reserved offline placeholder. Promotional wake cards replace
   the earlier Tiny Actions checklist; no completion counters or Garden sync.
 - Motion detection and the one-hour standing reminder are deferred until hardware
   support is confirmed, as requested. No inactivity substitute is enabled.
-- Session state resets on reboot. No storage, recording, network or paid AI.
+- Session state resets on reboot. Talk uses explicit button capture on hardware (unverified) and synthetic input in the browser; no recording persistence or paid AI.
   This is a puzzle, not real power simulation or carbon accounting.
 
 The firmware and browser compile the **same C game logic and draw list**. The

@@ -1,5 +1,7 @@
 [简体中文](zumi-pocket.zh_CN.md)
 
+> Historical stage record; see the [local integration report](zumi-talk-integration.md) for current Talk behavior.
+
 # Zumi Pocket: Design and Acceptance
 
 The home screen uses three numbered Talk / Play / Garden rows with a short

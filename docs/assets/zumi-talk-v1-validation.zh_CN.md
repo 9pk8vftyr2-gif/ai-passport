@@ -1,5 +1,7 @@
 [English](zumi-talk-v1-validation.md)
 
+> 历史阶段记录；Talk 当前接入情况见 [本地接入报告](zumi-talk-integration.zh_CN.md)。
+
 # Talk V1.0 设计阶段测试报告
 
 2026-10-18。本次范围为[架构与预算](zumi-talk-v1.zh_CN.md)、独立 C 状态模型、WASM 浏览器 UI，以及现有 Zumi 固件回归。没有实现或宣称生产用 Talk 音频/网络适配器。

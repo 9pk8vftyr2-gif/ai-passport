@@ -1,5 +1,7 @@
 [简体中文](zumi-talk-v1-validation.zh_CN.md)
 
+> Historical stage record; see the [local integration report](zumi-talk-integration.md) for current Talk behavior.
+
 # Talk V1.0 review validation
 
 2026-10-18. Review-stage scope: [architecture and budget](zumi-talk-v1.md),

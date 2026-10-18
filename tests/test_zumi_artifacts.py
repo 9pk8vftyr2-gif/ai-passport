@@ -30,7 +30,7 @@ class ArtifactTests(unittest.TestCase):
 
     def test_browser_sources_match_compiled_module(self):
         hashes = json.loads((ROOT / 'preview/build-manifest.json').read_text())
-        self.assertEqual(set(hashes), {'main/zumi/core.c', 'main/zumi/core.h',
+        self.assertEqual(set(hashes), {'main/zumi/core.c', 'main/zumi/core.h', 'main/zumi/talk_model.c', 'main/zumi/talk_model.h',
             'main/zumi/view.c', 'main/zumi/view.h', 'main/zumi/sound.h', 'main/zumi/sound.c', 'main/zumi/sounds.c', 'preview/bridge.c', 'preview/pocket.wasm'})
         for name, sha in hashes.items():
             self.assertEqual(hashlib.sha256((ROOT / name).read_bytes()).hexdigest(), sha,

@@ -4,7 +4,7 @@ for(const [path,hash] of Object.entries(JSON.parse(fs.readFileSync('preview/talk
 const audit=JSON.parse(fs.readFileSync('docs/assets/talk-v1/audit.json'));
 assert.equal(audit.runtime_free_internal_heap_bytes,null);assert.equal(audit.runtime_largest_internal_block_bytes,null);
 for(const [path,hash] of Object.entries(audit.source_sha256))
- assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path)).digest('hex'),hash,`Audited runtime changed: ${path}`);
+ assert.equal(crypto.createHash('sha256').update(cp.execFileSync('git',['show',`${audit.source_revision}:${path}`])).digest('hex'),hash,`Historical audit mismatch: ${path}`);
 cp.execFileSync('cc',['-std=c11','-Wall','-Wextra','-Werror','-Imain/zumi','tests/talk_trace.c','main/zumi/talk_model.c','-o','build/talk_trace']);
 (async()=>{
  const {instance}=await WebAssembly.instantiate(fs.readFileSync('preview/talk/talk.wasm'),{wasi_snapshot_preview1:{}}),a=instance.exports;

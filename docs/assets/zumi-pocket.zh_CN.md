@@ -1,5 +1,7 @@
 [English](zumi-pocket.md)
 
+> 历史阶段记录；Talk 当前接入情况见 [本地接入报告](zumi-talk-integration.zh_CN.md)。
+
 # Zumi Pocket：设计与验收
 
 首页使用 Talk / Play / Garden 三个编号入口、简短说明和深绿选中行，不再显示角色。

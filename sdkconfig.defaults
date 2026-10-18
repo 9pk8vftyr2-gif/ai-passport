@@ -43,3 +43,12 @@ CONFIG_BT_NIMBLE_ROLE_OBSERVER=n
 CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1
 CONFIG_BT_NIMBLE_HOST_BASED_PRIVACY=n
 CONFIG_BT_NIMBLE_NVS_PERSIST=n
+
+# Talk view uses bounded transcript snapshots on the application stack.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=6144
+
+# Bound Wi-Fi buffering for the no-PSRAM, half-duplex local Talk stream.
+# Keep the default 6-frame AMPDU receive window within the static RX pool.
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=6
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=8
+CONFIG_ESP_WIFI_DYNAMIC_TX_BUFFER_NUM=8
