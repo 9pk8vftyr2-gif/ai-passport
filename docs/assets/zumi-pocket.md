@@ -26,6 +26,8 @@ and randomly selects a different one of the three existing expressions. The
 wake press and any presses during the greeting are consumed through RELEASE.
 The greeting occupies 3,000 ms: 240 ms fade-in, hold to 2,640 ms, 360 ms fade-out;
 home then fades in for 240 ms. Each expression view has a `zco.eco` corner label.
+Only the wake greeting displays “Zumi Pocket”, above the character; other
+screens omit this brand heading.
 The firmware fades individual objects, without a full-screen compositing buffer.
 Games remain lit while thinking. This is not deep sleep or verified low power.
 Battery reads use the BSP and show `--` on failure. Talk/Garden perform no I/O.

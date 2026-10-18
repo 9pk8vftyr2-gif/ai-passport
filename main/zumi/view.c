@@ -30,11 +30,12 @@ static void choice(z_view *v,int y,const char *label,bool selected) {
 void z_render(const z_state *s, int battery, z_view *v) {
     v->count=0;
     box(v,0,0,240,320,PAPER,0);
-    text(v,22,16,"ZUMI POCKET",INK,14);
     char tmp[64];
     if(battery<0) snprintf(tmp,sizeof(tmp),"--"); else snprintf(tmp,sizeof(tmp),"%d%%",battery);
     text(v,184,16,tmp,MUTED,14);
+    int content_start=v->count;
     if(s->page==Z_WAKE) {
+        text(v,59,49,"Zumi Pocket",INK,20);
         z_draw *hero=add(v,Z_SPRITE,61,83,117,138,0);
         if(hero) hero->size=s->expression;
         text(v,66,241,"Hello again.",INK,14);
@@ -97,5 +98,5 @@ void z_render(const z_state *s, int battery, z_view *v) {
         else if(s->wake_ms>2640) opacity=(int)((3000-s->wake_ms)*255/360);
     } else if(s->page==Z_HOME && s->home_fade_ms)
         opacity=(int)((240-s->home_fade_ms)*255/240);
-    for(int i=3;i<v->count;i++) v->ops[i].opacity=opacity;
+    for(int i=content_start;i<v->count;i++) v->ops[i].opacity=opacity;
 }

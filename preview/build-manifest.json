@@ -1,8 +1,8 @@
 {
   "main/zumi/core.c": "6d6d137e850d9a8d0246c1fe6b2794a9dad91eeea8d5bf7cab66297c04304b34",
   "main/zumi/core.h": "004b0758b0677885c3659b005730414a84d445302c7e9b65bec427dade4abf50",
-  "main/zumi/view.c": "7478d8e4b3ba52a85bd20bd86cab15695d31a8b0bba5076a467396b982926463",
+  "main/zumi/view.c": "2002db44e642ae3006a7530e2a175f4a666557be4d60dc70293271f46accae44",
   "main/zumi/view.h": "b6fc3213e6321ffd3809a692753ab8118a27b992d8ad92b3391e149bd002d779",
   "preview/bridge.c": "f78f807be877af215154272d81d01d33996b93e827e55bfad13042c082bb58c6",
-  "preview/pocket.wasm": "6b476ac5f74ca764edd6f9dcbda63bcc1828defef349361be83120ec28616e99"
+  "preview/pocket.wasm": "d8d894ca104c9e6d70ad6fbd4fd80c984ff1c03fda1810b093c64d45d446dc26"
 }
