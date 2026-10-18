@@ -2,39 +2,40 @@
 
 # Zumi Pocket Validation
 
-2026-10-18. Firmware source: `62ac2bd` on `feature/zumi-pocket`.
+2026-10-18. Firmware source: `b0925a7` on `feature/zumi-pocket`.
 Scope: phase-one software prototype before hardware arrival.
 
 | Field | Status | Evidence |
 | --- | --- | --- |
 | Build | PASS | Full official gate, ESP-IDF v5.5.3, ESP32-C3; merged image and matching ELF verified |
-| Host Tests | PASS | Repository static/baseline checks; six solvable levels; 100,000 transitions with independent connectivity oracle; AddressSanitizer/UndefinedBehaviorSanitizer; 5,000 native/WASM replay comparisons |
-| Browser Demo | PASS | Chrome desktop 1440 x 1000 and mobile viewport 390 x 844; 15 interaction checks; offline play; no page errors; screenshots visually inspected |
+| Host Tests | PASS | Repository static/baseline checks; six solvable levels; 100,000 transitions with independent connectivity oracle; sound events, PCM gain/bounds and victory delay; AddressSanitizer/UndefinedBehaviorSanitizer; 5,000 native/WASM replay comparisons |
+| Browser Demo | PASS | Chrome desktop 1440 x 1000 and mobile viewport 390 x 844; 18 interaction checks; offline play; no page errors; screenshots visually inspected |
 | Device Tests | NOT RUN | Hardware unavailable; no device flashing, erase or reset |
-| Unverified | OPEN | Real LCD/font appearance, fade smoothness, input latency, LVGL allocation peak, long-run fragmentation, battery/current/thermal measurements, Safari, physical-phone use and user visual acceptance |
+| Unverified | OPEN | Physical speaker loudness/timbre/distortion, audio-failure recovery and concurrent display/audio, real LCD/font appearance, fade smoothness, input latency, LVGL allocation peak, long-run fragmentation, battery/current/thermal measurements, Safari, physical-phone use and user visual acceptance |
 
 ## Firmware evidence
 
-Application: 680,416 bytes in an 8,323,072-byte factory partition. Merged image:
-745,952 bytes. Original BSP and partition table unchanged. No PSRAM dependency.
-Enabled Montserrat 10 for the website label. No stored-data format or writes added.
+Application: 764,176 bytes in an 8,323,072-byte factory partition. Merged image:
+829,712 bytes. Original BSP and partition table unchanged. No PSRAM dependency.
+Enabled Montserrat 10 for the website label. No stored-data format or writes added. Audio uses the original BSP with a
+  dedicated chunked worker; website-matched PCM occupies 20,800 Flash bytes.
 
 Merged SHA-256:
-`96f70ab1bd3843676c6869a467019e512c38ee1f22407ea0260a2f757f43667a`.
+`6c1c4a1fa991c53c94c1faedc781f69ae5533281d93e82120546c554fbee0b18`.
 Matching ELF SHA-256:
-`17f39bb187d12bda7a558a2edfae0a8091aaf31ed3854cdcabb0b84795c1b25f`.
+`334efec14a38d39e2383cd877dd5518f2d5afa5fdd8fbe4285dc3022df3c04b1`.
 
 The local image/ELF/MAP/manifest bundle is in
-`build/firmware/96f70ab1bd3843676c6869a467019e512c38ee1f22407ea0260a2f757f43667a/`.
-Its app descriptor confirms source version `62ac2bd` and IDF `v5.5.3`.
+`build/firmware/6c1c4a1fa991c53c94c1faedc781f69ae5533281d93e82120546c554fbee0b18/`.
+Its app descriptor confirms source version `b0925a7` and IDF `v5.5.3`.
 Build outputs are ignored, not published firmware releases. The final report-only
 commit does not change the tested firmware, browser module or assets.
 
 ## Reproduce and test scope
 
 - Activate ESP-IDF 5.5.3 and run `./tools/validate.sh`. Local evidence:
-  `build/full-gate-title.log`. All original baseline checks remain enabled.
-- `cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -Imain/zumi tests/test_zumi.c main/zumi/core.c main/zumi/view.c -o build/test_zumi`
+  `build/full-gate-sound.log`. All original baseline checks remain enabled.
+- `cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -Imain/zumi tests/test_zumi.c main/zumi/core.c main/zumi/view.c main/zumi/sound.c main/zumi/sounds.c -o build/test_zumi`
   then `build/test_zumi`: solve all six levels via actions; verify fixed tiles,
   untimed play, next-level wrapping, all wake keys, consumed release, exactly
   3,000 ms greeting, home fade, URL and draw bounds. Randomized states are checked
@@ -44,10 +45,11 @@ commit does not change the tested firmware, browser module or assets.
 - With the preview server running, `node tests/browser_zumi.cjs`: home, Talk,
   Garden, game entry, first-level completion, next level, offline rotation,
   untimed thinking, long-OK release, idle dim, expression change, corner URL,
-  three-second return, mobile overflow and physical-button controls.
+  three-second return, mobile overflow, physical-button controls, full English
+  labels, real Web Audio PCM playback and sound cancellation on exit.
 - Browser evidence: `build/browser-results.json`, `browser-home.png`,
   `browser-link.png`, `browser-link-complete.png`, `browser-wake.png` and
-  `browser-mobile.png` under `build/`. A mobile viewport is not a phone test.
+  `browser-mobile.png`, `browser-wind.png` under `build/`. A mobile viewport is not a phone test.
 - Artwork compilation preserves source hashes; no image generation or paid
   service was called. Browser rendering cannot validate physical LVGL memory.
 
