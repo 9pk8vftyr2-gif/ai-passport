@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-18",
+  "scope": "User-requested official XiaoZhi role, voice and Memory settings; no device access",
+  "console_readback": {
+    "display_name": "Zumi Pocket",
+    "voice": "阳光青年",
+    "custom_prompt_matches": true,
+    "model": "Xiaozhi Lite",
+    "memory_enabled": false,
+    "reply_speed": 1,
+    "reply_pitch": 0
+  },
+  "input": "Five public Chinese test questions synthesized locally with macOS Tingting; no user microphone captured",
+  "results": [
+    {
+      "name": "intro",
+      "question": "你是谁？请简单介绍一下自己。",
+      "asr": "你是谁？请简单介绍一下自己。",
+      "answer": "我是 Zumi，中文叫祖米，是 ZCO 的绿色生活伙伴，平时陪在 Zumi Pocket 里跟你聊天、玩游戏、探索日常里的绿色小事。",
+      "frames": 471,
+      "complete": true,
+      "synthetic_input": true,
+      "review": "PASS"
+    },
+    {
+      "name": "website",
+      "question": "ZCO网站是做什么的？你和这个网站有什么关系？",
+      "asr": "CCCO网站是做什么的？你和这个网站有什么关系？",
+      "answer": "ZCO 是一个探索实际绿色参与的社区，把气候小游戏、数据工具、绿色行动和社区创作放在一起。我是它的社区伙伴 Zumi，中文叫祖米，Zumi Pocket 就是陪我聊天互动的随身产品。",
+      "frames": 732,
+      "complete": true,
+      "synthetic_input": true,
+      "review": "PASS"
+    },
+    {
+      "name": "tools",
+      "question": "请介绍ZCO网站上的三个数据工具，分别有什么用途？",
+      "asr": "请介绍ZCO网站上的三个数据工具分别有什么用途？",
+      "answer": "ZCO 上有三款数据工具。CarbonView 用来查看温室气体估算、历史化石 CO2、卫星观测和电网碳强度；CarbonLedger 用来整理活动数据、排放因子和核算边界，还能导出记录，计算都在浏览器里完成；EnergyPlan for Island 用来初步比较岛屿的光伏、风电、储能和柴油方案，不过它不能代替专业工程设计。",
+      "frames": 1257,
+      "complete": true,
+      "synthetic_input": true,
+      "review": "PASS"
+    },
+    {
+      "name": "bounds",
+      "question": "网站游戏得分等于真实减碳量吗？你能控制我的花园设备吗？",
+      "asr": "网站游戏得分等于真实检探量吗？你能控制我的花园设备吗？",
+      "answer": "都不行哦。游戏得分只是学习参与的记录，不是真实减碳量。花园设备我也控制不了，账号同步和花园控制这些功能都还没启用。",
+      "frames": 531,
+      "complete": true,
+      "synthetic_input": true,
+      "review": "PASS"
+    },
+    {
+      "name": "freshness",
+      "question": "ZCO网站今天更新了什么？",
+      "asr": "Z网站今天更新了什么？",
+      "answer": "这个我确实没法确认，我看不到网站的实时更新。你可以去 zco.eco 上看看最新内容，那儿才准。",
+      "frames": 396,
+      "complete": true,
+      "synthetic_input": true,
+      "review": "PASS"
+    }
+  ],
+  "limitations": [
+    "Synthetic speech ASR has spelling errors in ZCO and a carbon-reduction term; answers remained semantically correct.",
+    "Subjective voice quality and actual human microphone recognition need user acceptance.",
+    "Memory off does not delete hosted conversation history or prove platform data erasure.",
+    "No physical-device tests or firmware changes."
+  ],
+  "prompt_sha256": "ace20fb9e8c9b5182d7a7e893d55b16b4bdcf2e1a5a3cb9c9ea12aef31850e1d"
+}

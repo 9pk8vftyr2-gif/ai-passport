@@ -21,8 +21,9 @@ afterwards. In manual mode, the stop message requests the response.
 Use [the role setup page](../../preview/talk/setup.html) to copy the prepared Zumi
 instructions into the bound device's official agent settings. Choose an available
 free male voice, disable long-term memory, save, exit Talk and re-enter. These
-console settings **have not been applied or independently verified** by this
-implementation. No role or voice is injected through an undocumented protocol.
+console settings **were saved and read back on 2026-10-18**: custom Zumi role,
+Sunshine Youth male voice, standard reply speed/pitch, and Memory off. See the
+[role acceptance report](zumi-talk-persona.md). No role or voice is injected through an undocumented protocol.
 Knowing the website URL does not grant live browsing or account access.
 
 The usual <http://127.0.0.1:8876/preview/> remains the local synthetic mock. The
@@ -102,7 +103,7 @@ official-platform retention; check those controls separately in the account.
 | Browser Demo | PASS: official secure hello, public synthetic greeting recognized, reply text received, 123/123 audio frames played, max queue 12, zero observed underruns; no actual microphone used by automation |
 | Capture lifecycle | PASS with fake browser media: no request before OK, permission denial, cancellation on blur, late permission grant cleanup |
 | Device Tests | NOT RUN; no flash, erase, reset or serial operation |
-| Unverified | Actual human microphone/acoustics, approved male voice and persona, hosted memory/retention, sustained network recovery, C3 Opus/TLS/heap, Chinese device fonts |
+| Unverified | Actual human microphone/acoustics, subjective voice quality, hosted retention, sustained network recovery, C3 Opus/TLS/heap, Chinese device fonts |
 
 The official test used the public synthetic sentence "Hello. Please say hello
 in one short sentence." Only non-sensitive counts are retained in

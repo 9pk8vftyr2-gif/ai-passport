@@ -8,6 +8,7 @@
 <p><a href="https://xiaozhi.me/" target="_blank" rel="noopener">打开官方小智</a> · <a href="../?talk=xiaozhi">开始 Zumi 对话</a></p>
 <script type="module">
 const response=await fetch('../../config/zumi-persona.json');if(!response.ok)throw Error('Role unavailable');const role=await response.json();
-document.querySelector('#persona').value=role.system_prompt_zh+'\n\n当前语音后端：官方小智。角色名称始终为 Zumi（祖米）。本次没有启用网站账号联动、花园控制或长期记忆。\n\n已核对的网站背景：ZCO 将气候小游戏、数据工具、绿色参与和社区创作结合在一起。Zumi 是其绿色生活伙伴，Zumi Pocket 是随身互动产品，包含 Energy Link 和唤醒宣传卡。不了解未提供的最新网站内容。';
+document.querySelector('#persona').value=role.system_prompt_zh;
+if(role.hosted?.settings_readback_verified){document.querySelector('#status').textContent=`已于 ${role.hosted.verified_on} 在官方控制台保存：${role.voice.production_voice}，长期记忆关闭。`;}
 document.querySelector('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(document.querySelector('#persona').value);document.querySelector('#status').textContent='已复制';}catch{document.querySelector('#persona').select();document.querySelector('#status').textContent='请选择并复制文字';}};
 </script></html>

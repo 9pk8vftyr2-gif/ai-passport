@@ -76,7 +76,8 @@ recordings, and expires an idle connection after 60 seconds.
 **Zumi is the user-facing character; XiaoZhi is the selected desktop voice
 backend.** The firmware and default preview still use the local mock. The identity configuration
 at [config/zumi-persona.json](../../config/zumi-persona.json) is provider-neutral,
-contains no credentials, and has not been installed in a hosted agent.
+contains no credentials. Its Chinese role and reviewed website knowledge have now
+been applied to the official desktop agent; see the [role acceptance report](zumi-talk-persona.md).
 
 - Zumi is the ZCO green living companion. Talk omits the website badge and does not emphasize gender. He is warm, curious and concise,
   explains green ideas through everyday examples, and can answer ordinary questions.
@@ -85,10 +86,12 @@ contains no credentials, and has not been installed in a hosted agent.
   no website account synchronization or Garden control in this version.
 - Reviewed knowledge is a dated snapshot, separate from identity. A URL in a
   prompt does not make the model know or browse the website. Current facts were
-  checked read-only against local website source; live website retrieval failed.
+  initially checked against local website source, then verified on the live Zumi
+  and About pages for the hosted-role acceptance.
   Unknown or newer website claims must remain unknown until refreshed.
 - Explain the actual underlying service honestly when asked. No default long-term
-  conversation memory. Hosted retention/memory settings need separate verification.
+  conversation memory. The official Memory switch is now verified off; hosted
+  retention remains separately unverified.
 - Accept with questions about identity, ZCO, the website relationship,
   actual service, account access, Garden control and whether scores measure carbon.
   The fixture validates presentation, not an LLM's adherence to this role.
