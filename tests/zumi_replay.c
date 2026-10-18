@@ -3,7 +3,7 @@
 void pocket_init(unsigned);
 void pocket_button(int,int);
 void pocket_tick(unsigned);
-int pocket_page(void),pocket_moves(void),pocket_won(void),pocket_cursor(void),pocket_board(void),pocket_wake_card(void);
+int pocket_page(void),pocket_moves(void),pocket_won(void),pocket_cursor(void),pocket_board(void),pocket_wake_card(void),pocket_screen_off(void);
 int main(void) {
     uint32_t random=123;
     pocket_init(42);
@@ -17,7 +17,8 @@ int main(void) {
         random=random*1664525u+1013904223u;
         int key=(int)(random%3);
         pocket_button(key,0);pocket_button(key,4);pocket_tick(20);
-        if(i%37==0) { for(int t=0;t<600;t++)pocket_tick(100);pocket_button(0,0);pocket_button(0,4); }
-        printf("%d,%d,%d,%d,%d,%d\n",pocket_page(),pocket_moves(),pocket_won(),pocket_cursor(),pocket_board(),pocket_wake_card());
+        int off_before_wake=0;
+        if(i%37==0) { for(int t=0;t<600;t++)pocket_tick(100);off_before_wake=pocket_screen_off();pocket_button(0,0);pocket_button(0,4); }
+        printf("%d,%d,%d,%d,%d,%d,%d,%d\n",pocket_page(),pocket_moves(),pocket_won(),pocket_cursor(),pocket_board(),pocket_wake_card(),off_before_wake,pocket_screen_off());
     }
 }

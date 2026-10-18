@@ -34,11 +34,13 @@ needed. Gameplay continues offline after the page's local resources load.
 - **Sound:** website Energy Link rotation, connection and victory tones, played
   from the same 16 kHz PCM in the browser and firmware. Audio failure leaves the
   puzzle playable; physical speaker loudness/timbre await device testing.
-- **Wake cards:** menus dim after 60 seconds. A press restores brightness and
+- **Power saving and wake cards:** all pages turn off the backlight after 60 seconds
+  without input. A press restores brightness and
   selects one of eight approved promotional cards with distinct original Zumi
   sticker expressions/actions, avoiding an immediate repeat. The 3-second card
   fades into home. Each includes Zumi Pocket and zco.eco; wake keys are consumed.
-  Games stay lit. This is dimming, not deep sleep or measured low-power standby.
+  Screen-off stops application redraws; any key wakes to the card, then home.
+  This is backlight-off standby, not deep sleep; battery savings need measurement.
 - **Talk / Garden:** reserved offline placeholders. Promotional wake cards replace
   the earlier Tiny Actions checklist; no completion counters or Garden sync.
 - Motion detection and the one-hour standing reminder are deferred until hardware

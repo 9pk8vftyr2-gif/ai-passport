@@ -8,8 +8,9 @@ const native=cp.execFileSync('build/zumi_replay',{encoding:'utf8'}).trim().split
   if(i%250===0){a.pocket_init(42+i);a.pocket_button(1,0);if(i%750===500)a.pocket_button(1,0);a.pocket_button(2,0);a.pocket_button(2,4);if(i%500)a.pocket_button(1,0);a.pocket_button(2,0);a.pocket_button(2,4);}
   random=(Math.imul(random,1664525)+1013904223)>>>0;
   const key=random%3;a.pocket_button(key,0);a.pocket_button(key,4);a.pocket_tick(20);
-  if(i%37===0){for(let t=0;t<600;t++)a.pocket_tick(100);a.pocket_button(0,0);a.pocket_button(0,4);}
-  assert.equal([a.pocket_page(),a.pocket_moves(),a.pocket_won(),a.pocket_cursor(),a.pocket_board(),a.pocket_wake_card()].join(','),native[i],`transition ${i}`);
+  let offBeforeWake=0;
+  if(i%37===0){for(let t=0;t<600;t++)a.pocket_tick(100);offBeforeWake=a.pocket_screen_off();a.pocket_button(0,0);a.pocket_button(0,4);}
+  assert.equal([a.pocket_page(),a.pocket_moves(),a.pocket_won(),a.pocket_cursor(),a.pocket_board(),a.pocket_wake_card(),offBeforeWake,a.pocket_screen_off()].join(','),native[i],`transition ${i}`);
  }
  console.log('PASS: native C / browser WASM parity, 5000 transitions');
 })().catch(e=>{console.error(e);process.exit(1)});

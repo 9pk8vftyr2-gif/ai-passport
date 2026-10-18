@@ -30,7 +30,7 @@ int main(void) {
     z_action(&s,Z_DOWN);z_action(&s,Z_OK);assert(s.page==Z_PLAY);z_action(&s,Z_UP);assert(s.level==5);z_action(&s,Z_DOWN);assert(s.level==0);
     for(int level=0;level<Z_LEVELS;level++) {
         z_link_start(&s,level);assert(!s.won);uint8_t fixed[9];memcpy(fixed,s.tiles,9);
-        advance(&s,70000);assert(!s.dimmed&&s.moves==0);
+        advance(&s,50000);assert(!s.screen_off&&s.moves==0);
         for(int visit=0;visit<9&&!s.won;visit++) {
             int cursor=s.cursor;assert(!(s.fixed&(1u<<cursor))&&s.tiles[cursor]);
             for(int turns=0;turns<4&&s.tiles[cursor]!=s.solution[cursor]&&!s.won;turns++) z_action(&s,Z_OK);
@@ -43,8 +43,8 @@ int main(void) {
     }
     puts("PASS six solvable levels, fixed tiles, untimed play, wrap selection, next level");
     for(int key=0;key<3;key++) {
-        z_init(&s,42);in=(z_input){0};advance(&s,60000);assert(s.dimmed);
-        int previous=s.expression;z_button(&s,&in,key,0);assert(s.page==Z_WAKE&&!s.dimmed&&s.expression!=previous);
+        z_init(&s,42);in=(z_input){0};advance(&s,60000);assert(s.screen_off);
+        int previous=s.expression;z_button(&s,&in,key,0);assert(s.page==Z_WAKE&&!s.screen_off&&s.expression!=previous);
         advance(&s,2999);assert(s.page==Z_WAKE);bounds(&s);
         advance(&s,1);assert(s.page==Z_HOME&&s.home_fade_ms==240);
         z_button(&s,&in,key,3);z_button(&s,&in,key,4);assert(s.page==Z_HOME&&s.selection==0);
@@ -52,6 +52,28 @@ int main(void) {
         z_view v;z_render(&s,-1,&v);bool url=false;for(int i=0;i<v.count;i++) if(!strcmp(v.ops[i].text,"zco.eco")) url=true;assert(url);
     }
     puts("PASS all wake keys consumed, different expression, exact 3000 ms, home fade, URL");
+    for(int page=Z_HOME;page<=Z_GARDEN;page++) {
+        z_init(&s,42);in=(z_input){0};s.page=page;
+        if(page==Z_LINK) z_link_start(&s,1);
+        advance(&s,59999);assert(!s.screen_off);
+        z_button(&s,&in,Z_DOWN,0);z_button(&s,&in,Z_DOWN,4);
+        advance(&s,59999);assert(!s.screen_off);
+        advance(&s,1);assert(s.screen_off&&s.idle_ms==Z_IDLE_OFF_MS);
+        int moves=s.moves;uint8_t tiles[9];memcpy(tiles,s.tiles,9);
+        advance(&s,120000);assert(s.screen_off&&s.idle_ms==Z_IDLE_OFF_MS);
+        z_action(&s,Z_OK);assert(s.screen_off&&s.page==page);
+        z_button(&s,&in,Z_OK,3);z_button(&s,&in,Z_OK,4);
+        assert(s.screen_off&&s.page==page&&s.moves==moves&&!memcmp(tiles,s.tiles,9));
+        z_button(&s,&in,Z_OK,0);z_button(&s,&in,Z_OK,4);
+        assert(!s.screen_off&&s.page==Z_WAKE);
+        advance(&s,3000);assert(s.page==Z_HOME&&s.idle_ms==0);
+        advance(&s,59999);assert(!s.screen_off);advance(&s,1);assert(s.screen_off);
+    }
+    /* A release after holding OK across timeout must not enter a menu. */
+    z_init(&s,42);in=(z_input){0};z_button(&s,&in,Z_OK,0);
+    advance(&s,60000);z_button(&s,&in,Z_OK,4);
+    assert(s.screen_off&&s.page==Z_HOME&&!in.ok_down);
+    puts("PASS exact idle timeout on all pages, activity reset, black-screen input guard and repeat wake");
     z_link_start(&s,0);z_state before=s;
     z_action(&s,Z_DOWN);assert(z_sound_event(&before,&s)==Z_SOUND_NONE);
     before=s;z_action(&s,Z_OK);assert(z_sound_event(&before,&s)==Z_SOUND_WIN);

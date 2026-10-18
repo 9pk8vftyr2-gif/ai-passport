@@ -31,7 +31,7 @@ void z_link_evaluate(z_state *s) {
 static bool movable(const z_state *s,int i) { return s->tiles[i] && !(s->fixed&(1u<<i)); }
 void z_link_start(z_state *s,int level) {
     s->level=level>=0&&level<Z_LEVELS?level:0;
-    s->page=Z_LINK; s->moves=0; s->cursor=0; s->idle_ms=0; s->dimmed=0;
+    s->page=Z_LINK; s->moves=0; s->cursor=0; s->idle_ms=0; s->screen_off=0;
     s->homes=levels[s->level].homes; s->fixed=levels[s->level].fixed;
     s->source=levels[s->level].source;
     s->wind=s->level==2 || s->level==4;
@@ -40,8 +40,8 @@ void z_link_start(z_state *s,int level) {
     z_link_evaluate(s);
 }
 void z_action(z_state *s,int action) {
-    if(action<Z_UP||action>Z_BACK||s->page==Z_WAKE) return;
-    s->idle_ms=0; s->dimmed=0;
+    if(action<Z_UP||action>Z_BACK||s->page==Z_WAKE||s->screen_off) return;
+    s->idle_ms=0; s->screen_off=0;
     if(action==Z_BACK) { s->page=Z_HOME; s->selection=0; return; }
     if(s->page==Z_HOME) {
         if(action==Z_UP&&s->selection>0) s->selection--;
@@ -81,9 +81,8 @@ void z_tick(z_state *s,uint32_t ms) {
         return;
     }
     s->home_fade_ms=s->home_fade_ms>ms?s->home_fade_ms-ms:0;
-    if(s->page==Z_LINK) return; /* Untimed puzzles stay lit while thinking. */
-    if(s->idle_ms<60000) s->idle_ms+=ms;
-    if(s->idle_ms>=60000) { s->idle_ms=60000; s->dimmed=1; }
+    if(s->idle_ms<Z_IDLE_OFF_MS) s->idle_ms+=ms;
+    if(s->idle_ms>=Z_IDLE_OFF_MS) { s->idle_ms=Z_IDLE_OFF_MS; s->screen_off=1; }
 }
 void z_button(z_state *s, z_input *input, int button, int event) {
     if (button < 0 || button > 2) return;
@@ -91,15 +90,17 @@ void z_button(z_state *s, z_input *input, int button, int event) {
         if (event == 4 && button == input->wake_button) input->wake_held = false;
         return;
     }
-    if (s->dimmed && event == 0) {
+    if (s->screen_off && event == 0) {
         s->expression = (s->expression + 1 + (int)(random_next(s) % 2)) % 3;
         s->wake_card = s->wake_card<0 ? (int)(random_next(s)%Z_WAKE_CARDS) :
             (s->wake_card+1+(int)(random_next(s)%(Z_WAKE_CARDS-1)))%Z_WAKE_CARDS;
-        s->dimmed = 0; s->idle_ms = 0; s->wake_ms = 0;
+        s->screen_off = 0; s->idle_ms = 0; s->wake_ms = 0;
         s->page = Z_WAKE;
         *input = (z_input){.wake_held = true, .wake_button = button};
         return;
     }
+    /* A release/long event from a key held across timeout must not wake or act. */
+    if (s->screen_off) { *input = (z_input){0}; return; }
     /* All keys during the greeting are consumed, including a held OK whose
        release happens after the automatic return home. */
     if (s->page == Z_WAKE) {

@@ -29,6 +29,6 @@ int pocket_cursor(void) { return state.cursor; }
 int pocket_level(void) { return state.level; }
 int pocket_won(void) { return state.won; }
 int pocket_board(void) { int n=0; for(int i=0;i<9;i++) n=((int64_t)n*17+state.tiles[i])%1000000007; return n; }
-int pocket_dimmed(void) { return state.dimmed; }
+int pocket_screen_off(void) { return state.screen_off; }
 int pocket_expression(void) { return state.expression; }
 int pocket_wake_card(void) { return state.wake_card; }

@@ -21,7 +21,9 @@ and persistence are not imported; synthesized sound parameters are reused. Rules
 website source revision `a0504f97fb74a94ea864361f539e5832a16b268f`,
 `game/energy-link/engine.mjs` and `levels.mjs`. Pocket levels and C code are new.
 
-Menus dim after 60 seconds (70% to 20% brightness). A PRESS restores brightness
+All pages, including Energy Link, switch the backlight from 70% to 0% after
+60 seconds without input. Application redraws stop while the screen is off.
+A PRESS restores 70% brightness
 and randomly selects one of eight approved promotional cards, avoiding an immediate repeat. The
 wake press and any presses during the greeting are consumed through RELEASE.
 The greeting occupies 3,000 ms: 240 ms fade-in, hold to 2,640 ms, 360 ms fade-out;
@@ -29,7 +31,11 @@ home then fades in for 240 ms. Each expression view has a `zco.eco` corner label
 Only the wake greeting displays “Zumi Pocket”, above the character; other
 screens omit this brand heading.
 The firmware fades individual objects, without a full-screen compositing buffer.
-Games remain lit while thinking. This is not deep sleep or verified low power.
+Any input restarts the inactivity timer. The three-second card does not count
+toward the next home timeout. Late release/long events cannot wake the display.
+The application prepares the wake frame before restoring the backlight. CPU,
+button polling and initialized audio resources remain active: this is reversible
+backlight-off standby, not deep sleep or a measured battery-life claim.
 Battery reads use the BSP and show `--` on failure. Talk/Garden services perform no I/O.
 
 ## Offline promotional wake cards
@@ -40,7 +46,7 @@ and thanks. Background and copy follow the approved V3 design. Zumi Pocket and
 zco.eco are baked into each image; the battery overlay stays visible during fades.
 The earlier Tiny Actions checklist is removed. Garden is a reserved service
 placeholder with OK returning home; Talk is also unavailable. No completion
-tracking or storage writes. Startup still enters home; cards appear on dim-screen
+tracking or storage writes. Startup still enters home; cards appear on screen-off
 key wake only. Random selection does not repeat the previous card; it does not
 promise a shuffle bag or equal frequency over a short session.
 
@@ -146,7 +152,9 @@ flashing requires a new explicit authorization and a chosen target and image.
 4. Complete all six Energy Link boards, including branching and fixed clues.
    Verify only reciprocal connectors conduct, every home is required, completed
    boards remain visible, next/replay works and long OK exits.
-5. Wait 60 seconds on each menu, wake with each key, confirm a different
+5. Wait 60 seconds on every page, including a puzzle, and confirm the backlight
+   is fully off. Input before the deadline must restart the timer. Wake with
+   each key, confirm a different
    card, Zumi Pocket, `zco.eco`, three-second greeting and smooth transition home.
    Hold the wake key beyond the greeting and verify no accidental action.
 6. Wake repeatedly offline, inspect all eight distinct cards and no adjacent
@@ -156,7 +164,7 @@ flashing requires a new explicit authorization and a chosen target and image.
    block, LVGL pool peak, watchdog behavior, input latency and frame rate.
 8. Audition rotation, connection and victory sounds against the website. Check
    speaker loudness/distortion, cancellation on exit, rapid presses, unavailable
-   codec and simultaneous drawing/audio. Check battery gauge failure, real battery readings, idle/game current and
+   codec and simultaneous drawing/audio. Check battery gauge failure, real battery readings, lit/screen-off/game current and
    temperature. Battery life and fade smoothness remain unverified on hardware.
 9. Power-cycle only after authorization; verify session progress resets and the
    application never writes or erases unrelated storage.

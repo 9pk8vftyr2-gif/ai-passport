@@ -31,9 +31,9 @@ const color=n=>'#'+n.toString(16).padStart(6,'0');
 const decoder=new TextDecoder();
 function render(){
  const sound=api.pocket_take_sound();
- if(api.pocket_page()!==2) {if(soundNode)stopSound();}
+ if(api.pocket_screen_off() || api.pocket_page()!==2) {if(soundNode)stopSound();}
  else if(sound)playSound(sound);
- canvas.style.filter=api.pocket_dimmed()?'brightness(0.29)':'none';
+ if(api.pocket_screen_off()) {ctx.fillStyle='#000';ctx.fillRect(0,0,240,320);return;}
  const n=api.pocket_render(),base=api.pocket_ops(),stride=api.pocket_stride();
  const data=new DataView(api.memory.buffer);
  ctx.save();ctx.beginPath();ctx.roundRect(0,0,240,320,30);ctx.clip();

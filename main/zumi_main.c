@@ -123,10 +123,20 @@ void app_main(void) {
             int sound=z_sound_event(&before,&state);
             if(sound || (before.page==Z_LINK && state.page!=Z_LINK)) z_audio_play(sound);
         }
-        int desired=state.dimmed?20:70;
-        if(desired!=brightness) { bsp_display_backlight((uint8_t)desired); brightness=desired; }
+        if(state.screen_off && brightness) {
+            bsp_display_backlight(0); brightness=0;
+            z_audio_play(Z_SOUND_NONE);
+        }
         if(now-battery_time>=30000) { battery=bsp_battery_soc(); battery_time=now; }
-        if(bsp_lvgl_lock(50)) { render(); bsp_lvgl_unlock(); }
+        if(!state.screen_off && bsp_lvgl_lock(50)) {
+            render();
+            if(!brightness) {
+                /* Prepare the wake card while dark, then restore the backlight. */
+                lv_refr_now(NULL);
+                bsp_display_backlight(70); brightness=70;
+            }
+            bsp_lvgl_unlock();
+        }
         vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
