@@ -26,10 +26,13 @@ needed. Gameplay continues offline after the page's local resources load.
 - **Home:** Talk / Play / Garden. Zumi keeps his original appearance.
 - **Energy Link:** the only game, adapted from the website connection puzzle.
   Six pocket-authored 3 x 3 boards. UP/DOWN cycle through movable wires;
-  OK rotates clockwise. S is the fixed source, H is a fixed home. Matching
+  OK rotates clockwise. `Solar power` / `Wind power` name the fixed source; `House` names each home. Matching
   connectors carry power; light every home to win. No countdown or move limit.
   The completed board stays visible. OK opens the next level; hold OK goes home.
   On the start screen, UP/DOWN select any of six levels.
+- **Sound:** website Energy Link rotation, connection and victory tones, played
+  from the same 16 kHz PCM in the browser and firmware. Audio failure leaves the
+  puzzle playable; physical speaker loudness/timbre await device testing.
 - **Wake greeting:** menus dim after 60 seconds. A key press restores brightness,
   chooses a different existing expression, and consumes the wake press. A
   3-second greeting fades back to home, with `zco.eco` in the corner. Games stay lit.

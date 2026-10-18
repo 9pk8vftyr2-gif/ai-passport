@@ -78,8 +78,11 @@ void z_render(const z_state *s, int battery, z_view *v) {
             if(m&4) box(v,x+30,y+22,4,26,c,0);
             if(m&8) box(v,x,y+22,34,4,c,0);
             if(i==s->source || (s->homes&(1u<<i))) {
-                box(v,x+20,y+12,24,24,lit?INK:0xB8C1AE,6);
-                text(v,x+26,y+17,i==s->source?"S":"H",PAPER,14);
+                box(v,x+5,y+7,54,34,lit?INK:0x65766B,6);
+                if(i==s->source) {
+                    text(v,x+(s->wind?14:12),y+9,s->wind?"Wind":"Solar",PAPER,14);
+                    text(v,x+17,y+26,"power",PAPER,10);
+                } else text(v,x+11,y+17,"House",PAPER,14);
             } else if(s->fixed&(1u<<i)) box(v,x+6,y+6,4,4,INK,0);
         }
         if(s->won) {

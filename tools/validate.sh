@@ -25,7 +25,7 @@ run_static_checks() {
 
     test_dir="$(mktemp -d /tmp/ai-passport-host-tests.XXXXXX)"
     "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain/zumi \
-        tests/test_zumi.c main/zumi/core.c main/zumi/view.c \
+        tests/test_zumi.c main/zumi/core.c main/zumi/view.c main/zumi/sound.c main/zumi/sounds.c \
         -o "${test_dir}/test_zumi"
     "${test_dir}/test_zumi"
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_zumi_artifacts.py

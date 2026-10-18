@@ -17,7 +17,7 @@ are allowed. Fixed source/home tiles and marked fixed clues cannot rotate.
 There is no time or move limit. Completion keeps the board visible; OK advances
 to the next level's start screen, wrapping after six. Any level can be selected.
 The website's 5 x 5 boards, generated Hexapipes levels, artwork, undo/history,
-sound and persistence are not imported. Rules were inspected read-only at
+and persistence are not imported; synthesized sound parameters are reused. Rules were inspected read-only at
 website source revision `a0504f97fb74a94ea864361f539e5832a16b268f`,
 `game/energy-link/engine.mjs` and `levels.mjs`. Pocket levels and C code are new.
 
@@ -32,9 +32,37 @@ The firmware fades individual objects, without a full-screen compositing buffer.
 Games remain lit while thinking. This is not deep sleep or verified low power.
 Battery reads use the BSP and show `--` on failure. Talk/Garden perform no I/O.
 
+## Readable labels and shared sound
+
+Source cells show `Solar power` or `Wind power` on two lines (14/10 px);
+home cells show `House` (14 px). No S/H abbreviations. Wind appears in levels
+3 and 5, solar in the other levels. Source kind does not alter puzzle rules.
+
+Sound parameters come from the same website revision's `game.mjs`: sine waves,
+12 ms exponential attack from 0.0001 to 0.045 gain, decay to 0.0001, 20 ms tail.
+Rotation: 330 Hz / 70 ms. Additional home powered: 659.25 Hz / 70 ms. Victory:
+a connection tone immediately, then after 620 ms the 523.25 / 659.25 / 783.99 Hz
+chord with durations 180 / 180 / 250 ms and offsets 0 / 100 / 200 ms.
+`assets/music/zumi-link-tones.json` records these parameters;
+`python3 tools/build_zumi_sounds.py` generates the PCM without external media.
+
+Three const mono 16-bit / 16 kHz clips occupy 20,800 Flash bytes. The shared
+C event classifier distinguishes rotation, added homes and first victory.
+Browser AudioContext unlocks on a user gesture and plays the same PCM as the
+board. Hidden/blurred pages stop audio. A new sound replaces an older one to
+bound rapid-input backlog; leaving the game cancels pending victory audio.
+Firmware uses one lifetime worker with no UI pointers, a one-entry overwrite
+queue, 4,096-byte stack and a 512-byte PCM chunk on that stack. Only the worker
+calls BSP audio; initialization is lazy, writes block outside button/UI tasks,
+and failures leave gameplay available. Cancellation is checked each chunk;
+already-buffered BSP DMA can finish (up to roughly 90 ms). Hardware volume is
+60% as an initial setting, not a claim of matching physical loudness.
+Audio hardware resources remain initialized after first use; power consumption
+and display/audio contention require device measurement. No microphone reads.
+
 ## Architecture and budget
 
-- Allocation-free deterministic C model: 76 bytes, no timer-driven game state.
+- Allocation-free deterministic C model: 80 bytes, no timer-driven game state.
   Updates are capped at 100 ms after suspension. Prototype randomness uses a
   repeatable xorshift seed; it is not a claim of unpredictable randomness.
 - Shared view: at most 64 commands, 6,404 bytes per list; two firmware lists use
@@ -45,7 +73,7 @@ Battery reads use the BSP and show `--` on failure. Talk/Garden perform no I/O.
   Peak runtime heap, LVGL allocation and fragmentation need physical validation.
 - Original BSP and 8 MB partition table unchanged; no PSRAM. Enabled Montserrat
   10 for small website labels alongside existing 14/20 fonts. Original test UI
-  sources stay unlinked. No NVS persistence, networking, audio or sleep.
+  sources stay unlinked. No NVS persistence, networking, recording or sleep.
 - Browser uses identical C model/view compiled to WASM and draws with Canvas.
   Browser font rasterization and timing do not prove device behavior.
 
@@ -98,7 +126,9 @@ flashing requires a new explicit authorization and a chosen target and image.
 6. Disconnect networking: the game still works and Talk/Garden stay unavailable.
 7. Run 30 minutes and 100 page switches. Record minimum free heap, largest free
    block, LVGL pool peak, watchdog behavior, input latency and frame rate.
-8. Check battery gauge failure, real battery readings, idle/game current and
+8. Audition rotation, connection and victory sounds against the website. Check
+   speaker loudness/distortion, cancellation on exit, rapid presses, unavailable
+   codec and simultaneous drawing/audio. Check battery gauge failure, real battery readings, idle/game current and
    temperature. Battery life and fade smoothness remain unverified on hardware.
 9. Power-cycle only after authorization; verify session progress resets and the
    application never writes or erases unrelated storage.

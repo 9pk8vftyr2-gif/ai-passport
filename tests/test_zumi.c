@@ -1,5 +1,6 @@
 #include "core.h"
 #include "view.h"
+#include "sound.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -51,6 +52,21 @@ int main(void) {
         z_view v;z_render(&s,-1,&v);bool url=false;for(int i=0;i<v.count;i++) if(!strcmp(v.ops[i].text,"zco.eco")) url=true;assert(url);
     }
     puts("PASS all wake keys consumed, different expression, exact 3000 ms, home fade, URL");
+    z_link_start(&s,0);z_state before=s;
+    z_action(&s,Z_DOWN);assert(z_sound_event(&before,&s)==Z_SOUND_NONE);
+    before=s;z_action(&s,Z_OK);assert(z_sound_event(&before,&s)==Z_SOUND_WIN);
+    before=s;z_action(&s,Z_OK);assert(z_sound_event(&before,&s)==Z_SOUND_NONE);
+    z_link_start(&s,1);before=s;z_action(&s,Z_OK);assert(z_sound_event(&before,&s)==Z_SOUND_TURN);
+    before=s;s.moves++;s.powered|=s.homes;assert(z_sound_event(&before,&s)==Z_SOUND_CONNECT);
+    for(int event=1;event<=3;event++) {
+        int peak=0,nonzero=0,frames=z_sound_frames(event);
+        assert(frames==(event==3?17440:1440));
+        for(int i=0;i<frames;i++) {int sample=z_sound_sample(event,i);if(sample<0)sample=-sample;if(sample>peak)peak=sample;nonzero+=sample>0;}
+        assert(peak>1000&&peak<4500&&nonzero>1000);
+        assert(z_sound_sample(event,-1)==0&&z_sound_sample(event,frames)==0);
+    }
+    for(int i=1440;i<9920;i++) assert(z_sound_sample(Z_SOUND_WIN,i)==0);
+    puts("PASS sound event mapping, PCM bounds, gain, and 620 ms victory delay");
     unsigned r=123;
     for(int n=0;n<100000;n++) {
         if(n%100==0) z_link_start(&s,n%6);

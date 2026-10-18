@@ -9,9 +9,29 @@ try {
  api=instance.exports;api._initialize?.();api.pocket_init(0x5A554D49);
  status.textContent='本地预览 · 游戏逻辑与固件共享 · 无服务连接';
 } catch(e) {status.textContent=`加载失败：${e.message}`;throw e;}
+let audioContext, soundNode, soundGeneration=0;
+function unlockAudio(){
+ try {const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;
+ audioContext ||= new Audio();if(audioContext.state==='suspended')audioContext.resume().catch(()=>{});}catch{}
+}
+function stopSound(){soundGeneration++;if(soundNode){try{soundNode.stop();}catch{}soundNode.disconnect();soundNode=null;}}
+function playSound(event){
+ if(!audioContext || document.hidden)return;
+ stopSound();
+ const frames=api.pocket_sound_frames(event),buffer=audioContext.createBuffer(1,frames,16000),samples=buffer.getChannelData(0);
+ for(let frame=0;frame<frames;frame+=256){const ptr=api.pocket_sound_chunk(event,frame),pcm=new Int16Array(api.memory.buffer,ptr,256);
+ for(let i=0;i<Math.min(256,frames-frame);i++)samples[frame+i]=pcm[i]/32768;}
+ const node=audioContext.createBufferSource();node.buffer=buffer;node.connect(audioContext.destination);soundNode=node;
+ node.onended=()=>{node.disconnect();if(soundNode===node)soundNode=null;};
+ const generation=soundGeneration;
+ audioContext.resume().then(()=>{if(generation===soundGeneration)node.start();}).catch(()=>stopSound());
+}
 const color=n=>'#'+n.toString(16).padStart(6,'0');
 const decoder=new TextDecoder();
 function render(){
+ const sound=api.pocket_take_sound();
+ if(api.pocket_page()!==2) {if(soundNode)stopSound();}
+ else if(sound)playSound(sound);
  canvas.style.filter=api.pocket_dimmed()?'brightness(0.29)':'none';
  const n=api.pocket_render(),base=api.pocket_ops(),stride=api.pocket_stride();
  const data=new DataView(api.memory.buffer);
@@ -26,7 +46,7 @@ function render(){
  ctx.restore();
 }
 let held=null,longTimer=null;
-function press(key){if(held!==null)return;held=key;api.pocket_button(key,0);document.querySelector(`[data-key="${key}"]`).classList.add('pressed');if(key===2)longTimer=setTimeout(()=>{api.pocket_button(2,3);render();},500);render();}
+function press(key){if(held!==null)return;unlockAudio();held=key;api.pocket_button(key,0);document.querySelector(`[data-key="${key}"]`).classList.add('pressed');if(key===2)longTimer=setTimeout(()=>{api.pocket_button(2,3);render();},500);render();}
 function release(cancel=false){if(held===null)return;clearTimeout(longTimer);const key=held;held=null;document.querySelector(`[data-key="${key}"]`).classList.remove('pressed');if(cancel&&key===2)api.pocket_button(2,3);api.pocket_button(key,4);render();}
 for(const button of document.querySelectorAll('button')){
  button.addEventListener('pointerdown',e=>{e.preventDefault();button.setPointerCapture(e.pointerId);press(Number(button.dataset.key));});
@@ -40,8 +60,8 @@ for(const b of document.querySelectorAll('button')){
  b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(!e.repeat)press(Number(b.dataset.key));}});
  b.addEventListener('keyup',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();release();}});
 }
-window.addEventListener('blur',()=>release(true));
+window.addEventListener('blur',()=>{release(true);stopSound();});
 let last=performance.now();
 function frame(now){const dt=Math.floor(now-last);last+=dt;if(!document.hidden){api.pocket_tick(dt);render();}requestAnimationFrame(frame);}
-document.addEventListener('visibilitychange',()=>{last=performance.now();if(document.hidden)release(true);});
+document.addEventListener('visibilitychange',()=>{last=performance.now();if(document.hidden){release(true);stopSound();audioContext?.suspend().catch(()=>{});}});
 window.pocket={api,render};render();requestAnimationFrame(frame);

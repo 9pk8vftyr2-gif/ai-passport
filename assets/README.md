@@ -44,6 +44,15 @@ Store reusable source images and generated display assets in `images/`.
 
 ## Music and sound effects
 
+Zumi Pocket uses `music/zumi-link-tones.json` as the editable source for the
+existing ZCO Energy Link synthesized sine tones (source revision recorded there).
+No recordings or third-party audio assets are copied. Run
+`python3 tools/build_zumi_sounds.py` to compile `main/zumi/sounds.c`: three
+16 kHz, mono, signed 16-bit PCM clips, 20,800 bytes in Flash, streamed in
+512-byte chunks by the original BSP. The generated data follows this repository's
+code license. Browser and firmware use the same PCM. Device sound is unverified.
+
+
 Store reusable music and sound-effect sources in `music/`.
 
 - Document the source, license, sample rate, bit depth, channels, conversion command, and destination.

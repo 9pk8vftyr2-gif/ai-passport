@@ -11,6 +11,8 @@
 #include "zumi/core.h"
 #include "zumi/view.h"
 #include "zumi/sprites.h"
+#include "zumi/sound.h"
+#include "zumi/audio.h"
 #include <string.h>
 
 typedef struct { int button, event; } input_event;
@@ -100,6 +102,7 @@ void app_main(void) {
         }
         return;
     }
+    z_audio_start();
     uint64_t last=esp_timer_get_time()/1000, battery_time=last;
     int brightness=70;
     for(;;) {
@@ -108,7 +111,10 @@ void app_main(void) {
         input_event e;
         /* Bounded draining ensures an event flood cannot starve rendering. */
         for(int i=0;i<32 && xQueueReceive(queue,&e,0)==pdTRUE;i++) {
+            z_state before=state;
             z_button(&state,&input,e.button,e.event);
+            int sound=z_sound_event(&before,&state);
+            if(sound || (before.page==Z_LINK && state.page!=Z_LINK)) z_audio_play(sound);
         }
         int desired=state.dimmed?20:70;
         if(desired!=brightness) { bsp_display_backlight((uint8_t)desired); brightness=desired; }

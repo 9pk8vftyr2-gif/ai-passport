@@ -11,7 +11,7 @@ typedef struct {
     int expression, dimmed;
     uint8_t tiles[9], solution[9];
     uint16_t powered, homes, fixed;
-    int source;
+    int source, wind;
 } z_state;
 typedef struct { bool ok_down, ok_long, wake_held; int wake_button; } z_input;
 void z_init(z_state *s, uint32_t seed);

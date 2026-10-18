@@ -34,6 +34,7 @@ void z_link_start(z_state *s,int level) {
     s->page=Z_LINK; s->moves=0; s->cursor=0; s->idle_ms=0; s->dimmed=0;
     s->homes=levels[s->level].homes; s->fixed=levels[s->level].fixed;
     s->source=levels[s->level].source;
+    s->wind=s->level==2 || s->level==4;
     for(int i=0;i<9;i++) { s->tiles[i]=levels[s->level].initial[i]; s->solution[i]=levels[s->level].solved[i]; }
     for(int i=8;i>=0;i--) if(movable(s,i)) s->cursor=i;
     z_link_evaluate(s);

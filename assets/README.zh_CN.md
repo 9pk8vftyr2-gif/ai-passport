@@ -41,6 +41,9 @@ Zumi Pocket 使用[现有米白 2D 矢量](images/zumi-pocket/zumi-original.svg)
 
 ## 音乐与音效（music）
 
+Zumi Pocket 使用 `music/zumi-link-tones.json` 记录现有 ZCO Energy Link 合成正弦音参数和来源版本，不复制录音或第三方音频。运行 `python3 tools/build_zumi_sounds.py` 生成 `main/zumi/sounds.c`：三份 16 kHz、单声道、有符号 16 位 PCM，共占 Flash 20,800 字节，由原 BSP 按 512 字节分块播放。生成数据沿用仓库代码许可。浏览器与固件共用 PCM，真机听感尚未验证。
+
+
 可复用的音乐与音效源码放在 `music/`。
 
 - 记录来源、许可、采样率、位深、声道、转换命令与目标路径。
