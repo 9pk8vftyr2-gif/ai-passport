@@ -1,6 +1,7 @@
 #include "bsp_display.h"
 #include "bsp_button.h"
 #include "bsp_battery.h"
+#include "bsp_pins.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
@@ -79,6 +80,7 @@ void app_main(void) {
     if(!bsp_lvgl_lock(1000)) { vQueueDelete(queue); queue=NULL; return; }
     screen=lv_obj_create(NULL);
     lv_obj_remove_style_all(screen);
+    lv_obj_set_size(screen,BSP_LCD_W,BSP_LCD_H);
     lv_obj_remove_flag(screen,LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_bg_color(screen,lv_color_hex(0xF6F3E9),0);
     lv_obj_set_style_bg_opa(screen,LV_OPA_COVER,0);
