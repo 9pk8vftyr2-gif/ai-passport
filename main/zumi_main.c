@@ -98,14 +98,20 @@ void app_main(void) {
         }
         return;
     }
-    uint64_t last=esp_timer_get_time()/1000, battery_time=last;
+    uint64_t last=esp_timer_get_time()/1000, battery_time=last, activity_time=last;
+    int brightness=70;
     for(;;) {
         uint64_t now=esp_timer_get_time()/1000;
         z_tick(&state,(uint32_t)(now-last)); last=now;
         input_event e;
         /* Bounded draining ensures an event flood cannot starve rendering. */
-        for(int i=0;i<32 && xQueueReceive(queue,&e,0)==pdTRUE;i++)
+        for(int i=0;i<32 && xQueueReceive(queue,&e,0)==pdTRUE;i++) {
+            activity_time=now;
             z_button(&state,&input,e.button,e.event);
+        }
+        const bool playing=state.page==Z_CARBON || state.page==Z_JOURNEY;
+        int desired=(!playing && now-activity_time>=60000)?20:70;
+        if(desired!=brightness) { bsp_display_backlight((uint8_t)desired); brightness=desired; }
         if(now-battery_time>=30000) { battery=bsp_battery_soc(); battery_time=now; }
         if(bsp_lvgl_lock(50)) { render(); bsp_lvgl_unlock(); }
         vTaskDelay(pdMS_TO_TICKS(20));

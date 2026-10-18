@@ -14,8 +14,9 @@ ignored so rapid presses do not double-act. No simultaneous-key chords are used.
 The hardware power button remains separate.
 
 Each game lasts up to 30 seconds, has three hearts, supports replay and early exit.
-No NVS game persistence, audio, radio, deep sleep or automatic dimming is added
-in phase one. Battery readings use the official BSP and show `--` on failure.
+No NVS game persistence, audio, radio or deep sleep is added in phase one.
+Outside games, 60 seconds of inactivity dims the backlight from 70% to 20%;
+any key event restores it. This is not a validated low-power sleep mode. Battery readings use the official BSP and show `--` on failure.
 Talk and Garden return `Z_SERVICE_UNAVAILABLE` without doing any I/O.
 No external AI credentials or personal data enter this project.
 
@@ -91,7 +92,7 @@ flashing requires a new explicit authorization and a chosen target and image.
    timing or memory-fragmentation proof.
 8. Check real battery reading and unavailable-gauge behavior. Measure idle/game
    current and temperature. Battery life and low-power behavior are unverified;
-   the first prototype deliberately has no sleep policy.
+   the prototype dims idle menus but deliberately has no sleep policy.
 9. Power-cycle after permission, verify session scores reset as documented and
    that unrelated stored data has not been erased by application logic.
 10. Record board revision, firmware hash, observed result and evidence per item;
