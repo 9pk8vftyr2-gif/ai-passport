@@ -101,8 +101,8 @@ void z_render(const z_state *s, int battery, z_view *v) {
     if(s->page==Z_WAKE) {
         if(s->wake_ms<240) opacity=(int)(s->wake_ms*255/240);
         else if(s->wake_ms>2640) opacity=(int)((3000-s->wake_ms)*255/360);
-    } else if(s->page==Z_HOME && s->home_fade_ms)
-        opacity=(int)((240-s->home_fade_ms)*255/240);
+    } else if((s->page==Z_HOME || s->page==Z_LINK) && s->resume_fade_ms)
+        opacity=(int)((240-s->resume_fade_ms)*255/240);
     for(int i=content_start;i<v->count;i++) v->ops[i].opacity=opacity;
     if(s->page==Z_WAKE) text(v,184,16,tmp,MUTED,14);
 }

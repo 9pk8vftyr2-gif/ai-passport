@@ -12,7 +12,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs');
  });
  page.on('pageerror' ,e=>errors.push(e.message));
  await page.goto(process.env.ZUMI_PREVIEW_URL||'http://127.0.0.1:8876/preview/');await page.waitForFunction(()=>window.pocket);
- const state=()=>page.evaluate(()=>({page:pocket.api.pocket_page(),moves:pocket.api.pocket_moves(),won:pocket.api.pocket_won(),level:pocket.api.pocket_level()}));
+ const state=()=>page.evaluate(()=>({page:pocket.api.pocket_page(),moves:pocket.api.pocket_moves(),won:pocket.api.pocket_won(),level:pocket.api.pocket_level(),cursor:pocket.api.pocket_cursor(),board:pocket.api.pocket_board()}));
  const tap=key=>page.keyboard.press(key);
  const home=async()=>{await page.keyboard.down('Enter');await page.waitForTimeout(550);await page.keyboard.up('Enter');assert.equal((await state()).page,0);};
  await page.screenshot({path:'build/browser-home.png',fullPage:true});
@@ -59,12 +59,17 @@ const assert=require('node:assert/strict'),fs=require('node:fs');
  assert.deepEqual(errors,[]);
  // Idle blanking and wake also apply inside a puzzle; wake never rotates a tile.
  await home();await tap('ArrowDown');await tap('Enter');await tap('Enter');
- const movesBefore=(await state()).moves;
+ await tap('Enter');await tap('ArrowDown');
+ const gameBefore=await state();
  await page.evaluate(()=>{for(let i=0;i<600;i++)pocket.api.pocket_tick(100);pocket.render();});
  assert.equal(await page.evaluate(()=>pocket.api.pocket_screen_off()),1);
- await tap('ArrowUp');assert.equal((await state()).page,5);assert.equal((await state()).moves,movesBefore);
+ await tap('ArrowUp');assert.equal((await state()).page,5);assert.equal((await state()).moves,gameBefore.moves);
  await page.evaluate(()=>{for(let i=0;i<30;i++)pocket.api.pocket_tick(100);pocket.render();});
- assert.equal((await state()).page,0);
+ assert.deepEqual(await state(),gameBefore);
+ await page.waitForTimeout(300);
+ await page.locator('canvas').screenshot({path:'build/browser-game-resumed.png'});
+ await tap('Enter');assert.equal((await state()).moves,gameBefore.moves+1);
+ await home();
  const seen=new Set();let lastCard=-1;
  for(let n=0;n<128&&seen.size<8;n++) {
   const chosen=await page.evaluate(()=>{const a=pocket.api;for(let i=0;i<600;i++)a.pocket_tick(100);a.pocket_button(0,0);a.pocket_button(0,4);a.pocket_tick(100);a.pocket_tick(100);a.pocket_tick(100);pocket.render();return a.pocket_wake_card();});
@@ -73,6 +78,6 @@ const assert=require('node:assert/strict'),fs=require('node:fs');
   await page.evaluate(()=>{for(let i=0;i<31;i++)pocket.api.pocket_tick(100);pocket.render();});
  }
  assert.equal(seen.size,8);
- fs.writeFileSync('build/browser-results.json',JSON.stringify({status:'PASS',browser:'Chrome',checks:['home','Talk and Garden placeholders','single game entry','solve level 1','next level','offline rotation','untimed thinking','long OK release','60 second screen off on all pages','eight offline wake cards','no adjacent repeat','three second return','mobile overflow','physical controls','full English energy labels','real Web Audio PCM playback','sound cancellation on exit'],pageErrors:errors},null,2));
+ fs.writeFileSync('build/browser-results.json',JSON.stringify({status:'PASS',browser:'Chrome',checks:['home','Talk and Garden placeholders','single game entry','solve level 1','next level','offline rotation','untimed thinking','long OK release','60 second screen off on all pages','eight offline wake cards','no adjacent repeat','three second return to preserved game or home','mobile overflow','physical controls','full English energy labels','real Web Audio PCM playback','sound cancellation on exit'],pageErrors:errors},null,2));
  await browser.close();console.log('Browser Demo: PASS (desktop + mobile, eight offline wake cards, no page errors)');
 })().catch(e=>{console.error(e);process.exit(1)});

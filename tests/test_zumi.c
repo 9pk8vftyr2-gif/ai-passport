@@ -46,9 +46,9 @@ int main(void) {
         z_init(&s,42);in=(z_input){0};advance(&s,60000);assert(s.screen_off);
         int previous=s.expression;z_button(&s,&in,key,0);assert(s.page==Z_WAKE&&!s.screen_off&&s.expression!=previous);
         advance(&s,2999);assert(s.page==Z_WAKE);bounds(&s);
-        advance(&s,1);assert(s.page==Z_HOME&&s.home_fade_ms==240);
+        advance(&s,1);assert(s.page==Z_HOME&&s.resume_fade_ms==240);
         z_button(&s,&in,key,3);z_button(&s,&in,key,4);assert(s.page==Z_HOME&&s.selection==0);
-        advance(&s,240);assert(!s.home_fade_ms);
+        advance(&s,240);assert(!s.resume_fade_ms);
         z_view v;z_render(&s,-1,&v);bool url=false;for(int i=0;i<v.count;i++) if(!strcmp(v.ops[i].text,"zco.eco")) url=true;assert(url);
     }
     puts("PASS all wake keys consumed, different expression, exact 3000 ms, home fade, URL");
@@ -66,7 +66,7 @@ int main(void) {
         assert(s.screen_off&&s.page==page&&s.moves==moves&&!memcmp(tiles,s.tiles,9));
         z_button(&s,&in,Z_OK,0);z_button(&s,&in,Z_OK,4);
         assert(!s.screen_off&&s.page==Z_WAKE);
-        advance(&s,3000);assert(s.page==Z_HOME&&s.idle_ms==0);
+        advance(&s,3000);assert(s.page==(page==Z_LINK?Z_LINK:Z_HOME)&&s.idle_ms==0);
         advance(&s,59999);assert(!s.screen_off);advance(&s,1);assert(s.screen_off);
     }
     /* A release after holding OK across timeout must not enter a menu. */
@@ -74,6 +74,33 @@ int main(void) {
     advance(&s,60000);z_button(&s,&in,Z_OK,4);
     assert(s.screen_off&&s.page==Z_HOME&&!in.ok_down);
     puts("PASS exact idle timeout on all pages, activity reset, black-screen input guard and repeat wake");
+    for(int level=0;level<Z_LEVELS;level++) for(int key=0;key<3;key++) {
+        z_init(&s,42);in=(z_input){0};z_link_start(&s,level);
+        z_action(&s,Z_OK);z_action(&s,Z_DOWN);
+        /* Level 0 is won here; other levels cover partial boards. */
+        z_state saved=s;
+        for(int cycle=0;cycle<3;cycle++) {
+            advance(&s,60000);assert(s.screen_off);
+            z_button(&s,&in,key,0);assert(s.page==Z_WAKE);
+            advance(&s,2999);assert(s.page==Z_WAKE);
+            advance(&s,1);assert(s.page==Z_LINK&&s.idle_ms==0);
+            z_view v;z_render(&s,100,&v);assert(v.ops[2].opacity==0);
+            /* Holding the wake key past the greeting must not rotate/exit/advance. */
+            z_button(&s,&in,key,3);z_button(&s,&in,key,4);
+            assert(s.page==Z_LINK&&s.level==saved.level&&s.moves==saved.moves);
+            assert(s.cursor==saved.cursor&&s.won==saved.won&&s.powered==saved.powered);
+            assert(s.homes==saved.homes&&s.fixed==saved.fixed&&s.source==saved.source&&s.wind==saved.wind);
+            assert(!memcmp(s.tiles,saved.tiles,9)&&!memcmp(s.solution,saved.solution,9));
+            assert(z_sound_event(&saved,&s)==Z_SOUND_NONE);
+            advance(&s,240);z_render(&s,100,&v);assert(v.ops[2].opacity==255);
+        }
+        z_button(&s,&in,Z_OK,0);z_button(&s,&in,Z_OK,4);
+        if(saved.won) assert(s.page==Z_PLAY&&s.level==(level+1)%Z_LEVELS);
+        else assert(s.page==Z_LINK&&s.moves==saved.moves+1);
+        z_button(&s,&in,Z_OK,0);z_button(&s,&in,Z_OK,3);z_button(&s,&in,Z_OK,4);
+        assert(s.page==Z_HOME);
+    }
+    puts("PASS exact game resume across all levels/keys, completed boards, repeated wakes, fades and continued play");
     z_link_start(&s,0);z_state before=s;
     z_action(&s,Z_DOWN);assert(z_sound_event(&before,&s)==Z_SOUND_NONE);
     before=s;z_action(&s,Z_OK);assert(z_sound_event(&before,&s)==Z_SOUND_WIN);

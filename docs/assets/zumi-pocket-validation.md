@@ -2,30 +2,30 @@
 
 # Zumi Pocket Validation
 
-2026-10-18. Screen-off standby increment on `feature/zumi-pocket`, based on
-`233db11`. The successful gate ran before committing, so the image version is
-`233db11-dirty`; no firmware source or display pixel changes followed the build.
+2026-10-18. Game-resume-after-wake increment on `feature/zumi-pocket`, based on
+`0541fdd`. The successful gate ran before committing, so the image version is
+`0541fdd-dirty`; no firmware source or display pixel changes followed the build.
 The full-image and ELF hashes below identify the actual deliverable.
 
 | Field | Status | Evidence |
 | --- | --- | --- |
 | Build | PASS | ESP-IDF 5.5.3, complete official gate, merged layout and matching ELF archive verified |
 | Host Tests | PASS | Original repository checks, sanitizers, 100,000 game transitions, all-page 60-second boundaries/activity reset/late-key guards, 256 wake cycles and all eight cards, 5,000 native/WASM comparisons, provenance and pixel-data hashes |
-| Browser Demo | PASS | Chrome desktop/mobile; black pixels and in-game screen-off/wake, eight distinct cards offline, no adjacent repeats, three-second return, game controls, full English labels and shared sound |
+| Browser Demo | PASS | Chrome desktop/mobile; black pixels and in-game screen-off/wake with unchanged progress and continued play, eight distinct cards offline, no adjacent repeats, three-second return, game controls, full English labels and shared sound |
 | Device Tests | NOT RUN | No physical device flashed, erased, reset or opened |
 | Unverified | Pending hardware | physical backlight shutdown and wake latency, LCD colors and clipping, fade frame time, internal heap/LVGL peak, audio, battery current and real runtime |
 
 ## Exact firmware identity
 
-- Application: 1,993,728 bytes of the 8,323,072-byte factory partition.
-- Merged image: 2,059,264 bytes. Flash configuration: 8 MB; no PSRAM.
+- Application: 1,993,760 bytes of the 8,323,072-byte factory partition.
+- Merged image: 2,059,296 bytes. Flash configuration: 8 MB; no PSRAM.
 - Eight wake cards: 1,228,800 read-only Flash bytes, native 240 x 320 RGB565.
 - Basic sprites: 43,056 Flash bytes; shared audio PCM: 20,800 bytes.
-- State: 84 bytes; two draw lists: 12,808 bytes. Original 9,600-byte BSP draw
+- State: 88 bytes; two draw lists: 12,808 bytes. Original 9,600-byte BSP draw
   buffer and 24 KB LVGL pool retained. No added full-frame decoder buffer.
-- Full-image SHA-256: `75b007586df796302d96fa6824823b98e6b94ac4916022b382e8f3200dd85cf3`.
-- Matching ELF SHA-256: `7f3ee8f15c3c4fb792eeb6da89897e2af45f01e653d2f303e5dbfe5ff036cb0c`.
-- Local bundle: `build/firmware/75b007586df796302d96fa6824823b98e6b94ac4916022b382e8f3200dd85cf3/`.
+- Full-image SHA-256: `ecac5ae451e57c2713ddd2083b2753ca4b30c00ce0bd379a8ed6cdde7c08313e`.
+- Matching ELF SHA-256: `44441c7f3e6b2d67914f1f7628eb618d0cdc58ba1bd515988baebbbbaa5a3343`.
+- Local bundle: `build/firmware/ecac5ae451e57c2713ddd2083b2753ca4b30c00ce0bd379a8ed6cdde7c08313e/`.
 
 The archive contains the matching merged/application images, ELF, MAP, bootloader,
 partition table, flash arguments and manifest. It is ignored by Git and has not
@@ -36,7 +36,7 @@ layout; no Xiaozhi SDK was used.
 ## Actual validation
 
 `./tools/validate.sh` completed with ESP-IDF 5.5.3; log:
-`build/full-gate-screen-off.log`.
+`build/full-gate-game-resume.log`.
 
 `tests/test_zumi.c` also passed with AddressSanitizer and UndefinedBehaviorSanitizer.
 It checks all six solvable levels, a reciprocal-edge oracle, fixed tiles, 3,000 ms
@@ -47,7 +47,7 @@ repeats, fade boundaries, Garden placeholder and audio event/PCM bounds.
 original sticker hashes, approved source hashes, PNG dimensions and RGB565 slices.
 
 `node tests/browser_zumi.cjs` passed after loading local assets and switching the
-browser offline. Evidence: `build/browser-results.json`, `browser-screen-off.png`, `browser-play-title.png`,
+browser offline. Evidence: `build/browser-results.json`, `browser-screen-off.png`, `browser-game-resumed.png`, `browser-play-title.png`,
 `browser-wake-card-1.png` through `browser-wake-card-8.png`, `browser-link.png`,
 `browser-wind.png` and `browser-mobile.png`. Browser previews do not establish
 physical LCD, battery or audio performance.
@@ -64,7 +64,11 @@ Energy Link titles now sit at (22,16), clear of battery information.
 
 All pages turn the backlight off (70% to 0%) after 60 seconds without input,
 and application redraws stop. Any key wakes to a random card for three seconds,
-then home; the next 60-second interval starts when home appears. Tests cover
+then the original game, or home when woken from other pages. Game level, wires,
+moves, cursor and completion state are preserved. The resumed page fades in over
+240 ms and starts a new 60-second idle interval. Added tests cover six levels,
+all three keys and three consecutive wakes each, exact three-second timing,
+held-key guards, completed boards, continued rotation and next-level actions. Tests cover
 exact boundaries, activity reset, all wake keys, late long/release guards and
 repeated wakes. The wake frame is updated before restoring brightness; physical
 old-frame flashes still require checking. Screen-off cancels queued sound, but

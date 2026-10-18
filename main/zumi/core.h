@@ -8,12 +8,12 @@ enum { Z_IDLE_OFF_MS = 60000 };
 enum { Z_SERVICE_UNAVAILABLE = -1, Z_LEVELS = 6, Z_WAKE_CARDS = 8 };
 typedef struct {
     int page, selection, level, moves, cursor, won;
-    uint32_t rng, idle_ms, wake_ms, home_fade_ms;
+    uint32_t rng, idle_ms, wake_ms, resume_fade_ms;
     int expression, screen_off;
     uint8_t tiles[9], solution[9];
     uint16_t powered, homes, fixed;
     int source, wind;
-    int wake_card;
+    int wake_card, wake_return_page;
 } z_state;
 typedef struct { bool ok_down, ok_long, wake_held; int wake_button; } z_input;
 void z_init(z_state *s, uint32_t seed);

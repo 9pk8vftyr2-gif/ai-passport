@@ -77,10 +77,14 @@ void z_tick(z_state *s,uint32_t ms) {
     if(ms>100) ms=100;
     if(s->page==Z_WAKE) {
         s->wake_ms+=ms;
-        if(s->wake_ms>=3000) { s->page=Z_HOME; s->selection=0; s->home_fade_ms=240; s->idle_ms=0; }
+        if(s->wake_ms>=3000) {
+            s->page=s->wake_return_page==Z_LINK?Z_LINK:Z_HOME;
+            if(s->page==Z_HOME) s->selection=0;
+            s->resume_fade_ms=240; s->idle_ms=0;
+        }
         return;
     }
-    s->home_fade_ms=s->home_fade_ms>ms?s->home_fade_ms-ms:0;
+    s->resume_fade_ms=s->resume_fade_ms>ms?s->resume_fade_ms-ms:0;
     if(s->idle_ms<Z_IDLE_OFF_MS) s->idle_ms+=ms;
     if(s->idle_ms>=Z_IDLE_OFF_MS) { s->idle_ms=Z_IDLE_OFF_MS; s->screen_off=1; }
 }
@@ -95,6 +99,7 @@ void z_button(z_state *s, z_input *input, int button, int event) {
         s->wake_card = s->wake_card<0 ? (int)(random_next(s)%Z_WAKE_CARDS) :
             (s->wake_card+1+(int)(random_next(s)%(Z_WAKE_CARDS-1)))%Z_WAKE_CARDS;
         s->screen_off = 0; s->idle_ms = 0; s->wake_ms = 0;
+        s->wake_return_page = s->page==Z_LINK ? Z_LINK : Z_HOME;
         s->page = Z_WAKE;
         *input = (z_input){.wake_held = true, .wake_button = button};
         return;
@@ -102,7 +107,7 @@ void z_button(z_state *s, z_input *input, int button, int event) {
     /* A release/long event from a key held across timeout must not wake or act. */
     if (s->screen_off) { *input = (z_input){0}; return; }
     /* All keys during the greeting are consumed, including a held OK whose
-       release happens after the automatic return home. */
+       release happens after the automatic return to the game or home. */
     if (s->page == Z_WAKE) {
         if (event == 0) *input = (z_input){.wake_held=true,.wake_button=button};
         return;

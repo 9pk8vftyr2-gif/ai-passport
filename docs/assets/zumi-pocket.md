@@ -27,12 +27,14 @@ A PRESS restores 70% brightness
 and randomly selects one of eight approved promotional cards, avoiding an immediate repeat. The
 wake press and any presses during the greeting are consumed through RELEASE.
 The greeting occupies 3,000 ms: 240 ms fade-in, hold to 2,640 ms, 360 ms fade-out;
-home then fades in for 240 ms. Each expression view has a `zco.eco` corner label.
+the original game (when woken from Energy Link) or home fades in for 240 ms.
+Game level, wires, moves, cursor and completion state stay in RAM throughout the
+greeting. Resuming does not replay game sounds or advance a completed level. Each expression view has a `zco.eco` corner label.
 Only the wake greeting displays “Zumi Pocket”, above the character; other
 screens omit this brand heading.
 The firmware fades individual objects, without a full-screen compositing buffer.
 Any input restarts the inactivity timer. The three-second card does not count
-toward the next home timeout. Late release/long events cannot wake the display.
+toward the next inactivity timeout. Late release/long events cannot wake the display.
 The application prepares the wake frame before restoring the backlight. CPU,
 button polling and initialized audio resources remain active: this is reversible
 backlight-off standby, not deep sleep or a measured battery-life claim.
@@ -155,7 +157,9 @@ flashing requires a new explicit authorization and a chosen target and image.
 5. Wait 60 seconds on every page, including a puzzle, and confirm the backlight
    is fully off. Input before the deadline must restart the timer. Wake with
    each key, confirm a different
-   card, Zumi Pocket, `zco.eco`, three-second greeting and smooth transition home.
+   card, Zumi Pocket, `zco.eco`, three-second greeting and smooth transition to the original game or home.
+   Verify game level, wires, moves, cursor and completion state survive repeated
+   wakes; a new OK press continues playing or advances a completed level.
    Hold the wake key beyond the greeting and verify no accidental action.
 6. Wake repeatedly offline, inspect all eight distinct cards and no adjacent
    repeats. Confirm no Tiny Actions checklist, one-hour reminder or motion

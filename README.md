@@ -38,8 +38,9 @@ needed. Gameplay continues offline after the page's local resources load.
   without input. A press restores brightness and
   selects one of eight approved promotional cards with distinct original Zumi
   sticker expressions/actions, avoiding an immediate repeat. The 3-second card
-  fades into home. Each includes Zumi Pocket and zco.eco; wake keys are consumed.
-  Screen-off stops application redraws; any key wakes to the card, then home.
+  fades back into the same game, or home when woken from other pages. Each includes Zumi Pocket and zco.eco; wake keys are consumed.
+  Screen-off stops application redraws; any key wakes to the card, then resumes the game or home.
+  Game level, wires, moves, cursor and completion state survive screen-off.
   This is backlight-off standby, not deep sleep; battery savings need measurement.
 - **Talk / Garden:** reserved offline placeholders. Promotional wake cards replace
   the earlier Tiny Actions checklist; no completion counters or Garden sync.
