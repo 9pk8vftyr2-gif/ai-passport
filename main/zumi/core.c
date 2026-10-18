@@ -2,13 +2,13 @@
 /* Pocket-authored boards; Energy Link direction convention N/E/S/W = 1/2/4/8.
    The source and homes are fixed. Every home must be reached via reciprocal
    connectors; unused wires are allowed, exactly as in the website game. */
-static const struct { uint8_t initial[9], solved[9]; uint16_t homes, fixed; int source; } levels[Z_LEVELS] = {
-{ {0,0,0,2,5,8,0,0,0}, {0,0,0,2,10,8,0,0,0}, 32, 40, 3 },
-{ {0,9,8,3,3,0,1,0,0}, {0,6,8,6,9,0,1,0,0}, 4, 68, 6 },
-{ {2,7,8,0,10,0,0,1,0}, {2,14,8,0,5,0,0,1,0}, 5, 133, 7 },
-{ {0,0,4,12,5,14,1,0,1}, {0,0,4,6,10,13,1,0,1}, 260, 324, 6 },
-{ {4,12,8,9,7,0,0,9,8}, {4,6,8,3,13,0,0,3,8}, 260, 261, 0 },
-{ {2,9,4,3,11,7,1,0,1}, {2,12,4,6,11,13,1,0,1}, 324, 341, 0 }
+static const struct { uint8_t initial[Z_CELLS], solved[Z_CELLS]; uint16_t homes, fixed; int source; } levels[Z_LEVELS] = {
+{ { 4,0,0,5,0,0,10,0,0,1,0,0 }, { 4,0,0,5,0,0,5,0,0,1,0,0 }, 512, 521, 0 },
+{ { 0,3,8,0,10,0,9,12,0,1,0,0 }, { 0,6,8,0,5,0,6,9,0,1,0,0 }, 4, 516, 9 },
+{ { 2,13,8,0,5,0,0,10,0,0,1,0 }, { 2,14,8,0,5,0,0,5,0,0,1,0 }, 5, 1045, 10 },
+{ { 0,0,4,12,10,13,10,0,10,1,0,1 }, { 0,0,4,6,10,13,5,0,5,1,0,1 }, 2052, 2596, 9 },
+{ { 4,3,8,13,12,0,5,0,0,12,5,8 }, { 4,6,8,7,9,0,5,0,0,3,10,8 }, 2052, 2117, 0 },
+{ { 2,5,3,3,14,7,10,10,5,1,1,1 }, { 2,10,12,6,14,13,5,5,5,1,1,1 }, 3584, 3601, 0 }
 };
 static uint32_t random_next(z_state *s) {
     uint32_t x=s->rng; x^=x<<13; x^=x>>17; x^=x<<5; return s->rng=x;
@@ -17,11 +17,11 @@ void z_init(z_state *s,uint32_t seed) { *s=(z_state){.rng=seed?seed:1,.wake_card
 void z_link_evaluate(z_state *s) {
     s->powered=(uint16_t)(1u<<s->source);
     const int dr[]={-1,0,1,0}, dc[]={0,1,0,-1};
-    for(int pass=0;pass<9;pass++) for(int i=0;i<9;i++) if(s->powered&(1u<<i)) {
+    for(int pass=0;pass<Z_CELLS;pass++) for(int i=0;i<Z_CELLS;i++) if(s->powered&(1u<<i)) {
         for(int d=0;d<4;d++) {
-            int r=i/3+dr[d],c=i%3+dc[d];
-            if(r<0||r>2||c<0||c>2) continue;
-            int next=r*3+c;
+            int r=i/Z_COLS+dr[d],c=i%Z_COLS+dc[d];
+            if(r<0||r>=Z_ROWS||c<0||c>=Z_COLS) continue;
+            int next=r*Z_COLS+c;
             if((s->tiles[i]&(1u<<d)) && (s->tiles[next]&(1u<<((d+2)%4))))
                 s->powered|=(uint16_t)(1u<<next);
         }
@@ -35,8 +35,8 @@ void z_link_start(z_state *s,int level) {
     s->homes=levels[s->level].homes; s->fixed=levels[s->level].fixed;
     s->source=levels[s->level].source;
     s->wind=s->level==2 || s->level==4;
-    for(int i=0;i<9;i++) { s->tiles[i]=levels[s->level].initial[i]; s->solution[i]=levels[s->level].solved[i]; }
-    for(int i=8;i>=0;i--) if(movable(s,i)) s->cursor=i;
+    for(int i=0;i<Z_CELLS;i++) { s->tiles[i]=levels[s->level].initial[i]; s->solution[i]=levels[s->level].solved[i]; }
+    for(int i=Z_CELLS-1;i>=0;i--) if(movable(s,i)) s->cursor=i;
     z_link_evaluate(s);
 }
 void z_action(z_state *s,int action) {
@@ -64,7 +64,7 @@ void z_action(z_state *s,int action) {
             return;
         }
         if(action==Z_UP||action==Z_DOWN) {
-            for(int n=0;n<9;n++) { s->cursor=(s->cursor+(action==Z_UP?8:1))%9; if(movable(s,s->cursor)) break; }
+            for(int n=0;n<Z_CELLS;n++) { s->cursor=(s->cursor+(action==Z_UP?Z_CELLS-1:1))%Z_CELLS; if(movable(s,s->cursor)) break; }
         }
         if(action==Z_OK) {
             uint8_t m=s->tiles[s->cursor];

@@ -4,13 +4,14 @@
 enum { Z_HOME, Z_PLAY, Z_LINK, Z_TALK, Z_GARDEN, Z_WAKE };
 enum { Z_UP, Z_DOWN, Z_OK, Z_BACK };
 enum { Z_HAPPY, Z_FOCUS, Z_CHEER };
+enum { Z_COLS = 3, Z_ROWS = 4, Z_CELLS = Z_COLS * Z_ROWS };
 enum { Z_IDLE_OFF_MS = 60000 };
 enum { Z_SERVICE_UNAVAILABLE = -1, Z_LEVELS = 6, Z_WAKE_CARDS = 8 };
 typedef struct {
     int page, selection, level, moves, cursor, won;
     uint32_t rng, idle_ms, wake_ms, resume_fade_ms;
     int expression, screen_off;
-    uint8_t tiles[9], solution[9];
+    uint8_t tiles[Z_CELLS], solution[Z_CELLS];
     uint16_t powered, homes, fixed;
     int source, wind;
     int wake_card, wake_return_page;

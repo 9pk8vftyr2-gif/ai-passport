@@ -16,9 +16,9 @@ static void bounds(z_state *s) {
 static unsigned oracle(const z_state *s) {
     unsigned seen=1u<<s->source,previous;
     do { previous=seen;
-        for(int i=0;i<9;i++) {
-            if(i%3<2 && (s->tiles[i]&2) && (s->tiles[i+1]&8) && (seen&((1u<<i)|(1u<<(i+1))))) seen|=(1u<<i)|(1u<<(i+1));
-            if(i<6 && (s->tiles[i]&4) && (s->tiles[i+3]&1) && (seen&((1u<<i)|(1u<<(i+3))))) seen|=(1u<<i)|(1u<<(i+3));
+        for(int i=0;i<Z_CELLS;i++) {
+            if(i%Z_COLS<Z_COLS-1 && (s->tiles[i]&2) && (s->tiles[i+1]&8) && (seen&((1u<<i)|(1u<<(i+1))))) seen|=(1u<<i)|(1u<<(i+1));
+            if(i<Z_CELLS-Z_COLS && (s->tiles[i]&4) && (s->tiles[i+Z_COLS]&1) && (seen&((1u<<i)|(1u<<(i+Z_COLS))))) seen|=(1u<<i)|(1u<<(i+Z_COLS));
         }
     } while(seen!=previous);return seen;
 }
@@ -29,19 +29,37 @@ int main(void) {
     z_button(&s,&in,Z_OK,0);z_button(&s,&in,Z_OK,3);z_button(&s,&in,Z_OK,4);assert(s.page==Z_HOME);
     z_action(&s,Z_DOWN);z_action(&s,Z_OK);assert(s.page==Z_PLAY);z_action(&s,Z_UP);assert(s.level==5);z_action(&s,Z_DOWN);assert(s.level==0);
     for(int level=0;level<Z_LEVELS;level++) {
-        z_link_start(&s,level);assert(!s.won);uint8_t fixed[9];memcpy(fixed,s.tiles,9);
+        z_link_start(&s,level);assert(!s.won);uint8_t fixed[Z_CELLS];memcpy(fixed,s.tiles,sizeof(fixed));
+        z_state solved=s;memcpy(solved.tiles,solved.solution,sizeof(solved.tiles));
+        z_link_evaluate(&solved);assert(solved.won&&solved.powered==oracle(&solved));
+        assert(solved.powered & (7u << 9)); /* Each solution uses the fourth row. */
+        z_state picker=s;picker.page=Z_PLAY;z_state untouched=picker;
+        bounds(&picker);assert(!memcmp(&picker,&untouched,sizeof(picker)));
+        unsigned visited=0,expected=0;
+        for(int i=0;i<Z_CELLS;i++) if(s.tiles[i]&&!(s.fixed&(1u<<i))) expected|=1u<<i;
+        for(int i=0;i<Z_CELLS;i++){visited|=1u<<s.cursor;z_action(&s,Z_DOWN);}
+        assert(visited==expected);
+        z_link_start(&s,level);
         advance(&s,50000);assert(!s.screen_off&&s.moves==0);
-        for(int visit=0;visit<9&&!s.won;visit++) {
+        for(int visit=0;visit<Z_CELLS&&!s.won;visit++) {
             int cursor=s.cursor;assert(!(s.fixed&(1u<<cursor))&&s.tiles[cursor]);
             for(int turns=0;turns<4&&s.tiles[cursor]!=s.solution[cursor]&&!s.won;turns++) z_action(&s,Z_OK);
             if(!s.won) z_action(&s,Z_DOWN);bounds(&s);
         }
         assert(s.won&&(s.powered&s.homes)==s.homes);
-        for(int i=0;i<9;i++) if(s.fixed&(1u<<i)) assert(s.tiles[i]==fixed[i]);
+        for(int i=0;i<Z_CELLS;i++) if(s.fixed&(1u<<i)) assert(s.tiles[i]==fixed[i]);
         int moves=s.moves;z_action(&s,Z_UP);assert(s.moves==moves&&s.won);
         z_action(&s,Z_OK);assert(s.page==Z_LINK&&s.level==(level+1)%Z_LEVELS&&s.moves==0&&!s.won);
     }
     puts("PASS six solvable levels, fixed tiles, untimed play, wrap selection, next level");
+    z_init(&s,42);s.source=2;s.homes=1u<<3;s.tiles[2]=2;s.tiles[3]=8;
+    z_link_evaluate(&s);assert(!s.won); /* Right edge cannot wrap into the next row. */
+    z_init(&s,42);s.source=8;s.homes=1u<<11;s.tiles[8]=4;s.tiles[11]=1;
+    z_link_evaluate(&s);assert(s.won&&s.powered==((1u<<8)|(1u<<11)));
+    s.tiles[11]=2;z_link_evaluate(&s);assert(!s.won); /* Reciprocal bottom edge. */
+    z_init(&s,42);s.source=9;s.homes=1u<<11;s.tiles[9]=2;s.tiles[10]=10;s.tiles[11]=8;
+    z_link_evaluate(&s);assert(s.won&&s.powered==(7u<<9));
+    puts("PASS fourth-row connectivity, no row wrap, full cursor coverage and pure previews");
     for(int key=0;key<3;key++) {
         z_init(&s,42);in=(z_input){0};advance(&s,60000);assert(s.screen_off);
         int previous=s.expression;z_button(&s,&in,key,0);assert(s.page==Z_WAKE&&!s.screen_off&&s.expression!=previous);
@@ -59,11 +77,11 @@ int main(void) {
         z_button(&s,&in,Z_DOWN,0);z_button(&s,&in,Z_DOWN,4);
         advance(&s,59999);assert(!s.screen_off);
         advance(&s,1);assert(s.screen_off&&s.idle_ms==Z_IDLE_OFF_MS);
-        int moves=s.moves;uint8_t tiles[9];memcpy(tiles,s.tiles,9);
+        int moves=s.moves;uint8_t tiles[Z_CELLS];memcpy(tiles,s.tiles,sizeof(tiles));
         advance(&s,120000);assert(s.screen_off&&s.idle_ms==Z_IDLE_OFF_MS);
         z_action(&s,Z_OK);assert(s.screen_off&&s.page==page);
         z_button(&s,&in,Z_OK,3);z_button(&s,&in,Z_OK,4);
-        assert(s.screen_off&&s.page==page&&s.moves==moves&&!memcmp(tiles,s.tiles,9));
+        assert(s.screen_off&&s.page==page&&s.moves==moves&&!memcmp(tiles,s.tiles,sizeof(tiles)));
         z_button(&s,&in,Z_OK,0);z_button(&s,&in,Z_OK,4);
         assert(!s.screen_off&&s.page==Z_WAKE);
         advance(&s,3000);assert(s.page==(page==Z_LINK?Z_LINK:Z_HOME)&&s.idle_ms==0);
@@ -90,7 +108,7 @@ int main(void) {
             assert(s.page==Z_LINK&&s.level==saved.level&&s.moves==saved.moves);
             assert(s.cursor==saved.cursor&&s.won==saved.won&&s.powered==saved.powered);
             assert(s.homes==saved.homes&&s.fixed==saved.fixed&&s.source==saved.source&&s.wind==saved.wind);
-            assert(!memcmp(s.tiles,saved.tiles,9)&&!memcmp(s.solution,saved.solution,9));
+            assert(!memcmp(s.tiles,saved.tiles,sizeof(s.tiles))&&!memcmp(s.solution,saved.solution,sizeof(s.solution)));
             assert(z_sound_event(&saved,&s)==Z_SOUND_NONE);
             advance(&s,240);z_render(&s,100,&v);assert(v.ops[2].opacity==255);
         }

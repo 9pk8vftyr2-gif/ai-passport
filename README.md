@@ -27,7 +27,7 @@ needed. Gameplay continues offline after the page's local resources load.
   a clear selected row, and no character image. Original Zumi art stays in wake
   cards and Talk/Garden placeholders.
 - **Energy Link:** the only game, adapted from the website connection puzzle.
-  Six pocket-authored 3 x 3 boards. UP/DOWN cycle through movable wires;
+  Six pocket-authored 3-column x 4-row boards. UP/DOWN cycle through movable wires;
   OK rotates clockwise. `Solar power` / `Wind power` name the fixed source; `House` names each home. Matching
   connectors carry power; light every home to win. No countdown or move limit.
   The completed board stays visible. OK starts the next board directly, without an inter-level screen; hold OK goes home.

@@ -4,7 +4,7 @@
 
 The home screen uses three numbered Talk / Play / Garden rows with a short
 purpose line and a dark selected row. No character image appears there.
-Energy Link's level picker shows the selected level's initial 3 x 3 board,
+Energy Link's level picker shows the selected level's initial 3-column x 4-row board,
 using the same wire geometry and full energy labels as gameplay, without a
 character image. UP/DOWN changes the preview; OK starts that board. Wake-card
 art and the Talk/Garden placeholder characters are unchanged.
@@ -19,7 +19,11 @@ Three physical keys are the only input. UP/DOWN move selection on PRESS;
 home selection clamps, levels and movable wires wrap. OK acts on RELEASE;
 LONG at 500 ms returns home and suppresses that release. CLICK/DOUBLE are ignored.
 
-Energy Link is the only game. Six authored 3 x 3 boards preserve the website's
+The in-game level/turn counter sits at (22,47), above the four-row board
+starting at y=72. Cells are 64 x 44 pixels; the initial picker uses 60 x 34
+pixel cells. All six solutions use the fourth row.
+
+Energy Link is the only game. Six authored 3-column x 4-row boards preserve the website's
 reciprocal N/E/S/W connectors and source-to-all-homes win condition. Unused wires
 are allowed. Fixed source/home tiles and marked fixed clues cannot rotate.
 There is no time or move limit. Completion keeps the board visible; OK advances
