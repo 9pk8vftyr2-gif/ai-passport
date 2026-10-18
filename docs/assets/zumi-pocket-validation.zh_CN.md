@@ -2,7 +2,7 @@
 
 # Zumi Pocket 验证报告
 
-日期：2026-10-18。固件源码：`feature/zumi-pocket` 的 `1a361c9`。范围：硬件到货前的第一阶段软件原型。
+日期：2026-10-18。固件源码：`feature/zumi-pocket` 的 `62ac2bd`。范围：硬件到货前的第一阶段软件原型。
 
 | 项目 | 状态 | 证据 |
 | --- | --- | --- |
@@ -14,19 +14,19 @@
 
 ## 构建证据
 
-应用镜像 680,368 字节，factory 分区 8,323,072 字节；合并镜像 745,904 字节。原 BSP 和分区表未修改，无 PSRAM 依赖。新增 Montserrat 10 网址小字，没有增加存储格式或写入。
+应用镜像 680,416 字节，factory 分区 8,323,072 字节；合并镜像 745,952 字节。原 BSP 和分区表未修改，无 PSRAM 依赖。新增 Montserrat 10 网址小字，没有增加存储格式或写入。
 
 合并镜像 SHA-256：
-`279607af4c394a1344f036d13dbfc7a8c6b13d9d151712fe7ad8992fb9ef8e16`。
+`96f70ab1bd3843676c6869a467019e512c38ee1f22407ea0260a2f757f43667a`。
 匹配 ELF SHA-256：
-`9e3949471358432713a080d46d1cb9581da4111b63a3a9756ae056d3d0432dd7`。
+`17f39bb187d12bda7a558a2edfae0a8091aaf31ed3854cdcabb0b84795c1b25f`。
 
-本地镜像/ELF/MAP/manifest 保存在 `build/firmware/279607af4c394a1344f036d13dbfc7a8c6b13d9d151712fe7ad8992fb9ef8e16/`。
-应用描述确认源码版本 `1a361c9`、IDF `v5.5.3`。构建产物被 Git 忽略，并非发布的固件版本。最终报告提交不改变已测试的固件、浏览器模块或素材。
+本地镜像/ELF/MAP/manifest 保存在 `build/firmware/96f70ab1bd3843676c6869a467019e512c38ee1f22407ea0260a2f757f43667a/`。
+应用描述确认源码版本 `62ac2bd`、IDF `v5.5.3`。构建产物被 Git 忽略，并非发布的固件版本。最终报告提交不改变已测试的固件、浏览器模块或素材。
 
 ## 复现与测试范围
 
-- 激活 ESP-IDF 5.5.3 后运行 `./tools/validate.sh`。日志：`build/full-gate-link.log`，原基线检查全部保留。
+- 激活 ESP-IDF 5.5.3 后运行 `./tools/validate.sh`。日志：`build/full-gate-title.log`，原基线检查全部保留。
 - `cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -Imain/zumi tests/test_zumi.c main/zumi/core.c main/zumi/view.c -o build/test_zumi`，再运行 `build/test_zumi`：通过操作解六关，检查固定格、无限时、下一关循环、三键唤醒与释放抑制、精确 3,000 毫秒欢迎页、首页淡入、网址和绘制边界。随机状态使用独立的双向接头遍历校验。
 - `node tests/wasm_parity.cjs`：原生 C 与 WASM 的 5,000 次状态对照。源码/模块校验值防止旧模块冒充更新。
 - 预览服务器运行后执行 `node tests/browser_zumi.cjs`：首页、Talk、Garden、游戏入口、第一关通关、下一关、离线旋转、无限时思考、长 OK 释放、空闲变暗、不同表情、网址、3 秒返回、手机视口溢出、实体按键样式控件，共 15 项。

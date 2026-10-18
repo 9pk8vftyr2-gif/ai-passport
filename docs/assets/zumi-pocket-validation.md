@@ -2,7 +2,7 @@
 
 # Zumi Pocket Validation
 
-2026-10-18. Firmware source: `1a361c9` on `feature/zumi-pocket`.
+2026-10-18. Firmware source: `62ac2bd` on `feature/zumi-pocket`.
 Scope: phase-one software prototype before hardware arrival.
 
 | Field | Status | Evidence |
@@ -15,25 +15,25 @@ Scope: phase-one software prototype before hardware arrival.
 
 ## Firmware evidence
 
-Application: 680,368 bytes in an 8,323,072-byte factory partition. Merged image:
-745,904 bytes. Original BSP and partition table unchanged. No PSRAM dependency.
+Application: 680,416 bytes in an 8,323,072-byte factory partition. Merged image:
+745,952 bytes. Original BSP and partition table unchanged. No PSRAM dependency.
 Enabled Montserrat 10 for the website label. No stored-data format or writes added.
 
 Merged SHA-256:
-`279607af4c394a1344f036d13dbfc7a8c6b13d9d151712fe7ad8992fb9ef8e16`.
+`96f70ab1bd3843676c6869a467019e512c38ee1f22407ea0260a2f757f43667a`.
 Matching ELF SHA-256:
-`9e3949471358432713a080d46d1cb9581da4111b63a3a9756ae056d3d0432dd7`.
+`17f39bb187d12bda7a558a2edfae0a8091aaf31ed3854cdcabb0b84795c1b25f`.
 
 The local image/ELF/MAP/manifest bundle is in
-`build/firmware/279607af4c394a1344f036d13dbfc7a8c6b13d9d151712fe7ad8992fb9ef8e16/`.
-Its app descriptor confirms source version `1a361c9` and IDF `v5.5.3`.
+`build/firmware/96f70ab1bd3843676c6869a467019e512c38ee1f22407ea0260a2f757f43667a/`.
+Its app descriptor confirms source version `62ac2bd` and IDF `v5.5.3`.
 Build outputs are ignored, not published firmware releases. The final report-only
 commit does not change the tested firmware, browser module or assets.
 
 ## Reproduce and test scope
 
 - Activate ESP-IDF 5.5.3 and run `./tools/validate.sh`. Local evidence:
-  `build/full-gate-link.log`. All original baseline checks remain enabled.
+  `build/full-gate-title.log`. All original baseline checks remain enabled.
 - `cc -std=c11 -Wall -Wextra -Werror -fsanitize=address,undefined -Imain/zumi tests/test_zumi.c main/zumi/core.c main/zumi/view.c -o build/test_zumi`
   then `build/test_zumi`: solve all six levels via actions; verify fixed tiles,
   untimed play, next-level wrapping, all wake keys, consumed release, exactly
