@@ -36,7 +36,14 @@ needed. Gameplay continues offline after the page's local resources load.
 - **Wake greeting:** menus dim after 60 seconds. A key press restores brightness,
   chooses a different existing expression, and consumes the wake press. A
   3-second greeting fades back to home, with `zco.eco` in the corner. Games stay lit.
-- **Talk / Garden:** unavailable-service screens and C interfaces only.
+- **Tiny Actions (Garden):** eight offline action cards. UP/DOWN browse, OK marks
+  a card done. Completed cards show Zumi cheering; OK advances to an unfinished
+  card. Each card counts once, and all eight completed unlock an explicit new set.
+  Progress stays during this boot, including game/menu/wake transitions.
+- **Talk / Garden services:** voice remains unavailable; Garden networking is
+  still an interface stub. Local cards do not sync or measure real-world actions.
+- Motion detection and the one-hour standing reminder are deferred until hardware
+  support is confirmed, as requested. No inactivity substitute is enabled.
 - Session state resets on reboot. No storage, recording, network or paid AI.
   This is a puzzle, not real power simulation or carbon accounting.
 

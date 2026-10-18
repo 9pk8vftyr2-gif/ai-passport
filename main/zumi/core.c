@@ -10,6 +10,27 @@ static const struct { uint8_t initial[9], solved[9]; uint16_t homes, fixed; int 
 { {4,12,8,9,7,0,0,9,8}, {4,6,8,3,13,0,0,3,8}, 260, 261, 0 },
 { {2,9,4,3,11,7,1,0,1}, {2,12,4,6,11,13,1,0,1}, 324, 341, 0 }
 };
+static const z_card cards[Z_CARDS] = {
+    {"Bring a bottle", "Take a refillable bottle", "when you head out."},
+    {"Lights out", "Switch off unused lights", "when you leave a room."},
+    {"Carry a tote", "Take a reusable bag", "on your next shop."},
+    {"Use both sides", "Use the blank side", "of a sheet of paper."},
+    {"Save leftovers", "Store leftover food", "for another meal."},
+    {"Close the tap", "Turn off the tap", "while brushing teeth."},
+    {"Make it last", "Care for something", "you already own."},
+    {"Sort one item", "Check your local rules", "before you recycle."}
+};
+const z_card *z_card_get(int index) { return &cards[index>=0&&index<Z_CARDS?index:0]; }
+int z_card_count(const z_state *s) {
+    unsigned mask=s->cards_done;int count=0;
+    while(mask){count+=(int)(mask&1u);mask>>=1;}return count;
+}
+static void next_card(z_state *s) {
+    for(int i=0;i<Z_CARDS;i++) {
+        s->card=(s->card+1)%Z_CARDS;
+        if(!(s->cards_done&(1u<<s->card))) break;
+    }
+}
 static uint32_t random_next(z_state *s) {
     uint32_t x=s->rng; x^=x<<13; x^=x>>17; x^=x<<5; return s->rng=x;
 }
@@ -50,7 +71,19 @@ void z_action(z_state *s,int action) {
             const int pages[]={Z_TALK,Z_PLAY,Z_GARDEN};
             s->page=pages[s->selection]; s->selection=0;
             if(s->page==Z_TALK) (void)z_talk_request();
-            if(s->page==Z_GARDEN) (void)z_garden_sync(s);
+            if(s->page==Z_GARDEN) {
+                s->card=(int)(random_next(s)%Z_CARDS);
+                if(s->cards_done&(1u<<s->card)) next_card(s);
+            }
+        }
+    } else if(s->page==Z_GARDEN) {
+        if(action==Z_UP) s->card=(s->card+Z_CARDS-1)%Z_CARDS;
+        if(action==Z_DOWN) s->card=(s->card+1)%Z_CARDS;
+        if(action==Z_OK) {
+            if(z_card_count(s)==Z_CARDS) {
+                s->cards_done=0;s->card=(int)(random_next(s)%Z_CARDS);
+            } else if(s->cards_done&(1u<<s->card)) next_card(s);
+            else s->cards_done|=(uint8_t)(1u<<s->card);
         }
     } else if(s->page==Z_PLAY) {
         if(action==Z_UP) s->level=(s->level+Z_LEVELS-1)%Z_LEVELS;

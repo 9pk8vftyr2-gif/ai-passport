@@ -67,6 +67,29 @@ int main(void) {
     }
     for(int i=1440;i<9920;i++) assert(z_sound_sample(Z_SOUND_WIN,i)==0);
     puts("PASS sound event mapping, PCM bounds, gain, and 620 ms victory delay");
+    z_init(&s,123);z_action(&s,Z_DOWN);z_action(&s,Z_DOWN);z_action(&s,Z_OK);
+    assert(s.page==Z_GARDEN&&z_card_count(&s)==0);
+    int first=s.card;
+    for(int i=0;i<Z_CARDS;i++) z_action(&s,Z_UP);
+    assert(s.card==first);
+    for(int i=0;i<Z_CARDS;i++) {
+        assert(!(s.cards_done&(1u<<s.card)));
+        z_action(&s,Z_OK);assert(z_card_count(&s)==i+1);bounds(&s);
+        if(i<Z_CARDS-1) {z_action(&s,Z_OK);assert(z_card_count(&s)==i+1);}
+    }
+    assert(s.cards_done==255);
+    z_action(&s,Z_UP);z_action(&s,Z_DOWN);assert(z_card_count(&s)==8);
+    z_action(&s,Z_BACK);z_link_start(&s,0);z_action(&s,Z_BACK);
+    z_action(&s,Z_DOWN);z_action(&s,Z_DOWN);z_action(&s,Z_OK);assert(z_card_count(&s)==8);
+    z_action(&s,Z_OK);assert(z_card_count(&s)==0);
+    z_button(&s,&in,Z_OK,0);z_button(&s,&in,Z_OK,3);z_button(&s,&in,Z_OK,4);
+    assert(s.page==Z_HOME&&z_card_count(&s)==0);
+    z_action(&s,Z_DOWN);z_action(&s,Z_DOWN);z_action(&s,Z_OK);z_action(&s,Z_OK);
+    advance(&s,60000);assert(s.dimmed);z_button(&s,&in,Z_OK,0);advance(&s,3000);z_button(&s,&in,Z_OK,4);
+    assert(s.page==Z_HOME&&z_card_count(&s)==1);
+    z_init(&s,123);assert(z_card_count(&s)==0);
+    for(int i=0;i<Z_CARDS;i++) {const z_card *c=z_card_get(i);assert(c->title[0]&&c->line1[0]&&c->line2[0]);s.page=Z_GARDEN;s.card=i;bounds(&s);}
+    puts("PASS action cards: wrap, unique completion, all eight, explicit reset, session retention, wake and long-OK suppression");
     unsigned r=123;
     for(int n=0;n<100000;n++) {
         if(n%100==0) z_link_start(&s,n%6);

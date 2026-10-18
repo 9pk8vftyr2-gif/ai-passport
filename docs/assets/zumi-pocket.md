@@ -30,7 +30,31 @@ Only the wake greeting displays “Zumi Pocket”, above the character; other
 screens omit this brand heading.
 The firmware fades individual objects, without a full-screen compositing buffer.
 Games remain lit while thinking. This is not deep sleep or verified low power.
-Battery reads use the BSP and show `--` on failure. Talk/Garden perform no I/O.
+Battery reads use the BSP and show `--` on failure. Talk/Garden services perform no I/O.
+
+## Tiny Actions in Garden
+
+Garden opens eight local action cards: Bring a bottle, Lights out, Carry a tote,
+Use both sides, Save leftovers, Close the tap, Make it last, and Sort one item.
+Each has two short instruction lines. UP/DOWN browse all eight cyclically; OK
+marks an unfinished card complete. An eight-bit mask prevents duplicate counts.
+Completed cards use Zumi's existing cheering expression and a Next action button
+that seeks an unfinished card. When all eight are done, the explicit Start a new
+set button clears the mask. Long OK always exits without marking anything done.
+Entry picks an unfinished card when possible; the choices are repeatable from
+the prototype random seed. No pressure, penalties, streaks or carbon quantities.
+
+Progress survives home, game and wake transitions during this boot. A reboot
+clears it; there is no Flash persistence, calendar, account or cloud sync. The
+completion is self-reported, not a sensor measurement. No Garden service is
+called by the cards; the unavailable Garden sync interface remains reserved.
+Idle dim and the existing three-second wake greeting continue to apply.
+The brand heading stays exclusive to the wake greeting.
+
+The official hardware guide/BSP exposed no motion sensor interface during
+inspection. The user chose to defer both motion detection and the one-hour
+standing reminder until hardware is confirmed. No motion detector, hourly timer,
+or no-button-activity substitute is enabled in this version.
 
 ## Readable labels and shared sound
 
@@ -62,7 +86,7 @@ and display/audio contention require device measurement. No microphone reads.
 
 ## Architecture and budget
 
-- Allocation-free deterministic C model: 80 bytes, no timer-driven game state.
+- Allocation-free deterministic C model: 88 bytes, no timer-driven game state.
   Updates are capped at 100 ms after suspension. Prototype randomness uses a
   repeatable xorshift seed; it is not a claim of unpredictable randomness.
 - Shared view: at most 64 commands, 6,404 bytes per list; two firmware lists use
@@ -123,7 +147,10 @@ flashing requires a new explicit authorization and a chosen target and image.
 5. Wait 60 seconds on each menu, wake with each key, confirm a different
    expression, `zco.eco`, three-second greeting and smooth transition home.
    Hold the wake key beyond the greeting and verify no accidental action.
-6. Disconnect networking: the game still works and Talk/Garden stay unavailable.
+6. Complete and browse all eight cards offline, check one count per card,
+   explicit new-set reset, retention across home/game/wake and reset on reboot.
+   Confirm no one-hour reminder or motion detection is enabled. Disconnect
+   networking: the game and cards work; Talk/Garden services stay unavailable.
 7. Run 30 minutes and 100 page switches. Record minimum free heap, largest free
    block, LVGL pool peak, watchdog behavior, input latency and frame rate.
 8. Audition rotation, connection and victory sounds against the website. Check

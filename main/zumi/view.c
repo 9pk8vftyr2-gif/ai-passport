@@ -55,11 +55,23 @@ void z_render(const z_state *s, int battery, z_view *v) {
         text(v,43,217,tmp,MUTED,14);
         choice(v,247,"Start connecting",true);
         text(v,25,289,"UP / DOWN choose level",MUTED,14);
-    } else if(s->page==Z_TALK || s->page==Z_GARDEN) {
-        bool talk=s->page==Z_TALK;
-        text(v,24,55,talk?"Hello, friend.":"Our little garden.",INK,20);
+    } else if(s->page==Z_GARDEN) {
+        int count=z_card_count(s);
+        bool done=(s->cards_done&(1u<<s->card))!=0, all=count==Z_CARDS;
+        const z_card *card=z_card_get(s->card);
+        text(v,22,16,"UP / DOWN: browse",MUTED,10);
+        text(v,24,49,"Tiny Actions",INK,20);
+        snprintf(tmp,sizeof(tmp),"Card %d / 8    %d done",s->card+1,count);
+        text(v,24,77,tmp,MUTED,14);
+        sprite(v,81,97,done?Z_CHEER:s->expression);
+        text(v,24,205,all?"Nice work!":card->title,INK,20);
+        text(v,24,234,all?"Eight small steps.":card->line1,MUTED,14);
+        text(v,24,252,all?"Ready for another set?":done?"Nice small step!":card->line2,MUTED,14);
+        choice(v,278,all?"Start a new set":done?"Next action":"Mark as done",true);
+    } else if(s->page==Z_TALK) {
+        text(v,24,55,"Hello, friend.",INK,20);
         sprite(v,81,97,s->expression);
-        text(v,28,205,talk?"Voice is not connected.":"Garden is not connected.",INK,14);
+        text(v,28,205,"Voice is not connected.",INK,14);
         text(v,28,231,"Your games work offline.",MUTED,14);
         choice(v,263,"Back home",true);
     } else if(s->page==Z_LINK) {

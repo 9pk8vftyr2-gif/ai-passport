@@ -4,7 +4,7 @@
 enum { Z_HOME, Z_PLAY, Z_LINK, Z_TALK, Z_GARDEN, Z_WAKE };
 enum { Z_UP, Z_DOWN, Z_OK, Z_BACK };
 enum { Z_HAPPY, Z_FOCUS, Z_CHEER };
-enum { Z_SERVICE_UNAVAILABLE = -1, Z_LEVELS = 6 };
+enum { Z_SERVICE_UNAVAILABLE = -1, Z_LEVELS = 6, Z_CARDS = 8 };
 typedef struct {
     int page, selection, level, moves, cursor, won;
     uint32_t rng, idle_ms, wake_ms, home_fade_ms;
@@ -12,8 +12,13 @@ typedef struct {
     uint8_t tiles[9], solution[9];
     uint16_t powered, homes, fixed;
     int source, wind;
+    int card;
+    uint8_t cards_done;
 } z_state;
 typedef struct { bool ok_down, ok_long, wake_held; int wake_button; } z_input;
+typedef struct { const char *title, *line1, *line2; } z_card;
+const z_card *z_card_get(int index);
+int z_card_count(const z_state *s);
 void z_init(z_state *s, uint32_t seed);
 void z_action(z_state *s, int action);
 void z_tick(z_state *s, uint32_t ms);
