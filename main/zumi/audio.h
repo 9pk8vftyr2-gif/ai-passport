@@ -15,3 +15,6 @@ bool z_audio_drained(void);
 bool z_audio_stopped(void);
 bool z_audio_talk_failed(void);
 unsigned z_audio_pending(void);
+
+/* Codec-write envelope; physical DMA/speaker synchronization needs board testing. */
+unsigned z_audio_output_level(uint32_t turn);

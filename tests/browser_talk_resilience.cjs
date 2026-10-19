@@ -41,8 +41,9 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   assert.equal(await page.evaluate(()=>micRequests),0);
   await page.keyboard.press('Enter');await page.waitForFunction(()=>pocket.talkClient.evidence.sentFrames>5);await page.keyboard.press('Enter');
   await page.waitForFunction(()=>pocket.api.pocket_talk_state()===3,{},{timeout:8000}).catch(async e=>{console.log(await page.evaluate(()=>({state:pocket.api.pocket_talk_state(),evidence:pocket.talkClient.evidence,mic:document.querySelector('#live-capture').textContent,answer:document.querySelector('#live-answer').textContent,sockets:localSockets.map(s=>({seq:s.seq,credit:s.credit,active:s.active,ready:s.readyState}))})));throw e;});
-  // Audio already scheduled ahead must tolerate a busy UI thread.
-  await page.evaluate(()=>{const until=performance.now()+180;while(performance.now()<until){}});
+  // The audio thread must keep draining PCM while the UI is busy.
+  await page.waitForFunction(()=>pocket.talkClient.evidence.playedFrames>=5);
+  await page.evaluate(()=>{const until=performance.now()+400;while(performance.now()<until){}});
   await page.waitForFunction(()=>pocket.talkClient.evidence.done===1);
   const playback=await page.evaluate(()=>({...pocket.talkClient.evidence}));
   assert.equal(playback.receivedFrames,240);assert.equal(playback.playedFrames,240);assert.equal(playback.underruns,0);assert(playback.maxQueued<=36);
@@ -55,7 +56,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   await page.waitForFunction(()=>pocket.talkClient.evidence.connections===3);
   assert.equal(await page.evaluate(()=>micRequests),1);
   assert.deepEqual(errors,[]);
-  fs.writeFileSync('build/talk-resilience.json',JSON.stringify({status:'PASS',input:'fake media; no cloud',jitterMs:250,uiStallMs:180,playback,automaticReconnects:2,microphoneReopened:false},null,2));
+  fs.writeFileSync('build/talk-resilience.json',JSON.stringify({status:'PASS',input:'fake media; no cloud',jitterMs:250,uiStallMs:400,playback,automaticReconnects:2,microphoneReopened:false},null,2));
   console.log('Talk resilience: PASS',playback);
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});

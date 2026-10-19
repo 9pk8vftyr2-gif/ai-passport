@@ -16,7 +16,15 @@ int main(void){
     send(&m,T_OK);assert(m.state==T_PROCESSING&&!m.mic&&m.effect==T_F_COMMIT);
     t_event(&m,T_REPLY,m.turn,"Energy from sunlight.");assert(m.reply[0]);
     send(&m,T_AUDIO);assert(m.state==T_SPEAKING&&m.speaker&&!m.mic);
-    send(&m,T_OK);assert(m.state==T_IDLE&&!m.speaker&&!m.asr[0]&&!m.reply[0]);
+    assert(!m.mouth_open);t_output_level(&m,m.turn,1000);assert(m.mouth_open);
+    t_output_level(&m,m.turn,300);assert(m.mouth_open); /* Hysteresis avoids chatter. */
+    t_output_level(&m,m.turn-1,0);assert(m.mouth_open);
+    t_output_level(&m,m.turn,0);assert(!m.mouth_open);
+    t_tick(&m,140);assert(!m.mouth_open); /* Silence never starts a timer animation. */
+    t_output_level(&m,m.turn,1000);t_tick(&m,159);assert(m.mouth_open);
+    t_tick(&m,1);assert(!m.mouth_open); /* Lost output reports close the mouth. */
+    t_output_level(&m,m.turn,1000);
+    send(&m,T_OK);assert(m.state==T_IDLE&&!m.speaker&&!m.asr[0]&&!m.reply[0]&&!m.mouth_open);
     t_event(&m,T_AUDIO,old,0);assert(m.state==T_IDLE);
     send(&m,T_OK);t_event(&m,T_FAILURE,old,0);assert(m.state==T_LISTENING);
     t_tick(&m,14999);assert(m.mic);t_tick(&m,1);assert(m.state==T_PROCESSING&&!m.mic);

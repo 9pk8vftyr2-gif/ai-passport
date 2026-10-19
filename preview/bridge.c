@@ -40,3 +40,5 @@ int pocket_talk_state(void){return state.talk.state;}
 unsigned pocket_talk_turn(void){return state.talk.turn;}
 void pocket_talk_event(int event,unsigned turn){z_talk_receive(&state,event,turn,incoming);}
 char *pocket_talk_buffer(void){return incoming;}
+
+void pocket_talk_level(unsigned turn,unsigned level){t_output_level(&state.talk,turn,level);}

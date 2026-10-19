@@ -1,4 +1,4 @@
-import {createTalkClient} from "./talk_client.js?v=20261019-talk";
+import {createTalkClient} from "./talk_client.js?v=20261019-envelope2";
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d');
 const status=document.querySelector('#status');
 async function loadImages(paths){
@@ -16,7 +16,7 @@ const wakeCards=await loadImages(Array.from({length:8},(_,i)=>`../assets/images/
 const energyIcons=await loadImages(['solar-off','wind-off','house-off','solar-on','wind-on','house-on'].map(name=>`../assets/images/zumi-pocket/energy-icons/${name}.png`));
 let api;
 try {
- const response=await fetch('pocket.wasm?v=20261019-talk'); if(!response.ok)throw Error('请先运行 tools/build_preview.sh');
+ const response=await fetch('pocket.wasm?v=20261019-envelope2'); if(!response.ok)throw Error('请先运行 tools/build_preview.sh');
  const bytes=await response.arrayBuffer();
  const {instance}=await WebAssembly.instantiate(bytes,{wasi_snapshot_preview1:{clock_time_get:()=>52,fd_write:()=>0,fd_close:()=>0,fd_seek:()=>0,proc_exit:code=>{throw Error(`WASM exit ${code}`);}}});
  api=instance.exports;api._initialize?.();api.pocket_init(0x5A554D49);

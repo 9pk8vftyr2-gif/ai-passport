@@ -9,6 +9,7 @@ static void clear_text(t_model *m) {
 }
 static void enter(t_model *m,int state) {
     m->state=state;m->elapsed=m->silence=0;
+    m->mouth_open=false;m->mouth_age=0;
     m->mic=state==T_LISTENING;m->speaker=state==T_SPEAKING;
 }
 static void abort_turn(t_model *m,int state,int error) {
@@ -70,7 +71,15 @@ void t_event(t_model *m,int event,uint32_t turn,const char *text) {
     if(event==T_DONE&&(m->state==T_PROCESSING||m->state==T_SPEAKING)) enter(m,T_IDLE);
 }
 static uint32_t add_sat(uint32_t n,uint32_t ms) {return ms>UINT32_MAX-n?UINT32_MAX:n+ms;}
+void t_output_level(t_model *m,uint32_t turn,unsigned level) {
+    if(turn!=m->turn||m->state!=T_SPEAKING)return;
+    m->mouth_age=0;
+    if(level>=450)m->mouth_open=true;
+    else if(level<=220)m->mouth_open=false;
+}
 void t_tick(t_model *m,uint32_t ms) {
+    m->mouth_age=add_sat(m->mouth_age,ms);
+    if(m->mouth_age>=160)m->mouth_open=false;
     m->effect=T_F_NONE;
     m->elapsed=add_sat(m->elapsed,ms);m->silence=add_sat(m->silence,ms);
     if(m->connecting&&m->elapsed>=T_CONNECT_MS) {

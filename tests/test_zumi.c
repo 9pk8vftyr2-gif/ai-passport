@@ -42,7 +42,7 @@ int main(void) {
         }
         assert(mic);
         for(int frame=0;frame<3;frame++) {
-            talk.talk.state=frame==2?T_IDLE:T_SPEAKING;talk.talk.elapsed=frame*140;
+            talk.talk.state=frame==2?T_IDLE:T_SPEAKING;talk.talk.elapsed=frame*140;talk.talk.mouth_open=frame==0;
             z_render(&talk,-1,&v);int portrait=-1;
             for(int i=0;i<v.count;i++)if(v.ops[i].kind==Z_SPRITE)portrait=v.ops[i].size;
             assert(portrait==(frame==1?3:Z_HAPPY));

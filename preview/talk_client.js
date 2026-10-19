@@ -1,10 +1,11 @@
 import {captureMicrophone} from './talk_microphone.js';
+import {createPlayback} from './talk_playback.js?v=20261019-envelope2';
 // Default remains a synthetic local fixture. Official mode is explicitly selected.
 export function createTalkClient(api,getAudio,stopGame){
  const live=new URLSearchParams(location.search).get('talk')==='xiaozhi';
  const E={OK:0,CANCEL:1,CONNECTED:2,DISCONNECTED:3,ASR:4,REPLY:5,AUDIO:6,DONE:7,FAILURE:8,OVERFLOW:9};
- let socket=null,generation=0,capture=null,microphone=null,turn=0,seq=0,rxSeq=0,nodes=new Set(),ended=false,nextTime=0,committing=false,lastAudioAt=0;
- const evidence={connections:0,maxArrivalGapMs:0,underrunGapsMs:[],sentFrames:0,receivedFrames:0,playedFrames:0,maxQueued:0,underruns:0,commits:0,cancels:0,done:0};
+ let socket=null,generation=0,capture=null,microphone=null,turn=0,seq=0,rxSeq=0,playback=null,playbackReady=null,playbackRevision=0,queued=0,ended=false,committing=false,lastAudioAt=0;
+ const evidence={connections:0,maxArrivalGapMs:0,sentFrames:0,receivedFrames:0,playedFrames:0,maxQueued:0,underruns:0,commits:0,cancels:0,done:0};
  let outputWindow=12,retryAt=0,retryDelay=2000;
  const enc=new TextEncoder();
  function connectionStatus(text){const el=document.querySelector('#live-connection');if(live&&el)el.textContent=text;}
@@ -20,10 +21,27 @@ export function createTalkClient(api,getAudio,stopGame){
  function send(obj){if(socket?.readyState!==WebSocket.OPEN)throw Error('local relay offline');socket.send(JSON.stringify({v:1,...obj}));}
  function captureStatus(kind){const el=document.querySelector('#live-capture');if(el)el.textContent=({preparing:'麦克风准备中，请稍候…',ready:'可以说话了 · 再按 OK 发送',quiet:'声音较轻，请靠近麦克风',loud:'声音偏响，请稍微远离麦克风',sending:'录音已结束，正在发送…',off:'麦克风已关闭'})[kind]||'';}
  function stopCapture(){clearInterval(capture);capture=null;committing=false;microphone?.stop();microphone=null;if(live)captureStatus('off');}
- function stopPlayback(){for(const n of nodes){n.onended=null;try{n.stop();}catch{}n.disconnect();}nodes.clear();nextTime=0;ended=false;}
+ function stopPlayback(){playbackRevision++;playback?.stop();playback=null;playbackReady=null;queued=0;ended=false;api.pocket_talk_level(turn,0);}
+ function preparePlayback(){
+  const revision=playbackRevision,epoch=generation,activeTurn=turn,audio=getAudio();
+  if(!audio||audio.state!=='running')throw Error('audio unavailable');
+  playbackReady=createPlayback(audio,outputWindow,live,report=>{
+   if(revision!==playbackRevision||epoch!==generation||activeTurn!==api.pocket_talk_turn())return;
+   queued-=report.consumed;evidence.playedFrames+=report.consumed;evidence.underruns+=report.underruns;
+   api.pocket_talk_level(activeTurn,report.level);
+   try{
+    if(report.consumed)send({type:'output.credit',turn:activeTurn,frames:report.consumed});
+    if(report.done&&ended&&queued===0){ended=false;evidence.done++;event(E.DONE,activeTurn);}
+   }catch{fail();}
+  },()=>{if(revision===playbackRevision&&epoch===generation)fail();}).then(player=>{
+   if(revision!==playbackRevision||epoch!==generation){player.stop();return false;}
+   playback=player;return true;
+  });
+  // Observe loading errors even if recording is cancelled before commit.
+  playbackReady.catch(()=>{if(revision===playbackRevision&&epoch===generation)fail();});
+ }
  function close(){connectionStatus('语音连接已关闭，返回 Talk 后自动连接');retryAt=performance.now()+retryDelay;generation++;stopCapture();stopPlayback();const old=socket;socket=null;if(old){old.onclose=null;old.onmessage=null;old.close();}}
  function fail(){event(E.FAILURE);close();event(E.DISCONNECTED);}
- function finish(){if(ended&&!nodes.size){ended=false;evidence.done++;event(E.DONE,turn);}}
  function incoming(data,epoch){
   if(epoch!==generation)return;
   try{
@@ -34,7 +52,7 @@ export function createTalkClient(api,getAudio,stopGame){
     if(m.type==='asr.final'||m.type==='answer.snapshot'){
      if(typeof m.text!=='string'||enc.encode(m.text).length>(m.type==='asr.final'?1023:1535))throw Error('text bounds');
      event(m.type==='asr.final'?E.ASR:E.REPLY,turn,m.text);
-    }else if(m.type==='output.end'){if(m.last_seq!==rxSeq-1||!rxSeq)throw Error('missing output');ended=true;finish();}
+    }else if(m.type==='output.end'){if(m.last_seq!==rxSeq-1||!rxSeq)throw Error('missing output');ended=true;playback.end();}
     else if(m.type==='error')fail();else throw Error('unknown type');
     return;
    }
@@ -42,18 +60,12 @@ export function createTalkClient(api,getAudio,stopGame){
    const v=new DataView(data),n=v.getUint16(12,true),t=v.getUint32(4,true);
    if(t!==turn||t!==api.pocket_talk_turn())return;
    if(v.getUint8(0)!==1||v.getUint8(1)!==2||v.getUint16(2,true)||v.getUint32(8,true)!==rxSeq||n%2||!n||n>640||data.byteLength!==n+14||ended)throw Error('invalid frame');
-   if(nodes.size>=outputWindow)throw Error('queue full');
-   const audio=getAudio();if(!audio||audio.state!=='running')throw Error('audio unavailable');
+   if(queued>=outputWindow||!playback)throw Error('queue unavailable');
    const now=performance.now();if(lastAudioAt)evidence.maxArrivalGapMs=Math.max(evidence.maxArrivalGapMs,Math.round(now-lastAudioAt));lastAudioAt=now;
-   const buffer=audio.createBuffer(1,n/2,16000),pcm=buffer.getChannelData(0);
+   const pcm=new Float32Array(n/2);
    for(let i=0;i<n/2;i++)pcm[i]=v.getInt16(14+i*2,true)/32768;
-   const node=audio.createBufferSource();node.buffer=buffer;node.connect(audio.destination);
-   if(!rxSeq)nextTime=audio.currentTime+(live ? .30 : .12);
-   else if(nextTime<audio.currentTime){evidence.underruns++;if(evidence.underrunGapsMs.length<16)evidence.underrunGapsMs.push(Math.round((audio.currentTime-nextTime)*1000));nextTime=audio.currentTime+(live ? .20 : 0);}
-   nextTime=Math.max(nextTime,audio.currentTime);nodes.add(node);rxSeq++;evidence.receivedFrames++;
-   evidence.maxQueued=Math.max(evidence.maxQueued,nodes.size);event(E.AUDIO,turn);
-   node.onended=()=>{nodes.delete(node);node.disconnect();if(epoch!==generation)return;evidence.playedFrames++;try{send({type:'output.credit',turn,frames:1});finish();}catch{fail();}};
-   node.start(nextTime);nextTime+=n/32000;
+   queued++;rxSeq++;evidence.receivedFrames++;evidence.maxQueued=Math.max(evidence.maxQueued,queued);
+   event(E.AUDIO,turn);playback.push(pcm);
   }catch{fail();}
  }
  function command(c){
@@ -67,7 +79,7 @@ export function createTalkClient(api,getAudio,stopGame){
     socket.onclose=()=>{if(epoch===generation){close();retryDelay=Math.min(retryDelay*2,15000);connectionStatus('连接暂时中断，正在自动重连…');event(E.DISCONNECTED);}};
     socket.onerror=()=>{if(epoch===generation){close();retryDelay=Math.min(retryDelay*2,15000);connectionStatus('连接暂时中断，正在自动重连…');event(E.DISCONNECTED);}};
    }else if(c===1){
-    stopGame();stopCapture();stopPlayback();turn=api.pocket_talk_turn();seq=rxSeq=0;lastAudioAt=0;
+    stopGame();stopCapture();stopPlayback();turn=api.pocket_talk_turn();seq=rxSeq=0;lastAudioAt=0;preparePlayback();
     send({type:'input.begin',turn,capability:'qa',memory:'none',fixture:document.querySelector('#talk-fixture')?.value||'intro'});
     const epoch=generation;
     if(live){
@@ -91,16 +103,18 @@ export function createTalkClient(api,getAudio,stopGame){
      const epoch=generation,recordingTurn=turn,activeMic=microphone;committing=true;captureStatus('sending');
      (async()=>{try{
       const drained=await activeMic?.finish();
+      const outputReady=await playbackReady;
       if(epoch!==generation||turn!==recordingTurn||api.pocket_talk_turn()!==recordingTurn||api.pocket_talk_state()!==2||!committing)return;
       committing=false;microphone=null;
-      if(!drained||!seq)throw Error('empty or interrupted recording');
+      if(!drained||!outputReady||!seq)throw Error('empty or interrupted recording');
       send({type:'input.commit',turn,last_seq:seq-1});send({type:'output.credit',turn,frames:outputWindow});evidence.commits++;captureStatus('off');
      }catch{if(epoch===generation&&turn===recordingTurn)fail();}})();
      return;
     }
     stopCapture();if(!seq)throw Error('empty recording');
     // WebSocket preserves message order; bounded bufferedAmount prevents an utterance queue.
-    send({type:'input.commit',turn,last_seq:seq-1});send({type:'output.credit',turn,frames:outputWindow});evidence.commits++;
+    const revision=playbackRevision,recordingTurn=turn;
+    playbackReady.then(ready=>{if(!ready||revision!==playbackRevision||recordingTurn!==api.pocket_talk_turn())return;try{send({type:'input.commit',turn,last_seq:seq-1});send({type:'output.credit',turn,frames:outputWindow});evidence.commits++;}catch{fail();}}).catch(()=>{});
    }else if(c===3){
     evidence.cancels++;stopCapture();stopPlayback();
     if(socket?.readyState===WebSocket.OPEN)send({type:'cancel',turn});

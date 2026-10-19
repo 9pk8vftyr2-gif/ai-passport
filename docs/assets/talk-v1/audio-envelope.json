@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-19",
+  "build": {
+    "status": "PASS",
+    "idf_version": "5.5.3",
+    "app_bytes": 2757312,
+    "factory_remaining_bytes": 5565760,
+    "full_image_sha256": "843964406016c348fbd81cf11c6eab67b6accd76129eefb92fd376cbe1f2162d",
+    "elf_sha256": "399bac38c77e524571cb917151c7c6893e1d9bf37fac02bf2f17ac90ad81c2fb",
+    "source_version": "ceb35d5-dirty",
+    "archive": "build/firmware/843964406016c348fbd81cf11c6eab67b6accd76129eefb92fd376cbe1f2162d",
+    "archive_verified": true
+  },
+  "host_tests": "PASS; complete gate and additional playback/capture worklet and relay tests",
+  "browser_demo": "PASS",
+  "device_tests": "NOT RUN",
+  "animation": {
+    "status": "PASS",
+    "input": "synthetic tone / 800 ms silence / tone; no real microphone",
+    "mouthFrames": [
+      0,
+      3,
+      0
+    ],
+    "silentObservationMs": 350,
+    "cancelStopsOutput": true,
+    "errors": []
+  },
+  "controlled_playback": {
+    "status": "PASS",
+    "input": "fake media; no cloud",
+    "jitterMs": 250,
+    "uiStallMs": 400,
+    "playback": {
+      "connections": 1,
+      "maxArrivalGapMs": 534,
+      "sentFrames": 7,
+      "receivedFrames": 240,
+      "playedFrames": 240,
+      "maxQueued": 36,
+      "underruns": 0,
+      "commits": 1,
+      "cancels": 0,
+      "done": 1
+    },
+    "automaticReconnects": 2,
+    "microphoneReopened": false
+  },
+  "official_cloud": {
+    "status": "PASS",
+    "input": "public synthetic greeting; no real microphone",
+    "sequence": "two complete turns, interrupt, recovered complete turn",
+    "interruptMs": 5,
+    "evidence": {
+      "connections": 1,
+      "maxArrivalGapMs": 71,
+      "sentFrames": 799,
+      "receivedFrames": 456,
+      "playedFrames": 447,
+      "maxQueued": 16,
+      "underruns": 0,
+      "commits": 4,
+      "cancels": 1,
+      "done": 3,
+      "micRequests": 4,
+      "tracksStopped": true,
+      "questionPresent": true,
+      "answerPresent": true
+    },
+    "errors": []
+  },
+  "local_integration": {
+    "status": "PASS",
+    "evidence": {
+      "connections": 3,
+      "maxArrivalGapMs": 41,
+      "sentFrames": 54,
+      "receivedFrames": 495,
+      "playedFrames": 471,
+      "maxQueued": 12,
+      "underruns": 0,
+      "commits": 3,
+      "cancels": 5,
+      "done": 1
+    },
+    "errors": []
+  },
+  "microphone_lifecycle": "PASS; normal, finish ordering, denied, blur cancellation, late permission; fake microphone only",
+  "playback_unit": "PASS; 16000/44100/48000 Hz; silence, partial tail, credits, overflow, stop, drain, rebuffer",
+  "unverified": [
+    "Human microphone recognition and subjective listening quality",
+    "Physical display/speaker timing, runtime heap and power",
+    "Large network outages and full login/reboot acceptance"
+  ],
+  "notes": [
+    "Nine received frames were intentionally discarded during interruption in the final official run; completed turns drained all received frames.",
+    "Renderer underruns are measured on the audio thread; zero does not prove the cloud-generated waveform or physical audio output is gap-free.",
+    "No flash, paid service, character replacement, website or upstream main change."
+  ],
+  "playback_source_sha256": {
+    "preview/talk_client.js": "75c5dc134568d51c0d7bbe419adff0a64a5e390fa285ff80a3b02757499aa607",
+    "preview/talk_playback.js": "1c530e3dd26c6e9bd70b17243003de6be88e6c1390f09678f4a7af6efa6e572e",
+    "preview/talk_playback_worklet.js": "d6468b99d901920d32b2de1696f669f76370a82be33fb38f221af4050269e5fb"
+  }
+}

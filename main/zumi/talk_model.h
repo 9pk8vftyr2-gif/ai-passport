@@ -12,12 +12,15 @@ enum { T_RECORD_MS=15000, T_PROCESS_MS=20000, T_SPEAK_MS=60000,
        T_ASR_CAP=1024, T_REPLY_CAP=1536, T_FRAME_BYTES=640,
        T_UPLINK_FRAMES=5, T_DOWNLINK_FRAMES=12 };
 typedef struct {
-    uint32_t turn, elapsed, silence;
+    uint32_t turn, elapsed, silence, mouth_age;
     int state, effect, error;
-    bool online, mic, speaker, connecting;
+    bool online, mic, speaker, connecting, mouth_open;
     char asr[T_ASR_CAP], reply[T_REPLY_CAP];
 } t_model;
 void t_init(t_model *m);
 /* Network events carry the current turn; stale events cannot revive audio. */
 void t_event(t_model *m, int event, uint32_t turn, const char *text);
 void t_tick(t_model *m, uint32_t ms);
+
+/* Actual output amplitude (mean absolute PCM16), never packet-arrival timing. */
+void t_output_level(t_model *m, uint32_t turn, unsigned level);

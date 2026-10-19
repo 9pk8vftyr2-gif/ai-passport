@@ -2,12 +2,14 @@
 #include "sound.h"
 #include "bsp_audio.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include <stdatomic.h>
 static QueueHandle_t requests, uplink, downlink;
 static atomic_uint revision, talk_turn, pending, acknowledged;
+static atomic_uint output_level, output_at, output_turn;
 static atomic_int mode;
 static atomic_bool failed;
 static void worker(void *arg) {
@@ -36,6 +38,13 @@ static void worker(void *arg) {
             }else if(xQueueReceive(downlink,&block,pdMS_TO_TICKS(20))==pdTRUE){
                 if(block.turn==atomic_load(&talk_turn)&&rev==atomic_load(&revision)){
                     if(bsp_audio_write(block.pcm,block.bytes)!=ESP_OK){atomic_store(&failed,true);atomic_store(&mode,0);}
+                    else if(rev==atomic_load(&revision)&&atomic_load(&mode)==2){
+                        unsigned total=0;
+                        for(unsigned i=0;i<block.bytes;i+=2){int sample=(int16_t)((unsigned)block.pcm[i]|((unsigned)block.pcm[i+1]<<8));total+=(unsigned)(sample<0?-sample:sample);}
+                        atomic_store(&output_level,block.bytes?total/(block.bytes/2):0);
+                        atomic_store(&output_turn,block.turn);
+                        atomic_store(&output_at,(unsigned)(esp_timer_get_time()/1000));
+                    }
                 }
                 /* Queued and in-flight blocks each release exactly one pending count. */
                 atomic_fetch_sub(&pending,1);
@@ -70,7 +79,7 @@ bool z_audio_talk_prepare(void){
     return uplink&&downlink;
 }
 void z_audio_talk_mode(int next,uint32_t turn){
-    z_audio_play(Z_SOUND_NONE);atomic_store(&talk_turn,turn);atomic_fetch_add(&revision,1);
+    atomic_store(&output_level,0);z_audio_play(Z_SOUND_NONE);atomic_store(&talk_turn,turn);atomic_fetch_add(&revision,1);
     atomic_store(&mode,next==3?0:next);if(next==1||next==2)atomic_store(&failed,false);
     /* Queue items carry turn IDs; no queue reset races with a blocked codec read/write. */
     z_pcm_frame block;
@@ -88,3 +97,9 @@ bool z_audio_talk_failed(void){return atomic_load(&failed);}
 unsigned z_audio_pending(void){return atomic_load(&pending);}
 
 bool z_audio_stopped(void){return atomic_load(&mode)==0&&atomic_load(&acknowledged)==atomic_load(&revision);}
+
+unsigned z_audio_output_level(uint32_t turn){
+    unsigned now=(unsigned)(esp_timer_get_time()/1000);
+    if(atomic_load(&mode)!=2||atomic_load(&output_turn)!=turn||now-atomic_load(&output_at)>80)return 0;
+    return atomic_load(&output_level);
+}

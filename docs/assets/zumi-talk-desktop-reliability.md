@@ -5,6 +5,9 @@
 2026-10-19. No device was flashed. Official speech is still a desktop adapter;
 the device firmware retains the local PCM adapter.
 
+> Historical acceptance record. The fixed timer animation and source-node playback
+> described below are superseded by [audio-driven mouth and playback](zumi-talk-audio-envelope.md).
+
 ## Installed services
 
 `tools/talk_autostart.py` installs three user LaunchAgents with RunAtLoad,

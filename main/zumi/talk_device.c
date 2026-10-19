@@ -220,6 +220,7 @@ void z_talk_device_command(int code,uint32_t turn){
     if(xQueueSend(commands,&item,0)!=pdTRUE)atomic_store(&queue_failed,true);
 }
 void z_talk_device_poll(z_state *state){
+    t_output_level(&state->talk,state->talk.turn,z_audio_output_level(state->talk.turn));
     if(atomic_exchange(&queue_failed,false)){z_talk_device_command(5,state->talk.turn);z_talk_receive(state,T_FAILURE,state->talk.turn,NULL);z_talk_receive(state,T_DISCONNECTED,state->talk.turn,NULL);return;}
     if(!events){return;}
     static notification item;
