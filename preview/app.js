@@ -1,4 +1,4 @@
-import {createTalkClient} from "./talk_client.js?v=20261019-envelope2";
+import {createTalkClient} from "./talk_client.js?v=20261019-human-check2";
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d');
 const status=document.querySelector('#status');
 async function loadImages(paths){
@@ -16,13 +16,14 @@ const wakeCards=await loadImages(Array.from({length:8},(_,i)=>`../assets/images/
 const energyIcons=await loadImages(['solar-off','wind-off','house-off','solar-on','wind-on','house-on'].map(name=>`../assets/images/zumi-pocket/energy-icons/${name}.png`));
 let api;
 try {
- const response=await fetch('pocket.wasm?v=20261019-envelope2'); if(!response.ok)throw Error('请先运行 tools/build_preview.sh');
+ const response=await fetch('pocket.wasm?v=20261019-human-check2'); if(!response.ok)throw Error('请先运行 tools/build_preview.sh');
  const bytes=await response.arrayBuffer();
  const {instance}=await WebAssembly.instantiate(bytes,{wasi_snapshot_preview1:{clock_time_get:()=>52,fd_write:()=>0,fd_close:()=>0,fd_seek:()=>0,proc_exit:code=>{throw Error(`WASM exit ${code}`);}}});
  api=instance.exports;api._initialize?.();api.pocket_init(0x5A554D49);
  const live=new URLSearchParams(location.search).get('talk')==='xiaozhi';
  status.textContent=live?'Talk：官方小智 · 按 OK 才开启麦克风 · 游戏离线可用':'Talk：本地模拟录音与问答 · 真实分块语音播放 · 游戏离线可用';
  document.querySelector('#live-conversation').hidden=!live;
+ document.querySelector('#live-text-link').hidden=!live;
  if(live){document.querySelector('#talk-fixture').disabled=true;document.querySelector('#talk-fixture').closest('article').querySelector('p').textContent='进入 Talk 自动连接，OK 开始录音，再按 OK 结束并等待回答。首次使用请允许麦克风权限。回答时按 OK 打断，长按返回。每次录音最多 15 秒，离开页面即停止。';document.querySelector('.tag').textContent='Talk 官方小智联调 · 小游戏离线可玩';}
 } catch(e) {status.textContent=`加载失败：${e.message}`;throw e;}
 let audioContext, soundNode, soundGeneration=0;
@@ -82,8 +83,8 @@ for(const b of document.querySelectorAll('button')){
  b.addEventListener('keyup',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();release();}});
 }
 window.addEventListener('focus',()=>talkClient.resume());
-window.addEventListener('blur',()=>{release(true);stopSound();talkClient.cancel();});
+window.addEventListener('blur',()=>{release(true);stopSound();talkClient.cancel("窗口失去焦点");});
 let last=performance.now();
 function frame(now){const dt=Math.floor(now-last);last+=dt;if(!document.hidden){api.pocket_tick(dt);render();}requestAnimationFrame(frame);}
-document.addEventListener('visibilitychange',()=>{last=performance.now();if(document.hidden){release(true);stopSound();talkClient.cancel();audioContext?.suspend().catch(()=>{});}});
+document.addEventListener('visibilitychange',()=>{last=performance.now();if(document.hidden){release(true);stopSound();talkClient.cancel("页面隐藏");audioContext?.suspend().catch(()=>{});}});
 window.pocket={api,render,talkClient};render();requestAnimationFrame(frame);

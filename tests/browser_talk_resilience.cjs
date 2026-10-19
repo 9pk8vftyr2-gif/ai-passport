@@ -46,6 +46,9 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   await page.evaluate(()=>{const until=performance.now()+400;while(performance.now()<until){}});
   await page.waitForFunction(()=>pocket.talkClient.evidence.done===1);
   const playback=await page.evaluate(()=>({...pocket.talkClient.evidence}));
+  const check=await page.locator('#talk-check-current').textContent();
+  assert(check.includes('完整播放')&&check.includes('240 / 240')&&check.includes('缓冲耗尽：0 次'));
+  assert((await page.locator('#talk-check-audio').textContent()).includes('Hz'));
   assert.equal(playback.receivedFrames,240);assert.equal(playback.playedFrames,240);assert.equal(playback.underruns,0);assert(playback.maxQueued<=36);
   await page.evaluate(()=>localSockets.at(-1).disconnect());
   await page.waitForFunction(()=>pocket.talkClient.evidence.connections===2,{},{timeout:6000});
@@ -55,6 +58,8 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
   await page.waitForFunction(()=>pocket.talkClient.evidence.connections===3);
   assert.equal(await page.evaluate(()=>micRequests),1);
+  assert.equal(await page.locator('#talk-check-current').textContent(),check); // Completed receipt survives focus/reconnect.
+  assert.equal(await page.locator('#talk-check-stop').textContent(),'');
   assert.deepEqual(errors,[]);
   fs.writeFileSync('build/talk-resilience.json',JSON.stringify({status:'PASS',input:'fake media; no cloud',jitterMs:250,uiStallMs:400,playback,automaticReconnects:2,microphoneReopened:false},null,2));
   console.log('Talk resilience: PASS',playback);

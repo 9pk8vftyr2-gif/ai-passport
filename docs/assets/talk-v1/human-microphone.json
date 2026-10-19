@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-19",
+  "human_acceptance": "PARTIAL",
+  "environment": "real microphone; installed desktop preview; authorized free official XiaoZhi",
+  "baseline_commit": "6659bbb",
+  "diagnostic_patch": true,
+  "keywords": {
+    "zumi_chinese_alias": {
+      "status": "NOT STABLE",
+      "controlled_samples": 2,
+      "correct": 1,
+      "incorrect": 1,
+      "incorrect_term": "总以",
+      "intended_term_confirmed_by_user": true
+    },
+    "zco_letters": {
+      "status": "PASS in observed controlled sample"
+    },
+    "carbon_reduction": {
+      "status": "PASS in two controlled samples"
+    },
+    "english_zumi_spelling": "NOT TESTED"
+  },
+  "initial_continuity": "User reported stuttering; approximately synchronized mouth; no per-turn counters captured",
+  "completed_samples": [
+    {
+      "turn": 4,
+      "received": 354,
+      "played": 354,
+      "underruns": 0,
+      "max_arrival_gap_ms": 72,
+      "max_queued": 24
+    },
+    {
+      "turn": 5,
+      "received": 987,
+      "played": 987,
+      "underruns": 0,
+      "max_arrival_gap_ms": 79,
+      "max_queued": 35
+    },
+    {
+      "turn": 7,
+      "received": 282,
+      "played": 282,
+      "underruns": 0,
+      "max_arrival_gap_ms": 97,
+      "max_queued": 35
+    }
+  ],
+  "user_observation": {
+    "later_continuity": "normal",
+    "interruption_and_recovery": "normal",
+    "mouth_closes_in_pauses": true
+  },
+  "output_estimates": {
+    "sample_rate": 44100,
+    "base_latency_ms": 6,
+    "output_latency_ms": 186,
+    "physical_measurement": false
+  },
+  "device_tests": "NOT RUN",
+  "unverified": [
+    "Cause of initial intermittent stutter",
+    "Stable Zumi name recognition",
+    "Phoneme or frame-level synchronization",
+    "Physical device, heap, power"
+  ],
+  "automated_validation": {
+    "build": "PASS",
+    "host_tests": "PASS",
+    "browser_tests": "PASS; diagnostics, bounded jitter, reconnect, microphone lifecycle",
+    "firmware_source_changed": false,
+    "archive": "build/firmware/f437dbc31139a50c1ed4cfff3f8fb1d708efeeb59362959409fa87bd49318ff7",
+    "full_image_sha256": "f437dbc31139a50c1ed4cfff3f8fb1d708efeeb59362959409fa87bd49318ff7",
+    "elf_sha256": "ea1aed110e4a492de28bce2d42d513153814c0dc1e39b23f28948c8b493b246e",
+    "source_version": "6659bbb-dirty",
+    "app_bytes": 2757312,
+    "factory_remaining_bytes": 5565760
+  }
+}

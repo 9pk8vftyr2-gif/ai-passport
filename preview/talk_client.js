@@ -7,9 +7,21 @@ export function createTalkClient(api,getAudio,stopGame){
  let socket=null,generation=0,capture=null,microphone=null,turn=0,seq=0,rxSeq=0,playback=null,playbackReady=null,playbackRevision=0,queued=0,ended=false,committing=false,lastAudioAt=0;
  const evidence={connections:0,maxArrivalGapMs:0,sentFrames:0,receivedFrames:0,playedFrames:0,maxQueued:0,underruns:0,commits:0,cancels:0,done:0};
  let outputWindow=12,retryAt=0,retryDelay=2000;
+ let check=null,lastCheckAt=0;
+ function showCheck(force=true){
+  const now=performance.now();if(!force&&now-lastCheckAt<200)return;lastCheckAt=now;
+  if(!live||!check)return;
+  const el=document.querySelector('#talk-check-current');
+  if(el)el.textContent=`第 ${check.number} 轮 · ${check.phase}\n接收 / 播放：${check.received} / ${check.played} 帧\n缓冲耗尽：${check.underruns} 次\n最大到达间隔：${check.maxGap} ms · 最大队列：${check.maxQueued} 帧`;
+  const audio=getAudio(),info=document.querySelector('#talk-check-audio');
+  if(audio&&info)info.textContent=`输出：${audio.sampleRate} Hz · ${audio.state}\n浏览器报告延迟：处理 ${Math.round((audio.baseLatency||0)*1000)} ms / 输出 ${audio.outputLatency==null?'未知':Math.round(audio.outputLatency*1000)+' ms'}`;
+  const stop=document.querySelector('#talk-check-stop');if(stop)stop.textContent=check.stop?`停止原因：${check.stop}`:'';
+ }
+ function checkStop(reason){if(check&&check.phase!=='完整播放'){check.stop=reason;showCheck();}}
  const enc=new TextEncoder();
  function connectionStatus(text){const el=document.querySelector('#live-connection');if(live&&el)el.textContent=text;}
  function event(e,t=api.pocket_talk_turn(),text=''){
+  if(e===E.DISCONNECTED&&check&&!check.stop)checkStop('连接断开');
   if(live&&(e===E.ASR||e===E.REPLY)){
    const output=document.querySelector(e===E.ASR?'#live-question':'#live-answer');if(output)output.textContent=text;
    // The firmware font/wrapping is ASCII-only. Desktop Chinese stays in the transcript.
@@ -28,10 +40,12 @@ export function createTalkClient(api,getAudio,stopGame){
   playbackReady=createPlayback(audio,outputWindow,live,report=>{
    if(revision!==playbackRevision||epoch!==generation||activeTurn!==api.pocket_talk_turn())return;
    queued-=report.consumed;evidence.playedFrames+=report.consumed;evidence.underruns+=report.underruns;
+   if(check){check.played+=report.consumed;check.underruns+=report.underruns;if(report.consumed)check.phase="播放中";}
    api.pocket_talk_level(activeTurn,report.level);
    try{
     if(report.consumed)send({type:'output.credit',turn:activeTurn,frames:report.consumed});
-    if(report.done&&ended&&queued===0){ended=false;evidence.done++;event(E.DONE,activeTurn);}
+    if(report.done&&ended&&queued===0){ended=false;evidence.done++;if(check)check.phase="完整播放";event(E.DONE,activeTurn);}
+    showCheck(report.done);
    }catch{fail();}
   },()=>{if(revision===playbackRevision&&epoch===generation)fail();}).then(player=>{
    if(revision!==playbackRevision||epoch!==generation){player.stop();return false;}
@@ -41,7 +55,7 @@ export function createTalkClient(api,getAudio,stopGame){
   playbackReady.catch(()=>{if(revision===playbackRevision&&epoch===generation)fail();});
  }
  function close(){connectionStatus('语音连接已关闭，返回 Talk 后自动连接');retryAt=performance.now()+retryDelay;generation++;stopCapture();stopPlayback();const old=socket;socket=null;if(old){old.onclose=null;old.onmessage=null;old.close();}}
- function fail(){event(E.FAILURE);close();event(E.DISCONNECTED);}
+ function fail(){if(check)check.phase="错误";checkStop("服务或音频错误");event(E.FAILURE);close();event(E.DISCONNECTED);}
  function incoming(data,epoch){
   if(epoch!==generation)return;
   try{
@@ -61,10 +75,11 @@ export function createTalkClient(api,getAudio,stopGame){
    if(t!==turn||t!==api.pocket_talk_turn())return;
    if(v.getUint8(0)!==1||v.getUint8(1)!==2||v.getUint16(2,true)||v.getUint32(8,true)!==rxSeq||n%2||!n||n>640||data.byteLength!==n+14||ended)throw Error('invalid frame');
    if(queued>=outputWindow||!playback)throw Error('queue unavailable');
-   const now=performance.now();if(lastAudioAt)evidence.maxArrivalGapMs=Math.max(evidence.maxArrivalGapMs,Math.round(now-lastAudioAt));lastAudioAt=now;
+   const now=performance.now();if(lastAudioAt){const gap=Math.round(now-lastAudioAt);evidence.maxArrivalGapMs=Math.max(evidence.maxArrivalGapMs,gap);if(check)check.maxGap=Math.max(check.maxGap,gap);}lastAudioAt=now;
    const pcm=new Float32Array(n/2);
    for(let i=0;i<n/2;i++)pcm[i]=v.getInt16(14+i*2,true)/32768;
    queued++;rxSeq++;evidence.receivedFrames++;evidence.maxQueued=Math.max(evidence.maxQueued,queued);
+   if(check){check.received++;check.maxQueued=Math.max(check.maxQueued,queued);}
    event(E.AUDIO,turn);playback.push(pcm);
   }catch{fail();}
  }
@@ -79,7 +94,7 @@ export function createTalkClient(api,getAudio,stopGame){
     socket.onclose=()=>{if(epoch===generation){close();retryDelay=Math.min(retryDelay*2,15000);connectionStatus('连接暂时中断，正在自动重连…');event(E.DISCONNECTED);}};
     socket.onerror=()=>{if(epoch===generation){close();retryDelay=Math.min(retryDelay*2,15000);connectionStatus('连接暂时中断，正在自动重连…');event(E.DISCONNECTED);}};
    }else if(c===1){
-    stopGame();stopCapture();stopPlayback();turn=api.pocket_talk_turn();seq=rxSeq=0;lastAudioAt=0;preparePlayback();
+    stopGame();stopCapture();stopPlayback();turn=api.pocket_talk_turn();seq=rxSeq=0;lastAudioAt=0;check={number:(check?.number||0)+1,phase:"录音中",received:0,played:0,underruns:0,maxGap:0,maxQueued:0,stop:""};showCheck();preparePlayback();
     send({type:'input.begin',turn,capability:'qa',memory:'none',fixture:document.querySelector('#talk-fixture')?.value||'intro'});
     const epoch=generation;
     if(live){
@@ -99,6 +114,7 @@ export function createTalkClient(api,getAudio,stopGame){
      socket.send(frame);seq++;evidence.sentFrames++;
     }catch{fail();}},20);
    }else if(c===2){
+    if(check){check.phase="等待回复";showCheck();}
     if(live){
      const epoch=generation,recordingTurn=turn,activeMic=microphone;committing=true;captureStatus('sending');
      (async()=>{try{
@@ -116,11 +132,12 @@ export function createTalkClient(api,getAudio,stopGame){
     const revision=playbackRevision,recordingTurn=turn;
     playbackReady.then(ready=>{if(!ready||revision!==playbackRevision||recordingTurn!==api.pocket_talk_turn())return;try{send({type:'input.commit',turn,last_seq:seq-1});send({type:'output.credit',turn,frames:outputWindow});evidence.commits++;}catch{fail();}}).catch(()=>{});
    }else if(c===3){
+    if(check&&check.phase!=="完整播放"){check.phase="已中断";if(!check.stop)check.stop="按键打断或离开 Talk";showCheck();}
     evidence.cancels++;stopCapture();stopPlayback();
     if(socket?.readyState===WebSocket.OPEN)send({type:'cancel',turn});
     if(api.pocket_page()!==3||api.pocket_screen_off()||[4,5].includes(api.pocket_talk_state())){close();if(api.pocket_talk_state()!==4)event(E.DISCONNECTED);}
    }
   }catch{fail();}
  }
- return {pump(){const c=api.pocket_talk_command();if(c)command(c);else if(live&&!socket&&api.pocket_page()===3&&!api.pocket_screen_off()&&api.pocket_talk_state()===4&&!document.hidden&&document.hasFocus()&&performance.now()>=retryAt){event(E.OK);command(api.pocket_talk_command());}},resume(){retryAt=0;},cancel(){if(api.pocket_page()===3){event(E.CANCEL);command(api.pocket_talk_command());}close();event(E.DISCONNECTED);},evidence};
+ return {pump(){const c=api.pocket_talk_command();if(c)command(c);else if(live&&!socket&&api.pocket_page()===3&&!api.pocket_screen_off()&&api.pocket_talk_state()===4&&!document.hidden&&document.hasFocus()&&performance.now()>=retryAt){event(E.OK);command(api.pocket_talk_command());}},resume(){retryAt=0;},cancel(reason="离开页面"){checkStop(reason);if(api.pocket_page()===3){event(E.CANCEL);command(api.pocket_talk_command());}close();event(E.DISCONNECTED);},evidence};
 }
