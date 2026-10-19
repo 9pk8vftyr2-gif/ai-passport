@@ -78,8 +78,9 @@ listen start/stop, abort, STT, TTS sentence text and raw Opus audio, following t
 No MCP, camera, desktop tools, remote reboot or firmware commands are enabled.
 
 The server negotiated 24 kHz mono Opus; libopus decodes directly to 16 kHz for the
-existing playback path. At most 12 PCM frames (240 ms) are scheduled in-browser;
-initial prebuffer is 120 ms. Playback credits pace delivery. The decoder holds
+existing playback path. The desktop browser negotiates up to 36 PCM frames (720 ms);
+initial scheduling lead is 300 ms, with a 200 ms refill lead after an actual underrun.
+Legacy clients and the local mock retain the 12-frame window. Playback credits pace delivery. The decoder holds
 at most 120 ms PCM, the uplink packet accumulator at most 60 ms, and WebSocket
 receive queues are capped at four messages. Cloud JSON is capped at 64 KiB.
 These are desktop bounds, not a validated C3 memory budget.
@@ -123,3 +124,6 @@ Before hardware acceptance: complete console role/voice/memory checks; measure
 runtime heap and largest block with Wi-Fi/audio/display active; implement and
 budget the device cloud adapter or a trusted relay; confirm Chinese font coverage;
 then separately authorize physical tests. Desktop success is not flash approval.
+
+For login startup, foreground reconnection and the current playback/animation checks,
+see [desktop reliability](zumi-talk-desktop-reliability.md).

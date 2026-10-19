@@ -11,7 +11,7 @@ async function loadImages(paths){
  }
  return images;
 }
-const sprites=await loadImages([0,1,2].map(i=>`../assets/images/zumi-pocket/zumi-${i}.png`));
+const sprites=await loadImages([0,1,2,3].map(i=>`../assets/images/zumi-pocket/zumi-${i}.png`));
 const wakeCards=await loadImages(Array.from({length:8},(_,i)=>`../assets/images/zumi-pocket/wake-cards/card-${i+1}.png`));
 const energyIcons=await loadImages(['solar-off','wind-off','house-off','solar-on','wind-on','house-on'].map(name=>`../assets/images/zumi-pocket/energy-icons/${name}.png`));
 let api;
@@ -62,7 +62,7 @@ function render(){
   else if(kind===1){const b=new Uint8Array(api.memory.buffer,p+36,64);const end=b.indexOf(0);const text=decoder.decode(b.subarray(0,end<0?64:end));ctx.font=`${size}px Arial`;ctx.textBaseline='top';ctx.fillText(text,x,y);}
   else if(kind===4)ctx.drawImage(energyIcons[size%6],x,y,w,h);
   else if(kind===3)ctx.drawImage(wakeCards[size%8],x,y,w,h);
-  else ctx.drawImage(sprites[size%3],x,y,w,h);
+  else ctx.drawImage(sprites[size%4],x,y,w,h);
  }
  ctx.restore();
 }
@@ -81,6 +81,7 @@ for(const b of document.querySelectorAll('button')){
  b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(!e.repeat)press(Number(b.dataset.key));}});
  b.addEventListener('keyup',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();release();}});
 }
+window.addEventListener('focus',()=>talkClient.resume());
 window.addEventListener('blur',()=>{release(true);stopSound();talkClient.cancel();});
 let last=performance.now();
 function frame(now){const dt=Math.floor(now-last);last+=dt;if(!document.hidden){api.pocket_tick(dt);render();}requestAnimationFrame(frame);}

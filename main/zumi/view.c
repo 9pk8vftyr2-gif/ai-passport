@@ -100,9 +100,9 @@ void z_render(const z_state *s, int battery, z_view *v) {
         const char *names[]={"Idle","Listening","Processing","Speaking","Offline","Error"};
         const char *actions[]={"OK: Start talking","OK: Finish & send","OK: Cancel","OK: Stop speaking","OK: Connect","OK: Try again"};
         text(v,22,16,"Talk",INK,20);text(v,24,48,names[t->state],INK,14);
-        portrait(v,81,76,t->state==T_LISTENING||t->state==T_PROCESSING?Z_FOCUS:t->state==T_SPEAKING?Z_CHEER:Z_HAPPY);
+        portrait(v,81,76,t->state==T_LISTENING||t->state==T_PROCESSING?Z_FOCUS:t->state==T_SPEAKING?((t->elapsed/140)%2?3:Z_HAPPY):Z_HAPPY);
         snprintf(tmp,sizeof(tmp),t->mic?"REC  %02u / 15s":t->speaker?"VOICE PLAYBACK":"MIC OFF",(unsigned)(t->elapsed/1000));
-        text(v,78,176,tmp,t->mic?0xAA493B:MUTED,10);
+        text(v,(240-(int)strlen(tmp)*6)/2,174,tmp,t->mic?0xAA493B:MUTED,10);
         const char *message=t->state==T_LISTENING?"Press OK when finished.":
             t->state==T_PROCESSING?(t->asr[0]?t->asr:"Sending your question..."):
             t->state==T_OFFLINE?(t->connecting?"Connecting to local relay...":"I am Zumi, your ZCO green living companion. Let us explore, chat and play. Press OK to connect."):

@@ -47,8 +47,8 @@ class ArtifactTests(unittest.TestCase):
         manifest = json.loads((folder / 'manifest.json').read_text())
         self.assertEqual(hashlib.sha256((folder / 'zumi-original.svg').read_bytes()).hexdigest(),
                          manifest['source_sha256'])
-        self.assertEqual(len(manifest['assets']), 3)
-        self.assertEqual(sum(a['rgb565_bytes'] for a in manifest['assets']), 43056)
+        self.assertEqual(len(manifest['assets']), 4)
+        self.assertEqual(sum(a['rgb565_bytes'] for a in manifest['assets']), 57408)
         for asset in manifest['assets']:
             self.assertEqual(hashlib.sha256((folder / asset['name']).read_bytes()).hexdigest(),
                              asset['sha256'])

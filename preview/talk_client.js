@@ -3,9 +3,11 @@ import {captureMicrophone} from './talk_microphone.js';
 export function createTalkClient(api,getAudio,stopGame){
  const live=new URLSearchParams(location.search).get('talk')==='xiaozhi';
  const E={OK:0,CANCEL:1,CONNECTED:2,DISCONNECTED:3,ASR:4,REPLY:5,AUDIO:6,DONE:7,FAILURE:8,OVERFLOW:9};
- let socket=null,generation=0,capture=null,microphone=null,turn=0,seq=0,rxSeq=0,nodes=new Set(),ended=false,nextTime=0,committing=false;
- const evidence={sentFrames:0,receivedFrames:0,playedFrames:0,maxQueued:0,underruns:0,commits:0,cancels:0,done:0};
+ let socket=null,generation=0,capture=null,microphone=null,turn=0,seq=0,rxSeq=0,nodes=new Set(),ended=false,nextTime=0,committing=false,lastAudioAt=0;
+ const evidence={connections:0,maxArrivalGapMs:0,underrunGapsMs:[],sentFrames:0,receivedFrames:0,playedFrames:0,maxQueued:0,underruns:0,commits:0,cancels:0,done:0};
+ let outputWindow=12,retryAt=0,retryDelay=2000;
  const enc=new TextEncoder();
+ function connectionStatus(text){const el=document.querySelector('#live-connection');if(live&&el)el.textContent=text;}
  function event(e,t=api.pocket_talk_turn(),text=''){
   if(live&&(e===E.ASR||e===E.REPLY)){
    const output=document.querySelector(e===E.ASR?'#live-question':'#live-answer');if(output)output.textContent=text;
@@ -19,7 +21,7 @@ export function createTalkClient(api,getAudio,stopGame){
  function captureStatus(kind){const el=document.querySelector('#live-capture');if(el)el.textContent=({preparing:'麦克风准备中，请稍候…',ready:'可以说话了 · 再按 OK 发送',quiet:'声音较轻，请靠近麦克风',loud:'声音偏响，请稍微远离麦克风',sending:'录音已结束，正在发送…',off:'麦克风已关闭'})[kind]||'';}
  function stopCapture(){clearInterval(capture);capture=null;committing=false;microphone?.stop();microphone=null;if(live)captureStatus('off');}
  function stopPlayback(){for(const n of nodes){n.onended=null;try{n.stop();}catch{}n.disconnect();}nodes.clear();nextTime=0;ended=false;}
- function close(){generation++;stopCapture();stopPlayback();const old=socket;socket=null;if(old){old.onclose=null;old.onmessage=null;old.close();}}
+ function close(){connectionStatus('语音连接已关闭，返回 Talk 后自动连接');retryAt=performance.now()+retryDelay;generation++;stopCapture();stopPlayback();const old=socket;socket=null;if(old){old.onclose=null;old.onmessage=null;old.close();}}
  function fail(){event(E.FAILURE);close();event(E.DISCONNECTED);}
  function finish(){if(ended&&!nodes.size){ended=false;evidence.done++;event(E.DONE,turn);}}
  function incoming(data,epoch){
@@ -27,7 +29,7 @@ export function createTalkClient(api,getAudio,stopGame){
   try{
    if(typeof data==='string'){
     if(enc.encode(data).length>2048)throw Error('oversize JSON');const m=JSON.parse(data);if(m.v!==1)throw Error('version');
-    if(m.type==='ready'){if(m.audio!=='pcm_s16le'||m.rate!==16000||m.frame_ms!==20||(live&&m.backend!=='xiaozhi'))throw Error('format');event(E.CONNECTED);return;}
+    if(m.type==='ready'){if(m.audio!=='pcm_s16le'||m.rate!==16000||m.frame_ms!==20||(live&&m.backend!=='xiaozhi'))throw Error('format');outputWindow=live?(m.output_window??12):12;if(!Number.isInteger(outputWindow)||outputWindow<12||outputWindow>36)throw Error('window');retryDelay=2000;evidence.connections++;connectionStatus('已连接小智 · 按 OK 开始说话');event(E.CONNECTED);return;}
     if(m.turn!==turn||turn!==api.pocket_talk_turn())return;
     if(m.type==='asr.final'||m.type==='answer.snapshot'){
      if(typeof m.text!=='string'||enc.encode(m.text).length>(m.type==='asr.final'?1023:1535))throw Error('text bounds');
@@ -40,13 +42,14 @@ export function createTalkClient(api,getAudio,stopGame){
    const v=new DataView(data),n=v.getUint16(12,true),t=v.getUint32(4,true);
    if(t!==turn||t!==api.pocket_talk_turn())return;
    if(v.getUint8(0)!==1||v.getUint8(1)!==2||v.getUint16(2,true)||v.getUint32(8,true)!==rxSeq||n%2||!n||n>640||data.byteLength!==n+14||ended)throw Error('invalid frame');
-   if(nodes.size>=12)throw Error('queue full');
+   if(nodes.size>=outputWindow)throw Error('queue full');
    const audio=getAudio();if(!audio||audio.state!=='running')throw Error('audio unavailable');
+   const now=performance.now();if(lastAudioAt)evidence.maxArrivalGapMs=Math.max(evidence.maxArrivalGapMs,Math.round(now-lastAudioAt));lastAudioAt=now;
    const buffer=audio.createBuffer(1,n/2,16000),pcm=buffer.getChannelData(0);
    for(let i=0;i<n/2;i++)pcm[i]=v.getInt16(14+i*2,true)/32768;
    const node=audio.createBufferSource();node.buffer=buffer;node.connect(audio.destination);
-   if(!rxSeq)nextTime=audio.currentTime+.12;
-   else if(nextTime<audio.currentTime)evidence.underruns++;
+   if(!rxSeq)nextTime=audio.currentTime+(live ? .30 : .12);
+   else if(nextTime<audio.currentTime){evidence.underruns++;if(evidence.underrunGapsMs.length<16)evidence.underrunGapsMs.push(Math.round((audio.currentTime-nextTime)*1000));nextTime=audio.currentTime+(live ? .20 : 0);}
    nextTime=Math.max(nextTime,audio.currentTime);nodes.add(node);rxSeq++;evidence.receivedFrames++;
    evidence.maxQueued=Math.max(evidence.maxQueued,nodes.size);event(E.AUDIO,turn);
    node.onended=()=>{nodes.delete(node);node.disconnect();if(epoch!==generation)return;evidence.playedFrames++;try{send({type:'output.credit',turn,frames:1});finish();}catch{fail();}};
@@ -56,15 +59,15 @@ export function createTalkClient(api,getAudio,stopGame){
  function command(c){
   try{
    if(c===4){
-    close();const epoch=generation;
+    close();connectionStatus('正在连接小智…');const epoch=generation;
     const port=live?8882:Number(new URLSearchParams(location.search).get('talk_port')||8881);if(!Number.isInteger(port)||port<1||port>65535)throw Error('invalid local port');
     socket=new WebSocket(`ws://127.0.0.1:${port}`);socket.binaryType='arraybuffer';
-    socket.onopen=()=>{if(epoch===generation)send({type:'hello',capabilities:['qa']});};
+    socket.onopen=()=>{if(epoch===generation)send({type:'hello',capabilities:['qa'],...(live?{output_window:36}:{})});};
     socket.onmessage=e=>incoming(e.data,epoch);
-    socket.onclose=()=>{if(epoch===generation){close();event(E.DISCONNECTED);}};
-    socket.onerror=()=>{if(epoch===generation){close();event(E.DISCONNECTED);}};
+    socket.onclose=()=>{if(epoch===generation){close();retryDelay=Math.min(retryDelay*2,15000);connectionStatus('连接暂时中断，正在自动重连…');event(E.DISCONNECTED);}};
+    socket.onerror=()=>{if(epoch===generation){close();retryDelay=Math.min(retryDelay*2,15000);connectionStatus('连接暂时中断，正在自动重连…');event(E.DISCONNECTED);}};
    }else if(c===1){
-    stopGame();stopCapture();stopPlayback();turn=api.pocket_talk_turn();seq=rxSeq=0;
+    stopGame();stopCapture();stopPlayback();turn=api.pocket_talk_turn();seq=rxSeq=0;lastAudioAt=0;
     send({type:'input.begin',turn,capability:'qa',memory:'none',fixture:document.querySelector('#talk-fixture')?.value||'intro'});
     const epoch=generation;
     if(live){
@@ -91,19 +94,19 @@ export function createTalkClient(api,getAudio,stopGame){
       if(epoch!==generation||turn!==recordingTurn||api.pocket_talk_turn()!==recordingTurn||api.pocket_talk_state()!==2||!committing)return;
       committing=false;microphone=null;
       if(!drained||!seq)throw Error('empty or interrupted recording');
-      send({type:'input.commit',turn,last_seq:seq-1});send({type:'output.credit',turn,frames:12});evidence.commits++;captureStatus('off');
+      send({type:'input.commit',turn,last_seq:seq-1});send({type:'output.credit',turn,frames:outputWindow});evidence.commits++;captureStatus('off');
      }catch{if(epoch===generation&&turn===recordingTurn)fail();}})();
      return;
     }
     stopCapture();if(!seq)throw Error('empty recording');
     // WebSocket preserves message order; bounded bufferedAmount prevents an utterance queue.
-    send({type:'input.commit',turn,last_seq:seq-1});send({type:'output.credit',turn,frames:12});evidence.commits++;
+    send({type:'input.commit',turn,last_seq:seq-1});send({type:'output.credit',turn,frames:outputWindow});evidence.commits++;
    }else if(c===3){
     evidence.cancels++;stopCapture();stopPlayback();
     if(socket?.readyState===WebSocket.OPEN)send({type:'cancel',turn});
-    if(api.pocket_page()!==3||api.pocket_screen_off()||api.pocket_talk_state()===5){close();event(E.DISCONNECTED);}
+    if(api.pocket_page()!==3||api.pocket_screen_off()||[4,5].includes(api.pocket_talk_state())){close();if(api.pocket_talk_state()!==4)event(E.DISCONNECTED);}
    }
   }catch{fail();}
  }
- return {pump(){const c=api.pocket_talk_command();if(c)command(c);},cancel(){if(api.pocket_page()===3){event(E.CANCEL);command(api.pocket_talk_command());}close();event(E.DISCONNECTED);},evidence};
+ return {pump(){const c=api.pocket_talk_command();if(c)command(c);else if(live&&!socket&&api.pocket_page()===3&&!api.pocket_screen_off()&&api.pocket_talk_state()===4&&!document.hidden&&document.hasFocus()&&performance.now()>=retryAt){event(E.OK);command(api.pocket_talk_command());}},resume(){retryAt=0;},cancel(){if(api.pocket_page()===3){event(E.CANCEL);command(api.pocket_talk_command());}close();event(E.DISCONNECTED);},evidence};
 }

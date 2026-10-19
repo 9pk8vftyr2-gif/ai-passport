@@ -72,6 +72,23 @@ class RelayTests(unittest.IsolatedAsyncioTestCase):
         await self.audio(); await self.msg('input.commit',turn=1,last_seq=0)
         with self.assertRaises(ValueError): await self.msg('input.commit',turn=1,last_seq=0)
         with self.assertRaises(ValueError): await self.msg('output.credit',turn=1,frames=13)
+    async def test_negotiated_desktop_window_is_bounded(self):
+        session = Session(self.local, self.session.cloud_factory, Codec)
+        try:
+            await session.message(json.dumps(dict(v=1,type='hello',output_window=36)))
+            self.assertEqual(json.loads(self.local.sent[-1])['output_window'],36)
+            await session.message(json.dumps(dict(v=1,type='input.begin',turn=9,capability='qa',memory='none')))
+            await session.message(json.dumps(dict(v=1,type='output.credit',turn=9,frames=36)))
+            with self.assertRaises(ValueError):
+                await session.message(json.dumps(dict(v=1,type='output.credit',turn=9,frames=1)))
+        finally:
+            await session.cancel()
+        for value in (0,37,True,'36'):
+            invalid = Session(self.local, self.session.cloud_factory, Codec)
+            with self.assertRaises(ValueError):
+                await invalid.message(json.dumps(dict(v=1,type='hello',output_window=value)))
+            self.assertIsNone(invalid.cloud)
+
     async def test_cloud_error_propagates(self):
         await self.begin();await self.audio();await self.msg('input.commit',turn=1,last_seq=0)
         await self.clouds[-1].queue.put(json.dumps({'type':'error'}));await self.session.task

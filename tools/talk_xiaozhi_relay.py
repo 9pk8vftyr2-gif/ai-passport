@@ -61,6 +61,7 @@ class Session:
         self.credit_event = asyncio.Event()
         self.started = 0
         self.cancelled = False
+        self.credit_limit = 12
 
     async def send(self, kind, **values):
         await self.local.send(json.dumps(dict(v=1, type=kind, **values)))
@@ -169,8 +170,12 @@ class Session:
         if kind == 'hello':
             if self.hello:
                 raise ValueError('Duplicate hello')
+            requested = msg.get('output_window', 12)
+            if type(requested) is not int or not 12 <= requested <= 36:
+                raise ValueError('Invalid desktop output window')
+            self.credit_limit = requested
             await self.connect_cloud(); self.hello = True
-            await self.send('ready', audio='pcm_s16le', rate=16000, frame_ms=20, backend='xiaozhi')
+            await self.send('ready', audio='pcm_s16le', rate=16000, frame_ms=20, backend='xiaozhi', output_window=self.credit_limit)
             return
         if not self.hello:
             raise ValueError('Hello required')
@@ -203,7 +208,7 @@ class Session:
             if msg.get('turn') != self.turn:
                 return
             n = msg.get('frames')
-            if type(n) is not int or not 0 < n <= 12 or self.credits+n > 12:
+            if type(n) is not int or not 0 < n <= self.credit_limit or self.credits+n > self.credit_limit:
                 raise ValueError('Invalid credit')
             self.credits += n; self.credit_event.set()
         elif kind == 'cancel':

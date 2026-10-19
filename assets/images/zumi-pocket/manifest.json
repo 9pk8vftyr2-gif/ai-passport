@@ -5,7 +5,8 @@
   "expressions": [
     "happy (original)",
     "focused (face-only derivative)",
-    "cheering (face-only derivative)"
+    "cheering (face-only derivative)",
+    "speaking closed mouth (original eyes/body, mouth-only derivative)"
   ],
   "license": "ZCO character artwork; supplied for this project. No additional third-party license is granted.",
   "assets": [
@@ -22,6 +23,11 @@
     {
       "name": "zumi-2.png",
       "sha256": "b4f24c7bf3b6e20416c99d7c4116395142f2b0510584607e557c5421844ce5ce",
+      "rgb565_bytes": 14352
+    },
+    {
+      "name": "zumi-3.png",
+      "sha256": "2db1ecec12a7afec5a54b8449ecb4ca933737d8d61439dab77e26fbf656be825",
       "rgb565_bytes": 14352
     }
   ]

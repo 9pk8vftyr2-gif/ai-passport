@@ -1,0 +1,142 @@
+{
+  "date": "2026-10-19",
+  "build": {
+    "status": "PASS",
+    "idf_version": "5.5.3",
+    "app_bytes": 2756880,
+    "factory_remaining_bytes": 5566192,
+    "full_image_sha256": "3fbc5105e1eae9d43888260ad60dca22f881322d2d812464fc11fd51a1852ea9",
+    "elf_sha256": "20977516e27bde057088d23b64611429fbf164abce7879b76886bd0cece50b8d",
+    "source_version": "dec4136-dirty",
+    "archive": "build/firmware/3fbc5105e1eae9d43888260ad60dca22f881322d2d812464fc11fd51a1852ea9"
+  },
+  "host_tests": "PASS",
+  "browser_demo": "PASS; functional completion and bounded jitter test",
+  "device_tests": "NOT RUN",
+  "autostart": {
+    "login_agents_loaded": true,
+    "preview_port": 8876,
+    "voice_port": 8882,
+    "mock_port": 8881,
+    "voice_restart": {
+      "old_pid": 3342,
+      "new_pid": 3761,
+      "automatic_recovery": true
+    },
+    "cloud_probe": "PASS; TLS + official hello, no audio sent",
+    "real_login_cycle": "NOT RUN",
+    "device_tests": "NOT RUN"
+  },
+  "controlled_jitter": {
+    "status": "PASS",
+    "input": "fake media; no cloud",
+    "jitterMs": 250,
+    "uiStallMs": 180,
+    "playback": {
+      "connections": 1,
+      "maxArrivalGapMs": 329,
+      "underrunGapsMs": [],
+      "sentFrames": 7,
+      "receivedFrames": 240,
+      "playedFrames": 240,
+      "maxQueued": 36,
+      "underruns": 0,
+      "commits": 1,
+      "cancels": 0,
+      "done": 1
+    },
+    "automaticReconnects": 2,
+    "microphoneReopened": false
+  },
+  "cloud_under_build_load": {
+    "status": "PASS",
+    "input": "public synthetic greeting; no real microphone",
+    "sequence": "two complete turns, interrupt, recovered complete turn",
+    "interruptMs": 4,
+    "evidence": {
+      "connections": 1,
+      "sentFrames": 798,
+      "receivedFrames": 507,
+      "playedFrames": 498,
+      "maxQueued": 36,
+      "underruns": 5,
+      "commits": 4,
+      "cancels": 1,
+      "done": 3,
+      "micRequests": 4,
+      "tracksStopped": true,
+      "questionPresent": true,
+      "answerPresent": true
+    },
+    "errors": [],
+    "note": "First 36-frame run overlapped the full firmware compilation. Five underruns observed; retained as a failed smoothness check, although round trips completed."
+  },
+  "cloud_after_build": {
+    "status": "PASS",
+    "input": "public synthetic greeting; no real microphone",
+    "sequence": "two complete turns, interrupt, recovered complete turn",
+    "interruptMs": 4,
+    "evidence": {
+      "connections": 1,
+      "sentFrames": 799,
+      "receivedFrames": 498,
+      "playedFrames": 489,
+      "maxQueued": 25,
+      "underruns": 0,
+      "commits": 4,
+      "cancels": 1,
+      "done": 3,
+      "micRequests": 4,
+      "tracksStopped": true,
+      "questionPresent": true,
+      "answerPresent": true
+    },
+    "errors": []
+  },
+  "animation": {
+    "status": "PASS",
+    "speakingFrames": [
+      0,
+      3
+    ],
+    "cancelRestoresOriginal": true,
+    "realMicrophone": false
+  },
+  "character_difference": {
+    "changed_pixels": 125,
+    "bounding_box": [
+      38,
+      45,
+      53,
+      54
+    ],
+    "only_mouth": true,
+    "additional_rgb565_flash_bytes": 14352
+  },
+  "persona": {
+    "website_spelling": "W W W, dot, Z C O, dot, E C O",
+    "saved_and_read_back": true,
+    "memory_enabled": false,
+    "prompt_sha256": "92b4103c6c13ff4e1b5147c989377db3e1610538823962d647b43dca09107e1c"
+  },
+  "unverified": [
+    "actual logout/login or reboot cycle",
+    "human speech/listening acceptance",
+    "prolonged network stalls or high CPU load can still cause gaps",
+    "physical device tests"
+  ],
+  "notes": [
+    "Cloud tests used only public synthetic input; no real microphone.",
+    "The first cloud run had five underruns while firmware compilation was active; causality is not established.",
+    "The later run completed three answers and one interruption with zero measured underruns; this is not a guarantee of gap-free speech."
+  ],
+  "website_pronunciation_test": {
+    "name": "address-spelling",
+    "question": "请告诉我你的网站地址，并把所有英文字母逐个读出来。",
+    "asr": "请告诉我你的网站地址，并把所有英文字母逐个读出来。",
+    "answer": "网址是 W W W，点，Z C O，点，E C O。",
+    "frames": 285,
+    "complete": true,
+    "synthetic_input": true
+  }
+}

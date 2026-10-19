@@ -77,7 +77,7 @@ static void render(void) {
         } else if(d->kind==Z_WAKE_CARD) {
             lv_image_set_src(o,&zumi_wake_cards[d->size % Z_WAKE_CARDS]);
         } else {
-            lv_image_set_src(o,&zumi_sprites[d->size % 3]);
+            lv_image_set_src(o,&zumi_sprites[d->size % 4]);
             lv_image_set_pivot(o,0,0);
             lv_image_set_scale(o,(uint16_t)(d->w*256/78));
         }

@@ -27,7 +27,7 @@ if(process.env.ZUMI_TEST_OFFICIAL!=='1')throw Error('Set ZUMI_TEST_OFFICIAL=1 on
   await page.waitForTimeout(350);assert.equal(await page.evaluate(()=>pocket.talkClient.evidence.playedFrames),playedAfterCancel);
   await record();await page.waitForFunction(()=>pocket.talkClient.evidence.done===3,{},{timeout:70000});
   const evidence=await page.evaluate(()=>({...pocket.talkClient.evidence,micRequests,tracksStopped:testStreams.every(s=>s.getTracks().every(t=>t.readyState==='ended')),questionPresent:!!document.querySelector('#live-question').textContent,answerPresent:!!document.querySelector('#live-answer').textContent}));
-  assert(evidence.sentFrames>50&&evidence.receivedFrames>0&&evidence.receivedFrames>=evidence.playedFrames&&evidence.maxQueued<=12&&evidence.tracksStopped&&evidence.questionPresent&&evidence.answerPresent);
+  assert(evidence.sentFrames>50&&evidence.receivedFrames>0&&evidence.receivedFrames>=evidence.playedFrames&&evidence.maxQueued<=36&&evidence.tracksStopped&&evidence.questionPresent&&evidence.answerPresent);
   assert.equal(evidence.micRequests,4);assert.equal(evidence.done,3);assert.equal(evidence.cancels,1);assert.deepEqual(errors,[]);
   // Keep only counts in the receipt, never private utterances or account identifiers.
   fs.writeFileSync('build/xiaozhi-live-browser.json',JSON.stringify({status:'PASS',input:'public synthetic greeting; no real microphone',sequence:'two complete turns, interrupt, recovered complete turn',interruptMs,evidence,errors},null,2));

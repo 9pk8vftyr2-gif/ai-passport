@@ -34,6 +34,20 @@ static z_state solve(z_state *s) {
 }
 int main(void) {
     z_state s;z_input in={0};z_init(&s,42);
+    {
+        z_state talk=s;talk.page=Z_TALK;talk.talk.state=T_IDLE;
+        z_view v;z_render(&talk,-1,&v);bool mic=false;
+        for(int i=0;i<v.count;i++) if(!strcmp(v.ops[i].text,"MIC OFF")) {
+            assert(v.ops[i].x==99&&v.ops[i].y==174);mic=true;
+        }
+        assert(mic);
+        for(int frame=0;frame<3;frame++) {
+            talk.talk.state=frame==2?T_IDLE:T_SPEAKING;talk.talk.elapsed=frame*140;
+            z_render(&talk,-1,&v);int portrait=-1;
+            for(int i=0;i<v.count;i++)if(v.ops[i].kind==Z_SPRITE)portrait=v.ops[i].size;
+            assert(portrait==(frame==1?3:Z_HAPPY));
+        }
+    }
     z_action(&s,Z_OK);assert(s.page==Z_TALK&&s.talk.state==T_OFFLINE);z_action(&s,Z_BACK);
     z_action(&s,Z_DOWN);z_action(&s,Z_DOWN);z_action(&s,Z_OK);assert(s.page==Z_GARDEN&&z_garden_sync(&s)==-1);
     z_button(&s,&in,Z_OK,0);z_button(&s,&in,Z_OK,3);z_button(&s,&in,Z_OK,4);assert(s.page==Z_HOME);
